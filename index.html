@@ -311,176 +311,364 @@ const WORKOUT_TYPES = [
   { id:"home",     label:"Witcher's Camp",        icon:"🔥", sub:"Field training"      },
 ];
 
-const ARCS = [
-  {
-    id:"bruxa",
-    title:"The Bruxa of Beauclair",
-    loc:"Toussaint, Alba",
-    diff:"Uncommon",
-    xp:180,
-    icon:"🦇",
-    flavor:"\"She has been here longer than the vineyards. The villagers thought she was a blessing.\"",
-    desc:{
-      strength:"Bruxae move faster than any human threat. The only counter is to be stronger than anything they have ever encountered. You are building that margin today.",
-      run:"A bruxa does not chase. It teleports, reappears, and cuts. Your job is to be somewhere else before it arrives. Train the legs that make that possible.",
-      mobility:"Bruxae attack through the angles you leave open. Close them all. Every position you neglect is an invitation.",
-      home:"Toussaint's court has no weight room. You have the field behind the inn and whatever you carried in. It is enough.",
-    },
-    criteria:{
-      strength:"Compound lifts. No skipping the hard ones.",
-      run:"Track intervals. The bruxa doesn't let you cruise.",
-      mobility:"Full range holds. Find where the restriction is.",
-      home:"Bodyweight circuits. High output, minimal rest.",
-    },
-    traits:["speed","strength","precision"]
-  },
-  {
-    id:"frost",
-    title:"Contract: White Frost",
-    loc:"Skellige, Ard Skellig",
-    diff:"Rare",
-    xp:240,
-    icon:"❄️",
-    flavor:"\"The old texts do not describe a creature. They describe a direction.\"",
-    desc:{
-      strength:"Cold resistance is built through suffering. The Skelligers know this. Every heavy set is another degree of tolerance earned.",
-      run:"The wind off Hindarsfjall does not care about your pace plan. Run into it anyway.",
-      mobility:"Frozen joints are useless joints. Work the cold out. Maintain range when the body wants to contract.",
-      home:"A Skellige longhouse. The floor is stone. The wind is in the walls. You have no excuses that Crach an Craite would accept.",
-    },
-    criteria:{
-      strength:"Heavy sets, shorter rest. Build heat from within.",
-      run:"Wind-resistance pace. Sustained, not sprint.",
-      mobility:"Slow holds in full extension. Force the range.",
-      home:"Full body. No concessions to comfort.",
-    },
-    traits:["endurance","cold resistance","will"]
-  },
-  {
-    id:"crones",
-    title:"The Crones of Crookback Bog",
-    loc:"Velen, Crookback Bog",
-    diff:"Rare",
-    xp:220,
-    icon:"🌿",
-    flavor:"\"Do not run in the bog. You will not outrun what is in it. Think instead.\"",
-    desc:{
-      strength:"The Crones are patient. They have been patient for centuries. You need to be stronger than their patience runs out. Methodical. Heavy. Do not rush.",
-      run:"The bog is deceptive. Ground that looks solid will take you. Precise footwork, constant attention. Every stride is a decision.",
-      mobility:"Crookback Bog distorts the body as much as the mind. Maintain your physical reference points. Know where your limbs are.",
-      home:"The village of the orphans in the bog. You train with what the marsh provides. You adapt, or the bog takes you.",
-    },
-    criteria:{
-      strength:"Slow eccentrics. The Crones are patient. Match it.",
-      run:"Steady pace with agility focus. No autopilot.",
-      mobility:"Deliberate, held positions. Control over speed.",
-      home:"Adaptive circuits. Change the order mid-set.",
-    },
-    traits:["patience","precision","adaptability"]
-  },
-  {
-    id:"trials",
-    title:"Kaer Morhen: The Trials",
-    loc:"Kaer Morhen, the keep",
-    diff:"Common",
-    xp:160,
-    icon:"🏰",
-    flavor:"\"Most did not survive. The ones who did were not the strongest. They were the ones who did not stop.\"",
-    desc:{
-      strength:"The pendulum corridor. The obstacle course in full armour. Vesemir watching with the expression he reserves for disappointment. This is what built every witcher. It is what is building you.",
-      run:"The mountain circuit. Up from the keep, through the pass, back down the eastern ridge. Vesemir's record still stands. It does not have to stand today, but you will run it properly.",
-      mobility:"The forms come before the blade. Geralt's precision with the two swords comes from a foundation of range and control that took years to build. Begin that foundation now.",
-      home:"The courtyard at Kaer Morhen in the early morning, frost on the stone. No equipment. Just the body and what Vesemir taught.",
-    },
-    criteria:{
-      strength:"Full progressive overload. No abandoned sets.",
-      run:"Full distance. Consistent pace. No walk breaks.",
-      mobility:"Sword school forms. Precision over speed.",
-      home:"Kaer Morhen courtyard circuit. Everything counts.",
-    },
-    traits:["discipline","endurance","foundation"]
-  },
-  {
-    id:"wildhunt",
-    title:"The Wild Hunt Rides",
-    loc:"The Northern Kingdoms",
-    diff:"Rare",
-    xp:260,
-    icon:"🌑",
-    flavor:"\"You will not outfight them. You need to be too hard to catch.\"",
-    desc:{
-      strength:"Eredin's riders hit hard enough to shatter armour. The margin you need to survive is absolute. Build it. Every rep is preparation for something that does not negotiate.",
-      run:"The Hunt rides through the sky and takes what it wants. You run because the alternative is standing still. Do not stand still.",
-      mobility:"The Unseen Elder told Geralt to be unpredictable. An unpredictable body is a mobile one. Open the joints. Find the angles.",
-      home:"Nowhere to go. No equipment. The Hunt is hours away and you spend those hours becoming harder to kill.",
-    },
-    criteria:{
-      strength:"Maximum output. No conserving energy.",
-      run:"Long run at pace. No slowing down.",
-      mobility:"Full sequence. Do not skip the uncomfortable ones.",
-      home:"High intensity. The Hunt does not care that you are tired.",
-    },
-    traits:["urgency","power","survival"]
-  },
-  {
-    id:"foglets",
-    title:"Contract: Foglet Colony",
-    loc:"Velen, Oxenfurt Road",
-    diff:"Common",
-    xp:140,
-    icon:"🌫️",
-    flavor:"\"The fog is not the problem. What the fog is hiding is the problem.\"",
-    desc:{
-      strength:"Foglets are not individually dangerous. There are twelve of them. You clear them one by one, methodically, without letting the fog become an excuse to slow down.",
-      run:"The fog on the Oxenfurt Road lifts by noon. You run before it does, by feel, by memory, by training. Every metre is earned in near-zero visibility.",
-      mobility:"Foglets attack from concealment. Peripheral awareness starts with knowing where your own body is. Full range. No blind spots.",
-      home:"A farmhouse two miles from Oxenfurt. Abandoned. You have the barn, the field, and the fog. Work with it.",
-    },
-    criteria:{
-      strength:"Volume work. Multiple sets, controlled pace.",
-      run:"Sustained distance. No sprint, no walk.",
-      mobility:"Full sequence, methodical. Clear every restriction.",
-      home:"Bodyweight circuits. Complete each before moving on.",
-    },
-    traits:["patience","methodical","endurance"]
-  },
-  {
-    id:"brenna",
-    title:"The Battle of Brenna",
-    loc:"Brenna, Mahakam",
-    diff:"Uncommon",
-    xp:200,
-    icon:"⚔️",
-    flavor:"\"This is not a skirmish. This is the battle the North needed to win to survive. There is no pacing yourself.\"",
-    desc:{
-      strength:"A pitched battle has no programme. You push until the line holds or breaks. Everything you have, now.",
-      run:"Meve's cavalry covered fifteen miles that day. It was not a warm-up. It was the war. Run like the Northern Kingdoms depend on it.",
-      mobility:"Battle conditions demand range you did not know you needed until you needed it. Build it now, before the trumpet.",
-      home:"The field before Brenna. The army behind you. Whatever you have, you give it today.",
-    },
-    criteria:{
-      strength:"Everything. Full capacity.",
-      run:"Hard pace for full distance. No holding back.",
-      mobility:"Full sequence, full range. Battle-ready.",
-      home:"Maximum output. No modifications.",
-    },
-    traits:["power","courage","commitment"]
-  },
-];
+// Each workout type has its own rotating pool of contracts — distinct stories, not the same arc re-skinned.
+// getDailyContracts() returns one contract per type, rotating daily.
 
-const MISSIONS = ARCS;
-
-const BRIEFINGS = {
-  bruxa:    { crew:"geralt",    line:"Bruxa. Higher vampire subtype. Fast, territorial, allergic to light in full form. The vineyard workers think it's a ghost. It isn't. What kind of training are we starting with?" },
-  frost:    { crew:"yennefer",  line:"The Frost is a dimensional collapse. The texts Aretuza holds on the subject are incorrect in ways that are going to get people killed. Train first. We will need to be ready." },
-  crones:   { crew:"regis",     line:"The Crones predate the current age by several centuries. I have encountered older things. Few of them were more dangerous. What are you doing today?" },
-  trials:   { crew:"vesemir",   line:"The course is laid out. You know what is expected. I will not be offering encouragement. I will be watching for the things you skip when you think no one is looking." },
-  wildhunt: { crew:"ciri",      line:"They ride at midnight. We have until then to be better than we were this morning. Stop thinking about it. What type of session?" },
-  foglets:  { crew:"zoltan",    line:"Twelve foglets on the Oxenfurt Road. Three farmers dead. Village board paid fifty orens. We'll do better than that. What are we starting with?" },
-  brenna:   { crew:"meve",      line:"The armies are positioned. We move at dawn. Between now and then you train. What type?" },
+const CONTRACTS = {
+  strength: [
+    {
+      id:"st_pendulum",
+      type:"strength",
+      title:"The Pendulum Corridor",
+      loc:"Kaer Morhen, the keep",
+      diff:"Uncommon",
+      xp:180,
+      icon:"🏰",
+      companion:"vesemir",
+      briefingLine:"The corridor is set. You know what it asks. I will be watching for the sets you abandon when you think no one notices.",
+      flavor:"\"Most candidates failed here. Not because the weights were too heavy. Because they decided they were.\" — Vesemir",
+      desc:"The Trials of the Grasses demand a body that does not negotiate with itself. Vesemir has reset the pendulum corridor. The obstacle course is laid out in the courtyard. You will move through both.",
+      milestones:[
+        {l:"The Gate Opens",      c:"Warm up complete",         s:"Vesemir nods once. The pendulum corridor is ahead. The first candidate to attempt it this season didn't finish. You step in."},
+        {l:"First Station",       c:"First exercise done",      s:"The weights are heavier than yesterday. That is not an accident. Vesemir adjusts the programme based on what he sees."},
+        {l:"The Obstacle Course", c:"Second exercise done",     s:"Full weight. The courtyard stones are iced over. Candidates used that as an excuse. You won't."},
+        {l:"Halfway",             c:"Midpoint",                 s:"This is where the historical record shows candidates stopped. The ones who became witchers did not stop here."},
+        {l:"Final Station",       c:"Last section",             s:"Vesemir is not watching your face. He is watching your form. Keep it."},
+      ],
+    },
+    {
+      id:"st_hunt_prep",
+      type:"strength",
+      title:"Before the Hunt Arrives",
+      loc:"Kaer Morhen, lower hall",
+      diff:"Rare",
+      xp:220,
+      icon:"🌑",
+      companion:"lambert",
+      briefingLine:"Eredin's riders don't care what you lifted last week. Get in there and do something worth caring about.",
+      flavor:"\"You don't outfight the Wild Hunt. You build a body it can't break.\" — Lambert",
+      desc:"The Hunt rides in three days. Lambert has stripped the lower hall of everything except the essentials. This is not a programme. This is preparation for something that does not negotiate.",
+      milestones:[
+        {l:"Lambert's Standard",  c:"Warm up",                  s:"Lambert is already mid-set when you arrive. He doesn't stop. He just raises an eyebrow. You know what that means."},
+        {l:"First Lift",          c:"First exercise done",       s:"The bar is loaded heavier than you discussed. Lambert shrugs. 'The Hunt doesn't ask what you planned.'"},
+        {l:"The Hard Sets",       c:"Second exercise done",      s:"Lambert is counting your reps. He won't tell you what number he's looking for. Finish anyway."},
+        {l:"Halfway",             c:"Midpoint",                  s:"He says nothing. That is, in its own way, approval."},
+        {l:"Final Push",          c:"Last section",              s:"'You're close. Don't ruin it by half-finishing.' That is the most Lambert will give you. Take it."},
+      ],
+    },
+    {
+      id:"st_brenna",
+      type:"strength",
+      title:"The Field Before Brenna",
+      loc:"Brenna, Mahakam",
+      diff:"Rare",
+      xp:240,
+      icon:"⚔️",
+      companion:"meve",
+      briefingLine:"The armies move at dawn. Between now and then, you build the body that survives what comes next.",
+      flavor:"\"This is not a skirmish. The Northern Kingdoms do not have another army. Give everything.\" — Meve",
+      desc:"Meve's soldiers train the night before a pitched battle. Not because they have to. Because the ones who don't are the ones who don't come back. You are one of her soldiers tonight.",
+      milestones:[
+        {l:"Formation",           c:"Warm up",                  s:"The camp is quiet except for the weapons being checked. Meve walks the line. She stops at you. 'Ready?' It is not a question."},
+        {l:"First Drill",         c:"First exercise done",       s:"The other soldiers are watching. Not to judge — to calibrate. They want to know who they're going into battle with."},
+        {l:"War Conditioning",    c:"Second exercise done",      s:"A pitched battle has no programming. Your body needs to have already done this before it needs to do it for real."},
+        {l:"Halfway",             c:"Midpoint",                  s:"Meve passes you again. Doesn't slow down. But she nods. That nod means something in her army."},
+        {l:"Battle Ready",        c:"Last section",              s:"'Finish. Clean.' Two words. Everything she asks of her captains. Be one of them."},
+      ],
+    },
+    {
+      id:"st_crones",
+      type:"strength",
+      title:"Stronger Than Their Patience",
+      loc:"Velen, Crookback Bog",
+      diff:"Rare",
+      xp:200,
+      icon:"🌿",
+      companion:"regis",
+      briefingLine:"The Crones have been patient for centuries. You need to outlast that patience. Build the margin. Slowly. Methodically.",
+      flavor:"\"The Crones do not rush. They have never needed to. Show them something they have not seen.\" — Regis",
+      desc:"Regis has studied the Crones longer than most witchers have been alive. His assessment: they are patient, they are ancient, and they have never encountered something that simply refused to break. Be that thing.",
+      milestones:[
+        {l:"Into the Bog",        c:"Warm up",                  s:"Regis stands at the tree line. 'The Crones are watching already. They always are. Begin.'"},
+        {l:"Slow and Heavy",      c:"First exercise done",       s:"Slow eccentrics. Full range. The Crones move with absolute deliberateness. You are learning to match it."},
+        {l:"The Crones Notice",   c:"Second exercise done",      s:"Something shifts in the air. Regis says nothing. His expression does not change. Keep going."},
+        {l:"Halfway",             c:"Midpoint",                  s:"'I have watched them break things that fought harder than this. The difference is, those things stopped.' He looks at you. You keep going."},
+        {l:"Their Patience Ends", c:"Last section",              s:"The bog is quiet now. Something has decided you are not worth waiting out. Finish before it changes its mind."},
+      ],
+    },
+  ],
+  run: [
+    {
+      id:"run_bruxa",
+      type:"run",
+      title:"Before the Bruxa Strikes",
+      loc:"Toussaint, Alba vineyard roads",
+      diff:"Uncommon",
+      xp:180,
+      icon:"🦇",
+      companion:"geralt",
+      briefingLine:"Bruxa. Teleports. Reappears behind you. Your only advantage is not being where it expects. Build that advantage.",
+      flavor:"\"She doesn't chase. She appears. The gap between those two things is your window.\" — Geralt",
+      desc:"A bruxa hunts by teleportation and ambush. Every witcher who has survived one did it the same way: by being somewhere else before the strike landed. Today you build the legs that make that possible.",
+      milestones:[
+        {l:"Leaving Beauclair",   c:"Warm up, start moving",    s:"The city gates fall behind you. The vineyard roads stretch ahead. Somewhere in those hills, the bruxa is already aware you're coming."},
+        {l:"First Interval",      c:"First interval done",       s:"You find the attack site. The ground tells the story. She moves fast. The vineyard workers never heard her coming."},
+        {l:"The Middle Section",  c:"Midpoint",                  s:"Three kilometres in. The road curves into shadow. You feel her attention before you see any sign of her."},
+        {l:"She Tests You",       c:"Begin final intervals",     s:"She teleports twenty metres ahead and waits. She wants to know if you'll slow down. Don't slow down."},
+        {l:"The Return Road",     c:"Final stretch",             s:"The contract is done. The road back to Beauclair is clear. You run it anyway. Better to stay sharp."},
+      ],
+    },
+    {
+      id:"run_wildhunt",
+      type:"run",
+      title:"The Hunt Rides Tonight",
+      loc:"The Northern Kingdoms, open road",
+      diff:"Rare",
+      xp:260,
+      icon:"🌑",
+      companion:"ciri",
+      briefingLine:"They ride at midnight. We've been ahead of them before. We'll be ahead of them again. Move.",
+      flavor:"\"The Hunt does not tire. It does not stop. The only answer is to be faster and to stay faster.\" — Ciri",
+      desc:"Ciri has outrun the Wild Hunt across multiple worlds. She does not talk about technique. She talks about the moment your lungs tell you to stop and you decide they are wrong. Today is that training.",
+      milestones:[
+        {l:"The Hunt Spotted",    c:"Warm up",                   s:"Ciri sees them on the horizon before you do. Her hand is already on your arm. 'Now. We go now.'"},
+        {l:"Open Road",           c:"First interval",            s:"The riders are fast. You cannot outrun them over distance. You can stay ahead long enough to reach the waystone. Keep the pace."},
+        {l:"The Long Section",    c:"Midpoint",                  s:"Ciri glances back. They haven't gained. She doesn't say anything. She doesn't need to."},
+        {l:"Final Push",          c:"Last intervals",            s:"The waystone is visible. The Hunt is closer than it was. Ciri accelerates. Match her."},
+        {l:"Through the Gate",    c:"Final stretch",             s:"The waystone flares. The Hunt pulls back. 'We made it.' She says it like she expected to. Run it in anyway."},
+      ],
+    },
+    {
+      id:"run_foglets",
+      type:"run",
+      title:"The Oxenfurt Road at Dawn",
+      loc:"Velen, Oxenfurt Road",
+      diff:"Common",
+      xp:140,
+      icon:"🌫️",
+      companion:"zoltan",
+      briefingLine:"Foglets on the Oxenfurt Road. Fog lifts at noon. We go before it does. On your feet.",
+      flavor:"\"The fog doesn't slow a dwarf. We navigate by smell anyway.\" — Zoltan",
+      desc:"Zoltan has scouted the road. Twelve foglets, spread across four kilometres. The fog is still thick. You run the road by memory, by footfall, by training. One by one, you clear them.",
+      milestones:[
+        {l:"Into the Fog",        c:"Warm up",                   s:"Zoltan is already moving before you've finished lacing up. 'The fog thins around the third mile marker. Don't need to see. Just run.'"},
+        {l:"First Kilometre",     c:"First interval",            s:"The first foglet. It materialises two metres to your left. Zoltan is faster. 'Keep moving. Ten more.'"},
+        {l:"Deep Fog Section",    c:"Midpoint",                  s:"You can't see the road ahead. You know it anyway. The training is the map. Run it."},
+        {l:"Fog Lifting",         c:"Last intervals",            s:"The fog starts to thin. Zoltan counts down foglets on his fingers. He's down to three."},
+        {l:"Clear Road",          c:"Final stretch",             s:"The last foglet is down. The road to Oxenfurt is clear and fog-free. Zoltan is, for once, slightly out of breath. 'Not bad.'"},
+      ],
+    },
+    {
+      id:"run_mountain",
+      type:"run",
+      title:"The Kaer Morhen Circuit",
+      loc:"Kaer Morhen, mountain pass",
+      diff:"Uncommon",
+      xp:200,
+      icon:"🏔️",
+      companion:"eskel",
+      briefingLine:"Up through the pass. Down the eastern ridge. Eskel's time is on the board. Don't tell him you're trying to beat it.",
+      flavor:"\"The mountain doesn't care how fast you think you are.\" — Eskel",
+      desc:"The Kaer Morhen mountain circuit. Up from the keep gates, through the narrow pass at altitude, down the eastern ridge. Eskel runs it every morning. He has never once mentioned his time. You found it on the board anyway.",
+      milestones:[
+        {l:"The Keep Gate",       c:"Warm up",                   s:"Eskel is already outside. He looks at the sky, checks the wind. 'Good conditions.' That is his version of encouragement."},
+        {l:"The Ascent",          c:"First interval",            s:"The pass is always into headwind. Vesemir designed the route that way. You can feel him in every uphill section."},
+        {l:"The Pass",            c:"Midpoint",                  s:"The keep is invisible below. The wind is significant. Eskel is ten metres ahead. He hasn't looked back. He doesn't need to."},
+        {l:"The Ridge",           c:"Last intervals",            s:"The descent is harder than candidates expect. Eskel told you once that the eastern ridge broke more knees than any training drill. Watch your footing."},
+        {l:"The Gate",            c:"Final stretch",             s:"The keep gates visible below. Eskel finishes and turns to watch you come in. His expression does not change. That is the compliment."},
+      ],
+    },
+  ],
+  mobility: [
+    {
+      id:"mob_forms",
+      type:"mobility",
+      title:"The Sword School Forms",
+      loc:"Kaer Morhen, training yard",
+      diff:"Common",
+      xp:140,
+      icon:"🗡️",
+      companion:"geralt",
+      briefingLine:"The forms come before the blade. Every Witcher starts here. Most think they've outgrown them. They haven't.",
+      flavor:"\"Precision before speed. Range before strength. The form first. Always.\" — Geralt",
+      desc:"The Wolf School sword forms predate the current order by four centuries. Geralt practices them every morning without exception. Not for show. Because a body without full range is a body with exploitable angles.",
+      milestones:[
+        {l:"Opening Stance",      c:"Start",                     s:"Geralt is already in the yard. He's halfway through the first form. He doesn't stop when you arrive. You join in."},
+        {l:"Upper Body Forms",    c:"First sequence done",        s:"'The shoulder is where most witchers lose range first. Don't.' He's watching your rotation."},
+        {l:"Hip and Thoracic",    c:"Midpoint",                   s:"'This is the section people skip.' He's not looking at you. He doesn't need to. He already knows."},
+        {l:"Integration Forms",   c:"Begin final sequence",       s:"The forms start to connect into movement. This is what they were always building toward. Don't rush the last ones."},
+        {l:"Final Form",          c:"Final holds",                s:"Geralt finishes and stands still for a moment. 'Better.' That is significant coming from him."},
+      ],
+    },
+    {
+      id:"mob_yen",
+      type:"mobility",
+      title:"What Aretuza Requires",
+      loc:"Aretuza, the hall",
+      diff:"Uncommon",
+      xp:180,
+      icon:"💜",
+      companion:"yennefer",
+      briefingLine:"A sorceress whose body is a limitation is a liability. Aretuza teaches this before it teaches anything else. Begin.",
+      flavor:"\"The body and the mind are not separate instruments. What restricts one restricts both.\" — Yennefer",
+      desc:"Yennefer spent years undoing the physical restrictions that came with her spine. What she built in their place is a body that refuses to be a constraint. This is the session she runs before any significant working.",
+      milestones:[
+        {l:"The Hall",            c:"Start",                     s:"Yennefer is standing in the centre of the hall. She has not begun. She is waiting for you to arrive with your full attention. Give it."},
+        {l:"Foundational Work",   c:"First sequence done",        s:"'The restriction you just found is not new. Your body has been compensating around it for months. Address it.'"},
+        {l:"Deep Mobility",       c:"Midpoint",                   s:"'You are making a face. The discomfort is information. Use it.'"},
+        {l:"Integration",         c:"Begin final sequence",       s:"The restrictions are starting to release. Yennefer notices. She does not say so. She adjusts the next sequence to work deeper into what you've opened."},
+        {l:"Complete",            c:"Final holds",                s:"She looks at you for a long moment. 'Adequate.' From Yennefer, adequate is not a small thing."},
+      ],
+    },
+    {
+      id:"mob_regis",
+      type:"mobility",
+      title:"A Herbalist's Morning Practice",
+      loc:"Dillingen, Regis's cottage",
+      diff:"Common",
+      xp:140,
+      icon:"🦇",
+      companion:"regis",
+      briefingLine:"I have maintained this practice for two hundred years. The body requires attention given freely, not under duress. Join me.",
+      flavor:"\"I have watched the human body deteriorate through neglect and through excess. The answer is neither.\" — Regis",
+      desc:"Regis begins every morning the same way, regardless of what the night before contained. He moves slowly, with complete attention, through a sequence he has refined over two centuries. He has invited you to join him.",
+      milestones:[
+        {l:"The Garden",          c:"Start",                     s:"The cottage garden at dawn. Regis is already moving, unhurried, through a sequence you don't recognise. He nods once. You begin beside him."},
+        {l:"Breath and Base",     c:"First sequence done",        s:"'The breath drives the movement. Not the other way around.' He's not telling you anything is wrong. He's telling you what to find."},
+        {l:"The Deeper Work",     c:"Midpoint",                   s:"'In my experience, the restrictions people consider permanent are almost never permanent. They are simply unaddressed.' He demonstrates. You follow."},
+        {l:"Refinement",          c:"Begin final sequence",       s:"The garden is fully lit now. Something in the sequence has shifted from effort to attention. Regis notices. He slows down slightly so you can stay with him."},
+        {l:"Completion",          c:"Final holds",                s:"He holds the final position with you. 'The body remembers what you show it,' he says. 'Show it this.'"},
+      ],
+    },
+    {
+      id:"mob_triss",
+      type:"mobility",
+      title:"Field Recovery Protocol",
+      loc:"Temeria, field camp",
+      diff:"Common",
+      xp:160,
+      icon:"🔥",
+      companion:"triss",
+      briefingLine:"The body after hard work needs specific attention. I learned this at Kaer Morhen. We're doing it properly.",
+      flavor:"\"A witcher who can't move freely is a witcher who dies. I have seen it.\" — Triss",
+      desc:"Triss learned field medicine and movement rehabilitation treating witchers after the sacking of Kaer Morhen. What she developed is not gentle stretching. It is systematic maintenance of a body that needs to work tomorrow.",
+      milestones:[
+        {l:"Assessment",          c:"Start",                     s:"Triss looks you over the way she'd assess a patient. 'You've been compensating left. I can see it. We'll address that first.'"},
+        {l:"Targeted Work",       c:"First sequence done",        s:"'This is the section most people skip because it's uncomfortable. That's why most people's bodies fail them eventually.'"},
+        {l:"The Hip Complex",     c:"Midpoint",                   s:"'I treated a witcher at Kaer Morhen who had been ignoring this restriction for six years. By the time I saw him it was too late to fully fix. Don't be him.'"},
+        {l:"Integration",         c:"Begin final sequence",       s:"The work is starting to feel like movement instead of effort. Triss is watching your range improve in real time."},
+        {l:"Complete",            c:"Final holds",                s:"'You're in better shape than you think.' She says it like it's a clinical observation. Coming from Triss, it is."},
+      ],
+    },
+  ],
+  home: [
+    {
+      id:"home_courtyard",
+      type:"home",
+      title:"Kaer Morhen Courtyard at Dawn",
+      loc:"Kaer Morhen, the courtyard",
+      diff:"Common",
+      xp:140,
+      icon:"🏰",
+      companion:"lambert",
+      briefingLine:"No equipment. No excuses. The courtyard is the same one Eskel and I grew up on. It's enough.",
+      flavor:"\"The old ways built the witchers. The old ways still work.\" — Lambert",
+      desc:"The Kaer Morhen courtyard before sunrise. Frost on the stone. Lambert is already moving through his circuit, which he refuses to call a programme. You use the wall, the yard, the stairs. Nothing else is needed.",
+      milestones:[
+        {l:"First Light",         c:"Start",                     s:"Lambert is mid-circuit, not looking up. 'You're late.' You're not late. He just started early. Same thing to him."},
+        {l:"First Round",         c:"First circuit done",         s:"'That was the warm-up. Here's where it actually starts.' He adds two exercises without announcing them."},
+        {l:"Second Round",        c:"Midpoint",                   s:"The courtyard stones are still frost-slick. Lambert hasn't slipped once. Show the same."},
+        {l:"Third Round",         c:"Begin final round",          s:"'You're close. Don't half-finish the last one.' This is the most Lambert will compliment anyone. Register it."},
+        {l:"Complete",            c:"Final effort",               s:"Lambert finishes, checks the time. 'Not bad.' He walks away. That is a standing ovation from Lambert."},
+      ],
+    },
+    {
+      id:"home_inn",
+      type:"home",
+      title:"The Inn at the Crossroads",
+      loc:"Velen, the crossroads inn",
+      diff:"Common",
+      xp:120,
+      icon:"🍺",
+      companion:"dandelion",
+      briefingLine:"I have written three ballads at this inn. I will write a fourth about your training today if it's worth writing about. Make it worth writing about.",
+      flavor:"\"The great Dandelion documents only what is remarkable. Today, we aim for remarkable.\" — Dandelion",
+      desc:"The Inn at the Crossroads. A barn, a yard, and Dandelion annotating everything in his journal. You have no equipment but the space and your own body. Dandelion has promised the resulting ballad will be flattering, conditional on you actually finishing.",
+      milestones:[
+        {l:"The Barn",            c:"Start",                     s:"'The great warrior takes the field!' Dandelion announces to no one in particular. The innkeeper looks out a window. You begin."},
+        {l:"First Verse",         c:"First circuit done",         s:"'I've written the opening verse. It's very good. You'll want to earn the second one.' He shows you four words. They are indeed good."},
+        {l:"The Middle",          c:"Midpoint",                   s:"'This is the bridge section of the ballad — the part where the hero faces their moment of doubt. I suggest you do not doubt. It makes for a weaker middle eight.'"},
+        {l:"The Final Verse",     c:"Begin final round",          s:"'We're at the climax. This is the part I read aloud at banquets. Make sure it's accurate to your actual effort.' He readies his quill."},
+        {l:"Complete",            c:"Final effort",               s:"Dandelion writes the final line with a flourish. 'Magnificent. Truly. I mean, it was mostly my writing, but you gave me something to work with.'"},
+      ],
+    },
+    {
+      id:"home_camp",
+      type:"home",
+      title:"Witcher's Camp on the Road",
+      loc:"The Northern Kingdoms, forest camp",
+      diff:"Common",
+      xp:140,
+      icon:"🔥",
+      companion:"ciri",
+      briefingLine:"Fire's up. No gym for three days. Doesn't matter. Let's go.",
+      flavor:"\"The Path doesn't care about your access to equipment. It just cares whether you show up.\" — Ciri",
+      desc:"A clearing two miles from the nearest settlement. The fire is lit. You have whatever you carried. Ciri has already cleared a space and is moving through bodyweight drills before you've finished setting your pack down.",
+      milestones:[
+        {l:"Camp Ready",          c:"Start",                     s:"Ciri is already mid-drill. She doesn't stop when you arrive. She just points at the space beside her."},
+        {l:"First Circuit",       c:"First round done",           s:"'Vesemir made me do this circuit for six months before he let me touch a sword. Every morning, regardless of weather.' She adds a variation."},
+        {l:"Second Circuit",      c:"Midpoint",                   s:"The fire has burned down. The clearing is fully light. You're both breathing harder. She looks across at you. 'Again.'"},
+        {l:"Third Circuit",       c:"Begin final round",          s:"'The Hunt never caught me because I never had a bad day on the road. Every day on the road was training.' She starts the final round."},
+        {l:"Complete",            c:"Final effort",               s:"Ciri finishes and sits by the fire. After a moment: 'Come on. You're close.' She restarts the timer. Finish it."},
+      ],
+    },
+    {
+      id:"home_skellige",
+      type:"home",
+      title:"Skellige Longhouse Circuit",
+      loc:"Skellige, Ard Skellig",
+      diff:"Uncommon",
+      xp:180,
+      icon:"❄️",
+      companion:"zoltan",
+      briefingLine:"Skellige longhouse. Stone floor. Wind in the walls. Crach an Craite doesn't accept excuses. Neither do I.",
+      flavor:"\"Skelligers don't warm up. The cold is the warm-up.\" — Zoltan",
+      desc:"A Skellige longhouse in late autumn. The floor is stone. The wind off the Skellige Sea comes through the walls regardless of season. Zoltan is already stripped to the waist and has set up a circuit that requires nothing except willingness to be uncomfortable.",
+      milestones:[
+        {l:"Into the Cold",       c:"Start",                     s:"The longhouse door opens. The cold is immediate. Zoltan: 'Good. Cold keeps you honest.' He starts the first drill."},
+        {l:"First Round",         c:"First circuit done",         s:"'A dwarf with frost on his beard completes the circuit. What's your excuse?' He smiles when he says it. Mostly."},
+        {l:"Second Round",        c:"Midpoint",                   s:"You're warm despite the cold. That's the point. Zoltan nods. 'Now you're doing it right.'"},
+        {l:"Third Round",         c:"Begin final round",          s:"'Last one. Crach an Craite would be watching this part. Pretend he is. Adjust accordingly.'"},
+        {l:"Complete",            c:"Final effort",               s:"Zoltan hands you something hot to drink without comment. In Skellige, that is a standing ovation."},
+      ],
+    },
+  ],
 };
 
+// Returns one contract per workout type, rotating daily
+function getDailyContracts() {
+  const seed = dayStamp();
+  const result = {};
+  Object.entries(CONTRACTS).forEach(([type, pool]) => {
+    result[type] = pool[hash(seed + type) % pool.length];
+  });
+  return result;
+}
+
+// Backwards compat: single arc for workout view
+function getContractForType(type) {
+  return getDailyContracts()[type] || CONTRACTS[type][0];
+}
+
+const MISSIONS = Object.values(CONTRACTS).flat();
+
+const BRIEFINGS = {};
+Object.values(CONTRACTS).flat().forEach(c => {
+  BRIEFINGS[c.id] = { crew: c.companion, line: c.briefingLine };
+});
+
 const DEFAULT_BRIEFING = { crew:"geralt", line:"Contract came in this morning. Details are on the notice board. What kind of training are we starting with?" };
+
 
 const BANTER = {
   geralt: [
@@ -564,103 +752,6 @@ const EFFORT = [
   { v:"wolf",    icon:"🐺",  label:"White Wolf",      desc:"Total commitment" },
 ];
 
-const ARC_MILESTONES = {
-  bruxa: {
-    strength:[
-      {l:"First Contact",      c:"Warm up complete",          s:"You smell the vineyard before you see it. Something is wrong with the air here. Chemical, sweet, metallic."},
-      {l:"First Set Complete", c:"Complete first exercise",   s:"The workers scattered when you arrived. Sensible. A bruxa at full strength can take a man's head before he registers movement."},
-      {l:"Into the Hard Work", c:"Complete second exercise",  s:"You find a feather in the cellar. Black, iridescent. She has been roosting here. She knows you are in her territory now."},
-      {l:"Halfway",            c:"Halfway through session",   s:"The light changes. She is watching. Bruxae do not attack immediately. They learn you first. Be worth learning from."},
-      {l:"Final Push",         c:"Last set remaining",        s:"She makes her move. What she encounters is not what she expected when you walked through those vineyard gates."},
-    ],
-    run:[
-      {l:"Leaving Beauclair",  c:"Warm up, start moving",     s:"The city gates behind you. The road into the vineyard country ahead. A bruxa is somewhere in those hills."},
-      {l:"First Mile",         c:"First interval complete",   s:"You find where the attacks happened. The bodies were moved, but the blood trail is clear. She is fast. You need to be faster."},
-      {l:"The Long Section",   c:"Midpoint reached",          s:"Three kilometres in. The road bends into shadow. You feel her before you hear her."},
-      {l:"Acceleration",       c:"Begin final intervals",     s:"She teleports twenty metres ahead of you and waits. She wants to see what you do. Show her."},
-      {l:"The Return",         c:"Final stretch",             s:"The contract is complete. The road back to Beauclair is clear. You run it anyway. Better to stay sharp."},
-    ],
-    mobility:[
-      {l:"Opening Forms",      c:"Start mobility work",       s:"The contract briefing was specific: bruxae attack through peripheral angles. Find yours. Then close them."},
-      {l:"Hip and Shoulder",   c:"First sequence done",       s:"A higher vampire moves with absolute economy. No wasted motion. Work toward the same standard."},
-      {l:"Deep Work",          c:"Midpoint",                  s:"The form that protects you most is the one you neglect most. You know which one that is."},
-      {l:"Integration",        c:"Begin final sequence",      s:"Every angle closed is one fewer entry point. You are building something the bruxa will not expect."},
-      {l:"Full Form",          c:"Final holds",               s:"The difference between a witcher and a victim is the space they do not leave open. You are nearly there."},
-    ],
-    home:[
-      {l:"Camp Setup",         c:"Begin session",             s:"A farmhouse table. A stone floor. The inn's courtyard in the early morning. You have what you brought."},
-      {l:"First Circuit",      c:"First round done",          s:"The locals watch from a distance. A witcher training. They have heard stories. Let them watch."},
-      {l:"Second Circuit",     c:"Midpoint",                  s:"The bruxa hunts at dusk. You have hours. Use them."},
-      {l:"Third Circuit",      c:"Begin final round",         s:"You are building a margin. The bruxa is faster than you. The margin is what keeps you alive."},
-      {l:"Contract Ready",     c:"Final effort",              s:"The vineyard gates are ahead. The sun is low. The contract begins now."},
-    ],
-  },
-  trials: {
-    strength:[
-      {l:"The Corridor",       c:"Warm up complete",          s:"Vesemir starts the pendulums at dawn. You step in when he nods. Not before."},
-      {l:"First Trial",        c:"First set complete",        s:"The candidates who tried to be fast failed here. The ones who were precise made it through."},
-      {l:"The Obstacle Course",c:"Second exercise complete",  s:"Full armour on the obstacle course. Vesemir's expression has not changed. That is either good or indeterminate."},
-      {l:"The Hard Part",      c:"Halfway",                   s:"This is where they stopped. The ones who became witchers did not stop here. That is the entirety of the distinction."},
-      {l:"Completion",         c:"Final sets",                s:"Vesemir is watching the form, not the weight. The weight will come. The form must already be there."},
-    ],
-    run:[
-      {l:"The Gate",           c:"Start",                     s:"The keep at your back. The mountain circuit ahead. Geralt's record is on a board in the hall. You have seen it."},
-      {l:"The Ascent",         c:"First interval",            s:"The pass at the halfway point is always into the wind. There is no sheltered route. Vesemir designed it that way."},
-      {l:"The Ridge",          c:"Midpoint",                  s:"You can see the keep from here. It looks closer than it is. That is also by design."},
-      {l:"The Descent",        c:"Final intervals",           s:"The descent is harder than the ascent. Candidates who saved energy for it were the ones who finished clean."},
-      {l:"The Courtyard",      c:"Final stretch",             s:"Vesemir is standing at the gate. He has been standing there every morning for thirty years. Run in properly."},
-    ],
-    mobility:[
-      {l:"Morning Forms",      c:"Start",                     s:"The forms predate the current order. They are older than Kaer Morhen itself. Begin at the beginning."},
-      {l:"Blade Forms",        c:"First sequence",            s:"Geralt's precision with two swords starts here. At the hip. In the shoulder. In the thoracic spine. Not in the wrist."},
-      {l:"Integration",        c:"Midpoint",                  s:"Vesemir says: the body that cannot be surprised is the body that has gone everywhere already. Keep going."},
-      {l:"Advanced Forms",     c:"Begin final sequence",      s:"These are the forms the candidates who failed could not yet do. You are doing them."},
-      {l:"Completion",         c:"Final holds",               s:"The trial of the forms is not graded on grace. It is graded on honesty. Every restriction you ignored is visible."},
-    ],
-    home:[
-      {l:"Courtyard Dawn",     c:"Begin",                     s:"Frost on the stone. No equipment. Just the body and what the keep taught you."},
-      {l:"First Circuit",      c:"Round one done",            s:"Lambert is already done and watching. He will not say it, but he is watching to see if you finish."},
-      {l:"Second Circuit",     c:"Midpoint",                  s:"The body starts to argue at the midpoint. Vesemir taught that the argument is part of the training."},
-      {l:"Third Circuit",      c:"Begin final",               s:"Eskel ran this circuit for three years before Vesemir changed it. The original was harder. Keep that in mind."},
-      {l:"Trial Complete",     c:"Final effort",              s:"The courtyard is quiet. The keep stands. You have done what it asked today."},
-    ],
-  },
-};
-
-Object.keys(BANTER).forEach(id => {
-  if(!ARC_MILESTONES[id]) {
-    ARCS.forEach(arc => {
-      if(!ARC_MILESTONES[arc.id]) ARC_MILESTONES[arc.id] = {};
-      WORKOUT_TYPES.forEach(wt => {
-        if(!ARC_MILESTONES[arc.id][wt.id]) {
-          ARC_MILESTONES[arc.id][wt.id] = [
-            {l:"First Step on the Path", c:"Warm up complete",         s:`The contract is clear. The work begins now.`},
-            {l:"Into the Contract",      c:"First exercise complete",  s:`This is what the Path asks. You answer it.`},
-            {l:"Halfway",                c:"Midpoint reached",         s:`The hardest part of any contract is the middle. Keep moving.`},
-            {l:"Final Push",             c:"Begin last section",       s:`You are close. Do not let the form go now.`},
-            {l:"Contract Complete",      c:"Final effort",             s:`The Path does not reward the adequate. Finish with everything you have.`},
-          ];
-        }
-      });
-    });
-  }
-});
-
-ARCS.forEach(arc => {
-  if(!ARC_MILESTONES[arc.id]) ARC_MILESTONES[arc.id] = {};
-  WORKOUT_TYPES.forEach(wt => {
-    if(!ARC_MILESTONES[arc.id][wt.id]) {
-      ARC_MILESTONES[arc.id][wt.id] = [
-        {l:"First Step on the Path", c:"Warm up complete",         s:`${arc.loc}. The contract is in hand. The work begins.`},
-        {l:"Into the Contract",      c:"First exercise complete",  s:`The ${arc.title} contract is underway. Keep the pace.`},
-        {l:"Halfway",                c:"Midpoint reached",         s:`Halfway through. This is where it counts.`},
-        {l:"Final Push",             c:"Begin last section",       s:`The end is close. Do not ease off now.`},
-        {l:"Contract Complete",      c:"Final effort",             s:`Everything you have. The Path is watching.`},
-      ];
-    }
-  });
-});
-
 const DEFAULT_MILESTONES = [
   {l:"First Step on the Path", c:"Warm up complete",       s:"The work begins."},
   {l:"Into the Contract",      c:"First section complete", s:"You are in it now."},
@@ -706,19 +797,14 @@ function initState() {
   return { char:{name:"Ashley",level:1,xp:0,total:0,reputation:30000}, ch, weekKey:weekKey(), weekW:[], allW:[], streak:0, best:0 };
 }
 
-function getDailyArc() {
-  const seed = dayStamp();
-  return ARCS[hash(seed) % ARCS.length];
-}
-
 /* ═══════════════════════════════════════════════════
    COMPONENTS
 ═══════════════════════════════════════════════════ */
 
-function BriefingSection({ apiKey, onSelectWorkoutType }) {
-  const todayArc   = getDailyArc();
-  const briefing   = BRIEFINGS[todayArc?.id] || DEFAULT_BRIEFING;
-  const companion  = CREW.find(c=>c.id===briefing.crew) || CREW[0];
+function BriefingSection({ contract, apiKey, onBegin, onBack }) {
+  const briefing  = BRIEFINGS[contract.id] || DEFAULT_BRIEFING;
+  const companion = CREW.find(c=>c.id===briefing.crew) || CREW[0];
+  const wt        = WORKOUT_TYPES.find(w=>w.id===contract.type) || WORKOUT_TYPES[0];
 
   const [feed,     setFeed]     = useState([{type:"companion", cid:companion.id, text:briefing.line}]);
   const [input,    setInput]    = useState("");
@@ -746,35 +832,36 @@ function BriefingSection({ apiKey, onSelectWorkoutType }) {
       }).filter(Boolean).join("\n");
 
       const voiceMap = {
-        geralt:    "Short declarative sentences. Observational. Dry. Never inspirational. Does not reassure unless earned. Notices specific details. Occasionally just 'Hmm.'",
-        yennefer:  "Cold, precise. States requirements not suggestions. Contemptuous of hesitation. Respects actual results. Does not offer encouragement. Offers standards.",
-        triss:     "Warmer than Yennefer but not soft. Has survived Kaer Morhen. Practical. Believes in preparation. Occasionally a dark reference to things she has seen.",
-        dandelion: "Verbose, self-referential, genuinely excited. Will insert himself into the narrative. References his own work. Means well. Occasionally actually useful.",
-        ciri:      "Competitive, direct, not interested in excuses. Has done harder things than this workout and knows it. Slightly impatient. Will not wait.",
-        zoltan:    "Blunt, warm, pragmatic. Calls things what they are. Has no patience for ceremony or hesitation. Short sentences. Occasional mild profanity.",
-        vesemir:   "Demanding but not cruel. Has trained witchers for a century. Knows the body's limits precisely. Sets real standards. Everything is a lesson.",
-        lambert:   "Sarcastic, abrasive, not wrong. Will tell you if you are slacking. Will also tell you if you are doing well, once, briefly, without making it a thing.",
-        eskel:     "Minimal words. Steady. When he speaks it changes the scene. No encouragement for its own sake. Precise.",
-        philippa:  "Calculates everything. Tells you what you need to know, not what you want to hear. Has her own agenda. Watching.",
-        regis:     "Philosophical, unhurried. Centuries of perspective. Will draw unexpected connections between the workout and something ancient. Never panics. Occasionally unsettling.",
-        meve:      "Soldier's directness. No ceremony. Already moving. Expects you to keep up. Brief.",
+        geralt:    "Short declarative sentences. Observational. Dry. Never inspirational. Does not reassure unless earned. Occasionally just 'Hmm.'",
+        yennefer:  "Cold, precise. States requirements not suggestions. Contemptuous of hesitation. Respects results. Does not offer encouragement. Offers standards.",
+        triss:     "Warmer but not soft. Has survived Kaer Morhen. Practical. Occasionally a dark reference to things she has seen.",
+        dandelion: "Verbose, self-referential, genuinely excited. Will insert himself into the narrative. References his own work. Means well.",
+        ciri:      "Competitive, direct, not interested in excuses. Has done harder things. Slightly impatient. Will not wait.",
+        zoltan:    "Blunt, warm, pragmatic. No patience for ceremony. Short sentences. Occasional mild profanity.",
+        vesemir:   "Demanding but not cruel. Trained witchers for a century. Sets real standards. Everything is a lesson.",
+        lambert:   "Sarcastic, abrasive, not wrong. Will tell you if you're slacking. Will also tell you if you're doing well, once, briefly.",
+        eskel:     "Minimal words. When he speaks it changes the scene. No encouragement for its own sake.",
+        philippa:  "Calculates everything. Tells you what you need to know, not what you want to hear. Has her own agenda.",
+        regis:     "Philosophical, unhurried. Centuries of perspective. Will draw unexpected connections. Occasionally unsettling.",
+        meve:      "Soldier's directness. No ceremony. Already moving. Brief.",
       };
 
       const sys=`You are ${companion.name} from The Witcher, delivering the pre-contract briefing inside a workout app called On the Path.
 
-Ashley is about to do a real physical workout. She has not chosen the type yet. Your job is to set the scene for today's contract and make the workout feel like stepping onto the Path.
+Ashley has chosen her contract and is about to begin. Your job is to set the scene and get her into the right headspace for what she's about to do.
 
-TODAY'S CONTRACT: "${todayArc?.title}" at ${todayArc?.loc}
+CONTRACT: "${contract.title}" at ${contract.loc}
+WORKOUT TYPE: ${wt.label}
+CONTRACT DESCRIPTION: ${contract.desc}
 YOUR ROLE: ${companion.role}
 CONVERSATION SO FAR:
 ${history}
 
-This is a two-way conversation. She can respond, ask questions, push back. React in character. Keep each response under 3 sentences. No monologues. No em dashes. No inspirational fitness language.
+This is a two-way conversation. React in character. Keep responses under 3 sentences. No monologues. No em dashes. No inspirational fitness language.
 
-YOUR VOICE:
-${voiceMap[companion.id]||"In character. Present. Direct."}
+YOUR VOICE: ${voiceMap[companion.id]||"In character. Direct."}
 
-No JSON. Speak as ${companion.name} only. 3 sentences maximum.`;
+No JSON. Speak as ${companion.name} only.`;
 
       const res=await fetch("https://api.anthropic.com/v1/messages",{
         method:"POST",
@@ -789,19 +876,27 @@ No JSON. Speak as ${companion.name} only. 3 sentences maximum.`;
       const reply=data.content?.[0]?.text||"...";
       setFeed(f=>[...f,{type:"companion",cid:companion.id,text:reply}]);
     } catch(err) {
-      setFeed(f=>[...f,{type:"companion",cid:companion.id,text:"Megascope's down. Choose your workout type."}]);
+      setFeed(f=>[...f,{type:"companion",cid:companion.id,text:"Megascope's down. Let's move."}]);
     } finally { setThinking(false); }
   }
 
-  return h('div',{class:"briefing-section"},
-    h('div',{class:"briefing-header"},
-      h(CompanionIcon,{id:companion.id,size:44,style:"border:2px solid "+companion.color+";flex-shrink:0;"}),
-      h('div',null,
-        h('div',{class:"briefing-arc"},`Contract Today: ${todayArc?.title||"On the Path"}`),
-        h('div',{style:"font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:#c8d4e0"},companion.name)
+  return h('div',{class:"view fade-in",style:"display:flex;flex-direction:column;height:100%;"},
+    h('div',{style:"padding:10px 14px 8px;border-bottom:1px solid #2a3040;flex-shrink:0"},
+      h('button',{style:"font-family:'Cinzel',serif;font-size:10px;font-weight:600;color:#8b9db0;letter-spacing:1px;padding:4px 0;background:none;border:none;margin-bottom:8px;",onClick:onBack},"← Back"),
+      h('div',{class:"row",style:"gap:8px;margin-bottom:2px"},
+        h('span',{style:"font-size:20px"},contract.icon),
+        h('div',null,
+          h('div',{style:"font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:#c8d4e0"},contract.title),
+          h('div',{style:"font-family:'EB Garamond',serif;font-style:italic;font-size:12px;color:#8b9db0"},contract.loc)
+        )
+      ),
+      h('div',{class:"row",style:"gap:6px;margin-top:6px"},
+        h('span',{style:"font-size:13px"},wt.icon),
+        h('span',{style:"font-family:'Cinzel',serif;font-size:9px;font-weight:700;color:#a07840;letter-spacing:1px;text-transform:uppercase"},wt.label),
+        h('span',{class:"tag tag-diff",style:`color:${diffColor(contract.diff)};border-color:${diffColor(contract.diff)};background:${diffColor(contract.diff)}11;margin-left:4px`},contract.diff)
       )
     ),
-    h('div',{class:"briefing-feed",ref:feedRef},
+    h('div',{class:"briefing-feed",ref:feedRef,style:"flex:1;"},
       feed.map((item,i)=>{
         if(item.type==="companion") {
           const c=CREW.find(x=>x.id===item.cid)||companion;
@@ -827,14 +922,11 @@ No JSON. Speak as ${companion.name} only. 3 sentences maximum.`;
       h('input',{class:"briefing-input",value:input,placeholder:`Speak to ${companion.name}...`,onInput:e=>setInput(e.target.value),onKeyDown:e=>{if(e.key==="Enter"){e.preventDefault();sendMsg();}},disabled:thinking}),
       h('button',{class:"briefing-send",disabled:!input.trim()||thinking,onClick:sendMsg},"➤")
     ),
-    h('div',{class:"workout-type-grid"},
-      WORKOUT_TYPES.map(wt=>
-        h('button',{key:wt.id,class:"wt-btn",onClick:()=>onSelectWorkoutType(wt.id)},
-          h('div',{class:"wt-icon"},wt.icon),
-          h('div',{class:"wt-label"},wt.label),
-          h('div',{class:"wt-sub"},todayArc?.title||"On the Path")
-        )
-      )
+    h('div',{style:"padding:10px 14px;border-top:1px solid #2a3040;flex-shrink:0;"},
+      h('button',{
+        style:"width:100%;padding:14px;background:#8b1a1a;color:#e8dfc8;font-family:'Cinzel',serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border:none;",
+        onClick:onBegin
+      },"Choose Party and Begin")
     )
   );
 }
@@ -849,27 +941,88 @@ function NavBar({ view, setView }) {
   );
 }
 
-function HomeView({ gs, setGs, onStartWorkout, apiKey }) {
-  const [expanded, setExpanded] = useState(null);
-  const [workoutType, setWorkoutType] = useState(null);
-  const arc = getDailyArc();
-  const wk  = gs.weekKey===weekKey() ? gs.weekW : [];
-  const doneIds = (gs.allW||[]).filter(w=>w.stamp===dayStamp()).map(w=>w.arcId);
-  const injured = CREW.filter(c=>gs.ch[c.id]?.hp<50);
-  const today = todayIdx();
-
-  const days=["M","T","W","T","F","S","S"];
-  const doneMap={};
-  (gs.allW||[]).forEach(w=>{
-    if(w.dayIdx!==undefined) doneMap[w.dayIdx]=true;
+function PartyPickerModal({ gs, setGs, onConfirm, onBack }) {
+  const [selected, setSelected] = useState(()=>{
+    const prev = gs.party||[];
+    const valid = prev.filter(id=>CREW.find(c=>c.id===id)&&(gs.ch[id]?.hp||100)>=50);
+    if(valid.length>0) return new Set(valid);
+    return new Set(CREW.filter(c=>(gs.ch[c.id]?.hp||100)>=50).slice(0,4).map(c=>c.id));
   });
-  const thisWeekW = gs.weekKey===weekKey()?(gs.weekW||[]):[];
-  const wDays=["mon","tue","wed","thu","fri","sat","sun"];
-  thisWeekW.forEach(w=>{ if(w.day) doneMap[wDays.indexOf(w.day)]=-1; });
 
-  function handleStartWorkout(type) {
-    if(onStartWorkout) onStartWorkout(arc, type);
+  function toggle(id) {
+    setSelected(prev=>{
+      const next=new Set(prev);
+      if(next.has(id)) { if(next.size>1) next.delete(id); }
+      else { if(next.size<4) next.add(id); else { const arr=[...next]; arr.shift(); arr.push(id); return new Set(arr); } }
+      return next;
+    });
   }
+
+  function confirm() {
+    const party=[...selected];
+    setGs(g=>({...g,party}));
+    onConfirm(party);
+  }
+
+  return h('div',{class:"view fade-in",style:"display:flex;flex-direction:column;"},
+    h('div',{style:"padding:14px 14px 6px;border-bottom:1px solid #2a3040;flex-shrink:0"},
+      h('button',{style:"font-family:'Cinzel',serif;font-size:10px;font-weight:600;color:#8b9db0;letter-spacing:1px;padding:4px 0;background:none;border:none;margin-bottom:8px;",onClick:onBack},"← Back"),
+      h('div',{class:"section-head",style:"margin-bottom:2px"},"Choose Your Party"),
+      h('div',{style:"font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:#8b9db0;margin-bottom:4px"},`Up to 4 companions. ${selected.size} selected.`)
+    ),
+    h('div',{style:"flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 14px"},
+      h('div',{style:"display:grid;grid-template-columns:repeat(2,1fr);gap:10px;"},
+        CREW.map(c=>{
+          const chs=gs.ch[c.id]||{hp:100,xp:0,level:1};
+          const isSel=selected.has(c.id);
+          const isInj=chs.hp<50;
+          return h('div',{
+            key:c.id,
+            class:`companion-card${isSel?" selected":""}${isInj?" injured":""}`,
+            onClick:()=>!isInj&&toggle(c.id),
+            style:`opacity:${isInj?0.45:1};`
+          },
+            h('div',{class:"companion-sel"},isSel?"✓":""),
+            h(CompanionIcon,{id:c.id,size:44,style:`border:2px solid ${isSel?c.color:"#2a3040"};`}),
+            h('div',{class:"companion-name"},c.name),
+            h('div',{class:"companion-role"},c.role),
+            h('div',{class:"hp-bar-track"},h('div',{class:"hp-bar-fill",style:`width:${chs.hp}%;background:${chs.hp>60?"#16a34a":chs.hp>30?"#d97706":"#8b1a1a"}`})),
+            h('div',{class:"companion-xp"},isInj?"Injured":"Lv."+chs.level)
+          );
+        })
+      )
+    ),
+    h('div',{style:"padding:12px 14px;border-top:1px solid #2a3040;flex-shrink:0;"},
+      h('button',{
+        style:"width:100%;padding:14px;background:#8b1a1a;color:#e8dfc8;font-family:'Cinzel',serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;border:none;",
+        onClick:confirm
+      },`Ride Out with ${selected.size} Companion${selected.size!==1?"s":""}`)
+    )
+  );
+}
+
+function HomeView({ gs, setGs, onStartWorkout, apiKey }) {
+  const [step,           setStep]           = useState("home"); // "home" | "briefing" | "party"
+  const [selectedContract, setSelectedContract] = useState(null);
+
+  const dailyContracts = getDailyContracts();
+  const doneIds = (gs.allW||[]).filter(w=>w.stamp===dayStamp()).map(w=>w.arcId);
+  const today   = todayIdx();
+  const thisWeekW = gs.weekKey===weekKey()?(gs.weekW||[]):[];
+  const days=["M","T","W","T","F","S","S"];
+
+  if(step==="briefing"&&selectedContract) return h(BriefingSection,{
+    contract:selectedContract,
+    apiKey,
+    onBack:()=>setStep("home"),
+    onBegin:()=>setStep("party"),
+  });
+
+  if(step==="party"&&selectedContract) return h(PartyPickerModal,{
+    gs, setGs,
+    onBack:()=>setStep("briefing"),
+    onConfirm:()=>{ onStartWorkout&&onStartWorkout(selectedContract, selectedContract.type); },
+  });
 
   return h('div',{class:"view fade-in"},
     h('div',{class:"stat-row"},
@@ -903,55 +1056,51 @@ function HomeView({ gs, setGs, onStartWorkout, apiKey }) {
       h('div',{class:"progress-text"},thisWeekW.length>=4?"Contract quota fulfilled this week.":`${4-thisWeekW.length} session${4-thisWeekW.length!==1?"s":""} remaining on the Path this week.`)
     ),
 
-    injured.length>0&&h('div',{class:"injured-card"},
-      h('div',{class:"injured-h"},"Companions Down"),
-      injured.map(c=>h('div',{key:c.id,class:"row",style:"margin-bottom:8px"},
-        h(CompanionIcon,{id:c.id,size:36}),
-        h('div',{style:"flex:1"},
-          h('div',{style:"font-family:'Cinzel',serif;font-weight:700;color:#8b1a1a;font-size:13px"},c.name),
-          h('div',{style:"font-family:'EB Garamond',serif;font-style:italic;color:#8b1a1a;font-size:12px"},`"${c.injuredQ}"`)
-        ),
-        h('div',{style:"color:#8b1a1a;font-weight:700;font-size:12px;font-family:'Cinzel',serif"},`HP ${gs.ch[c.id]?.hp}`)
-      ))
-    ),
-
-    h('div',{style:"margin:0 14px 12px"},
-      h('div',{class:"section-head"},"Today's Contract"),
-      h('div',{style:"font-family:'EB Garamond',serif;font-style:italic;font-size:12px;color:#8b9db0;margin-bottom:14px;margin-top:-6px"},"Rotates at midnight. Choose your approach above."),
-      h('div',{class:"mission-card",style:`opacity:${doneIds.includes(arc.id)?0.55:1}`},
-        h('div',{class:"mission-top",onClick:()=>setExpanded(expanded===arc.id?null:arc.id)},
-          h('div',{style:"font-size:26px;line-height:1"},arc.icon),
-          h('div',{style:"flex:1"},
-            h('div',{class:"row",style:"flex-wrap:wrap;gap:6px;margin-bottom:3px"},
-              h('div',{class:"mission-title"},`${doneIds.includes(arc.id)?"Completed: ":""}${arc.title}`),
-              h('div',{class:"tag tag-diff",style:`color:${diffColor(arc.diff)};border-color:${diffColor(arc.diff)};background:${diffColor(arc.diff)}11`},arc.diff)
+    h('div',{style:"padding:0 14px 20px"},
+      h('div',{class:"section-head"},"Today's Contracts"),
+      h('div',{style:"font-family:'EB Garamond',serif;font-style:italic;font-size:12px;color:#8b9db0;margin-bottom:14px;margin-top:-6px"},"Choose a story. The workout type follows the contract."),
+      WORKOUT_TYPES.map(wt=>{
+        const contract = dailyContracts[wt.id];
+        if(!contract) return null;
+        const done = doneIds.includes(contract.id);
+        const companion = CREW.find(c=>c.id===contract.companion);
+        return h('div',{
+          key:wt.id,
+          class:"mission-card",
+          style:`margin-bottom:10px;opacity:${done?0.55:1};cursor:pointer;`,
+          onClick:()=>{ if(!done){ setSelectedContract(contract); setStep("briefing"); } }
+        },
+          h('div',{style:"padding:12px 14px 10px;border-bottom:1px solid #2a3040"},
+            h('div',{class:"row",style:"gap:8px;margin-bottom:6px"},
+              h('span',{style:"font-size:22px;line-height:1"},contract.icon),
+              h('div',{style:"flex:1"},
+                h('div',{class:"row",style:"flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:2px"},
+                  h('div',{class:"mission-title"},`${done?"Completed: ":""}${contract.title}`),
+                  h('div',{class:"tag tag-diff",style:`color:${diffColor(contract.diff)};border-color:${diffColor(contract.diff)};background:${diffColor(contract.diff)}11`},contract.diff)
+                ),
+                h('div',{class:"mission-loc"},contract.loc)
+              )
             ),
-            h('div',{class:"mission-loc"},arc.loc),
-            h('div',{class:"row",style:"gap:6px;margin-top:5px;flex-wrap:wrap"},
-              h('span',{class:"tag tag-oren"},`${fmt(arc.xp*100)} Orens`),
-              h('span',{style:"font-family:'Cinzel',serif;font-size:9px;font-weight:700;background:#141820;color:#a07840;padding:2px 8px;border:1px solid #2a3040;letter-spacing:1px"},"All workout types")
+            h('div',{class:"row",style:"gap:8px;flex-wrap:wrap"},
+              h('div',{class:"row",style:"gap:5px;background:#141820;padding:4px 8px;border:1px solid #2a3040;"},
+                h('span',{style:"font-size:12px"},wt.icon),
+                h('span',{style:"font-family:'Cinzel',serif;font-size:9px;font-weight:700;color:#a07840;letter-spacing:1px;text-transform:uppercase"},wt.label)
+              ),
+              companion&&h('div',{class:"row",style:"gap:5px;"},
+                h(CompanionIcon,{id:companion.id,size:18,style:`border:1.5px solid ${companion.color};`}),
+                h('span',{style:`font-family:'Cinzel',serif;font-size:9px;font-weight:600;color:${companion.color};letter-spacing:1px`},companion.name)
+              ),
+              h('span',{style:"font-family:'Cinzel',serif;font-size:9px;font-weight:700;color:#a07840;margin-left:auto"},`${fmt(contract.xp*100)} ø`)
             )
           ),
-          h('div',{class:"chevron"},expanded===arc.id?"▲":"▼")
-        ),
-        expanded===arc.id&&h('div',{class:"mission-body"},
-          h('div',{class:"mission-flavor"},arc.flavor),
-          WORKOUT_TYPES.map(wt=>
-            h('div',{key:wt.id,class:"mission-type-desc"},
-              h('div',{class:"row",style:"gap:6px;margin-bottom:4px"},
-                h('span',{style:"font-size:14px"},wt.icon),
-                h('div',{class:"mission-type-label"},wt.label)
-              ),
-              h('div',{class:"mission-type-text"},arc.desc[wt.id])
-            )
+          h('div',{style:"padding:10px 14px;"},
+            h('div',{style:"font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:#8b9db0;line-height:1.5"},contract.desc)
+          ),
+          !done&&h('div',{style:"padding:0 14px 12px"},
+            h('div',{style:"font-family:'Cinzel',serif;font-size:9px;font-weight:700;color:#8b1a1a;letter-spacing:2px;text-transform:uppercase"},"Tap to begin")
           )
-        )
-      )
-    ),
-
-    h('div',{style:"padding:0 14px 20px"},
-      h('div',{class:"section-head"},"Begin Today's Contract"),
-      !workoutType&&h(BriefingSection,{apiKey,onSelectWorkoutType:type=>{ setWorkoutType(type); handleStartWorkout(type); }})
+        );
+      })
     )
   );
 }
@@ -998,9 +1147,9 @@ function PartyView({ gs, setGs }) {
 }
 
 function WorkoutView({ mission, workoutType, gs, setGs, apiKey, onFinish, onAbandon }) {
-  const arc = ARCS.find(a=>a.id===mission?.id) || mission;
+  const arc = mission;
   const wt  = WORKOUT_TYPES.find(w=>w.id===workoutType) || WORKOUT_TYPES[0];
-  const milestones = ARC_MILESTONES[arc?.id]?.[workoutType] || DEFAULT_MILESTONES;
+  const milestones = mission?.milestones || DEFAULT_MILESTONES;
   const partyIds   = gs.party || CREW.filter(c=>(gs.ch[c.id]?.hp||0)>=50).slice(0,4).map(c=>c.id);
   const crewObjs   = partyIds.map(id=>CREW.find(c=>c.id===id)).filter(Boolean);
 
@@ -1016,6 +1165,7 @@ function WorkoutView({ mission, workoutType, gs, setGs, apiKey, onFinish, onAban
   const [curEx,    setCurEx]   = useState(null);
   const [weightVal,setWeightVal]=useState("");
   const [repsVal,  setRepsVal] = useState("");
+  const lastWeightByEx = useRef({});
   const feedRef = useRef(null);
 
   const banterFeed = [];
@@ -1255,9 +1405,13 @@ Maximum 2 responses.`;
         h('div',{class:"log-set-prev"},curEx ? `Exercise: ${curEx}` : "Select exercise"),
         h('div',{class:"exercise-picker"},
           Object.entries(EXERCISES).flatMap(([cat,exs])=>exs.map(ex=>
-            h('button',{key:ex,class:`ex-pick-btn${curEx===ex?" active":""}`,onClick:()=>setCurEx(ex)},
+            h('button',{key:ex,class:`ex-pick-btn${curEx===ex?" active":""}`,onClick:()=>{
+              setCurEx(ex);
+              const last=lastWeightByEx.current[ex];
+              if(last) setWeightVal(String(last));
+            }},
               h('div',{class:"ex-pick-name"},ex),
-              h('div',{class:"ex-pick-prev",style:"color:#8b9db0"},cat)
+              h('div',{class:"ex-pick-prev",style:"color:#8b9db0"},lastWeightByEx.current[ex]?`last: ${lastWeightByEx.current[ex]}kg`:cat)
             )
           ))
         ),
@@ -1273,7 +1427,9 @@ Maximum 2 responses.`;
         ),
         h('button',{class:"log-set-confirm",disabled:!curEx||!weightVal||!repsVal,onClick:()=>{
           setSets(s=>[...s,{exId:curEx,exName:curEx,kg:Number(weightVal),reps:Number(repsVal)}]);
-          setWeightVal(""); setRepsVal(""); setLogSetOpen(false);
+          lastWeightByEx.current={...lastWeightByEx.current,[curEx]:Number(weightVal)};
+          setRepsVal("");
+          setLogSetOpen(false);
           addFeed({type:"milestone",label:"Set Logged",text:`${curEx}: ${weightVal}kg × ${repsVal}`});
         }},"Log Set"),
         h('button',{class:"log-set-cancel",onClick:()=>setLogSetOpen(false)},"Cancel")
