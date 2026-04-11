@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="On the Path">
+<link rel="apple-touch-icon" href="crew/applescreen.png">
+<title>On the Path</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { height: 100%; }
+  body { height: 100%; background: #0d0f14; font-family: 'EB Garamond', Georgia, serif; color: #c8d4e0; overflow: hidden; }
+  #app { height: 100%; display: flex; flex-direction: column; max-width: 430px; margin: 0 auto; position: relative; }
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: #1a1f2e; }
+  ::-webkit-scrollbar-thumb { background: #8b1a1a; border-radius: 2px; }
+  input, textarea, button { font-family: inherit; -webkit-appearance: none; border-radius: 0; }
+  button { cursor: pointer; border: none; background: none; }
+  button:active { opacity: 0.75; }
+  input:focus, textarea:focus { outline: none; }
+
+  /* Palette:
+     bg-deep:   #0d0f14
+     bg-mid:    #141820
+     bg-card:   #1a1f2e
+     bg-raised: #1f2535
+     silver:    #c8d4e0
+     steel:     #8b9db0
+     gold:      #a07840
+     parchment: #e8dfc8
+     blood:     #8b1a1a
+     forest:    #1a3a2a
+     violet:    #3d1f5e
+     wolf:      #4a4a5a
+  */
+
+  @keyframes fadeIn   { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes slideUp  { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes banterIn { from { opacity:0; transform:translateX(-10px); } to { opacity:1; transform:translateX(0); } }
+  @keyframes encPop   { from { opacity:0; transform:scale(0.93); } to { opacity:1; transform:scale(1); } }
+  @keyframes pulse    { 0%,100% { opacity:1; } 50% { opacity:0.4; } }
+  @keyframes celeb    { 0%,100% { transform:scale(1) rotate(0deg); } 25% { transform:scale(1.05) rotate(-1deg); } 75% { transform:scale(1.05) rotate(1deg); } }
+  @keyframes flicker  { 0%,100% { opacity:1; } 45% { opacity:0.85; } 50% { opacity:1; } 85% { opacity:0.9; } }
+
+  .fade-in     { animation: fadeIn   0.3s ease forwards; }
+  .slide-up    { animation: slideUp  0.35s ease forwards; }
+  .banter-in   { animation: banterIn 0.3s ease forwards; }
+  .enc-pop     { animation: encPop   0.25s ease forwards; }
+  .pulsing     { animation: pulse 1.2s ease infinite; }
+  .celebrating { animation: celeb 0.5s ease; }
+  .flickering  { animation: flicker 3s ease infinite; }
+
+  /* ── Chrome ── */
+  .topbar { display:flex; align-items:center; padding:10px 14px 8px; border-bottom:1px solid #2a3040; flex-shrink:0; background:#0d0f14; }
+  .topbar-title { font-family:'Cinzel',serif; font-size:16px; font-weight:700; color:#c8d4e0; letter-spacing:2px; flex:1; }
+  .topbar-sub   { font-family:'EB Garamond',serif; font-style:italic; font-size:12px; color:#8b9db0; }
+  .topbar-streak { display:flex; align-items:center; gap:5px; font-family:'Cinzel',serif; font-size:12px; font-weight:600; color:#a07840; }
+
+  .navbar { display:flex; padding:6px 10px; padding-bottom:max(6px,env(safe-area-inset-bottom)); background:#0d0f14; border-top:1px solid #2a3040; flex-shrink:0; }
+  .nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 4px; border-radius:4px; transition:background 0.15s; }
+  .nav-btn.active { background:#1a1f2e; }
+  .nav-icon  { font-size:20px; line-height:1; }
+  .nav-label { font-family:'Cinzel',serif; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:#8b9db0; }
+  .nav-btn.active .nav-label { color:#c8d4e0; }
+
+  .view { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+
+  /* ── Cards ── */
+  .section-head { font-family:'Cinzel',serif; font-size:10px; font-weight:700; letter-spacing:3px; text-transform:uppercase; color:#a07840; margin-bottom:8px; }
+
+  .stat-row { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; padding:14px; }
+  .stat-card { background:#1a1f2e; border:1px solid #2a3040; padding:10px 12px; }
+  .stat-val  { font-family:'Cinzel',serif; font-size:20px; font-weight:700; color:#c8d4e0; line-height:1; }
+  .stat-label{ font-family:'EB Garamond',serif; font-style:italic; font-size:11px; color:#8b9db0; margin-top:2px; }
+
+  .week-card { margin:0 14px 12px; background:#1a1f2e; border:1px solid #2a3040; padding:14px; }
+  .week-days { display:flex; gap:4px; margin-bottom:10px; }
+  .day-dot   { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .day-label { font-family:'Cinzel',serif; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; }
+  .day-mark  { font-size:14px; }
+  .progress-track { height:3px; background:#2a3040; border-radius:0; overflow:hidden; margin-bottom:6px; }
+  .progress-fill  { height:100%; background:linear-gradient(90deg,#8b1a1a,#a07840); border-radius:0; transition:width 0.4s ease; }
+  .progress-text  { font-family:'EB Garamond',serif; font-style:italic; font-size:12px; color:#8b9db0; }
+
+  .injured-card { margin:0 14px 12px; background:#1a0d0d; border:1px solid #8b1a1a44; padding:12px 14px; }
+  .injured-h    { font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#8b1a1a; margin-bottom:8px; }
+
+  .mission-card { background:#1a1f2e; border:1px solid #2a3040; margin-bottom:10px; }
+  .mission-top  { display:flex; align-items:flex-start; gap:10px; padding:12px 14px; cursor:pointer; }
+  .mission-title{ font-family:'Cinzel',serif; font-size:14px; font-weight:700; color:#c8d4e0; line-height:1.3; }
+  .mission-loc  { font-family:'EB Garamond',serif; font-style:italic; font-size:12px; color:#8b9db0; margin-top:2px; }
+  .mission-body { padding:0 14px 14px; border-top:1px solid #2a3040; }
+  .mission-flavor { font-family:'EB Garamond',serif; font-style:italic; font-size:13px; color:#8b9db0; margin:10px 0 8px; border-left:2px solid #a0784055; padding-left:10px; }
+  .mission-type-desc { background:#141820; padding:10px 12px; margin-top:8px; }
+  .mission-type-label{ font-family:'Cinzel',serif; font-size:9px; font-weight:600; letter-spacing:2px; text-transform:uppercase; color:#a07840; margin-bottom:4px; }
+  .mission-type-text { font-family:'EB Garamond',serif; font-size:13px; color:#c8d4e0; line-height:1.5; }
+
+  .tag { display:inline-block; font-family:'Cinzel',serif; font-size:9px; font-weight:600; letter-spacing:1px; text-transform:uppercase; padding:2px 7px; border:1px solid; }
+  .tag-diff  { }
+  .tag-oren  { background:#1a1a0d; color:#a07840; border-color:#a0784066; }
+  .chevron   { font-size:12px; color:#8b9db0; transition:transform 0.2s; margin-left:4px; flex-shrink:0; }
+
+  /* ── Companion cards ── */
+  .party-grid { padding:14px; display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+  .companion-card { background:#1a1f2e; border:1px solid #2a3040; padding:12px; position:relative; }
+  .companion-card.selected { border-color:#a07840; }
+  .companion-card.injured  { border-color:#8b1a1a44; opacity:0.7; }
+  .companion-name { font-family:'Cinzel',serif; font-size:12px; font-weight:700; color:#c8d4e0; margin-top:6px; margin-bottom:1px; }
+  .companion-role { font-family:'EB Garamond',serif; font-style:italic; font-size:11px; color:#8b9db0; }
+  .hp-bar-track { height:3px; background:#2a3040; margin-top:6px; }
+  .hp-bar-fill  { height:100%; transition:width 0.3s; }
+  .companion-sel { position:absolute; top:8px; right:8px; width:18px; height:18px; border:1.5px solid #2a3040; display:flex; align-items:center; justify-content:center; font-size:10px; background:#141820; }
+  .companion-card.selected .companion-sel { border-color:#a07840; background:#a0784022; color:#a07840; }
+  .companion-xp { font-family:'Cinzel',serif; font-size:9px; font-weight:600; color:#8b9db0; margin-top:3px; }
+
+  /* ── Briefing section ── */
+  .briefing-section { display:flex; flex-direction:column; flex:1; min-height:0; }
+  .briefing-header  { display:flex; align-items:center; gap:10px; padding:12px 14px 10px; border-bottom:1px solid #2a3040; flex-shrink:0; }
+  .briefing-arc     { font-family:'Cinzel',serif; font-size:9px; font-weight:700; color:#a07840; letter-spacing:2px; text-transform:uppercase; }
+  .briefing-feed    { padding:12px 14px; min-height:80px; max-height:220px; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .briefing-msg     { display:flex; gap:8px; margin-bottom:10px; }
+  .briefing-bubble  { background:#1a1f2e; border:1px solid #2a304066; border-radius:0 8px 8px 8px; padding:10px 12px; flex:1; }
+  .briefing-who     { font-family:'Cinzel',serif; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
+  .briefing-text    { font-family:'EB Garamond',serif; font-style:italic; font-size:14px; color:#c8d4e0; line-height:1.55; }
+  .briefing-player  { background:#1f1a2e; border:1px solid #a0784044; border-radius:8px 0 8px 8px; padding:10px 12px; margin-bottom:10px; }
+  .briefing-p-who   { font-family:'Cinzel',serif; font-size:9px; font-weight:700; color:#a07840; letter-spacing:1px; text-transform:uppercase; margin-bottom:3px; }
+  .briefing-p-text  { font-family:'EB Garamond',serif; font-size:14px; color:#c8d4e0; }
+  .briefing-input-row { display:flex; gap:8px; padding:10px 14px; border-top:1px solid #2a3040; }
+  .briefing-input   { flex:1; padding:9px 14px; background:#141820; border:1px solid #2a3040; font-family:'EB Garamond',serif; font-size:14px; color:#c8d4e0; }
+  .briefing-input::placeholder { color:#8b9db055; }
+  .briefing-input:focus { border-color:#a07840; }
+  .briefing-send    { width:38px; height:38px; background:#8b1a1a; color:#c8d4e0; font-size:14px; flex-shrink:0; display:flex; align-items:center; justify-content:center; font-weight:900; }
+  .briefing-send:disabled { opacity:0.3; }
+  .briefing-thinking { font-family:'EB Garamond',serif; font-style:italic; font-size:12px; color:#a0784088; padding:2px 4px; }
+
+  .workout-type-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; padding:12px 14px 14px; border-top:1px solid #2a3040; }
+  .wt-btn { background:#141820; border:1px solid #2a3040; padding:14px 10px; display:flex; flex-direction:column; align-items:center; gap:5px; transition:border-color 0.15s, background 0.15s; }
+  .wt-btn:active { background:#1a1f2e; border-color:#a07840; }
+  .wt-icon  { font-size:26px; line-height:1; }
+  .wt-label { font-family:'Cinzel',serif; font-size:10px; font-weight:700; color:#c8d4e0; letter-spacing:0.5px; text-align:center; }
+  .wt-sub   { font-family:'EB Garamond',serif; font-style:italic; font-size:10px; color:#8b9db0; text-align:center; }
+
+  /* ── Workout view ── */
+  .workout-header { padding:14px 14px 10px; border-bottom:1px solid #2a3040; flex-shrink:0; }
+  .workout-title  { font-family:'Cinzel',serif; font-size:18px; font-weight:700; color:#c8d4e0; line-height:1.2; margin-bottom:3px; }
+  .workout-meta   { display:flex; gap:10px; align-items:center; }
+  .workout-timer  { font-family:'Cinzel',serif; font-size:24px; font-weight:700; color:#a07840; }
+  .workout-loc    { font-family:'EB Garamond',serif; font-style:italic; font-size:12px; color:#8b9db0; }
+
+  .milestone-track { padding:10px 14px; display:flex; gap:4px; flex-shrink:0; border-bottom:1px solid #2a3040; }
+  .ms-dot { flex:1; height:4px; background:#2a3040; transition:background 0.3s; }
+  .ms-dot.done { background:#a07840; }
+  .ms-dot.curr { background:#8b1a1a; animation:pulse 1.5s ease infinite; }
+
+  .workout-feed { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding:10px 14px; }
+  .feed-item { margin-bottom:10px; animation:banterIn 0.3s ease forwards; }
+  .feed-milestone { background:#141820; border-left:2px solid #a07840; padding:10px 12px; }
+  .feed-ms-label  { font-family:'Cinzel',serif; font-size:11px; font-weight:700; color:#a07840; letter-spacing:1px; margin-bottom:2px; }
+  .feed-ms-text   { font-family:'EB Garamond',serif; font-style:italic; font-size:13px; color:#8b9db0; }
+  .feed-banter    { display:flex; gap:8px; }
+  .feed-banter-bubble { background:#1a1f2e; border:1px solid #2a304066; border-radius:0 8px 8px 8px; padding:8px 11px; flex:1; }
+  .feed-banter-who    { font-family:'Cinzel',serif; font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:3px; }
+  .feed-banter-text   { font-family:'EB Garamond',serif; font-style:italic; font-size:13px; color:#c8d4e0; line-height:1.5; }
+  .feed-player    { background:#1f1a2e; border:1px solid #a0784044; border-radius:8px 0 8px 8px; padding:8px 11px; margin-left:30px; }
+  .feed-p-who     { font-family:'Cinzel',serif; font-size:9px; font-weight:700; color:#a07840; letter-spacing:1px; margin-bottom:2px; }
+  .feed-p-text    { font-family:'EB Garamond',serif; font-size:13px; color:#c8d4e0; }
+  .feed-event     { background:#1a0d0d; border:1px solid #8b1a1a55; padding:10px 12px; }
+  .feed-event-title { font-family:'Cinzel',serif; font-size:12px; font-weight:700; color:#c87070; margin-bottom:4px; }
+  .feed-event-text  { font-family:'EB Garamond',serif; font-size:13px; color:#c8d4e0; margin-bottom:8px; }
+  .feed-event-choices { display:flex; flex-direction:column; gap:6px; }
+  .feed-event-choice  { padding:8px 12px; background:#141820; border:1px solid #2a3040; font-family:'EB Garamond',serif; font-size:13px; color:#c8d4e0; text-align:left; }
+  .feed-event-choice:active { border-color:#a07840; }
+  .feed-event-result  { font-family:'EB Garamond',serif; font-style:italic; font-size:12px; color:#8b9db0; margin-top:4px; padding-left:10px; border-left:2px solid #a0784055; }
+
+  .workout-input-row { display:flex; gap:8px; padding:10px 14px; border-top:1px solid #2a3040; flex-shrink:0; }
+  .workout-input     { flex:1; padding:9px 14px; background:#141820; border:1px solid #2a3040; font-family:'EB Garamond',serif; font-size:14px; color:#c8d4e0; }
+  .workout-input::placeholder { color:#8b9db055; }
+  .workout-input:focus { border-color:#a07840; }
+  .workout-send      { width:38px; height:38px; background:#1a1f2e; border:1px solid #2a3040; color:#a07840; font-size:14px; flex-shrink:0; display:flex; align-items:center; justify-content:center; }
+  .workout-send:disabled { opacity:0.3; }
+
+  .complete-btn { margin:10px 14px 14px; padding:14px; background:#8b1a1a; color:#e8dfc8; font-family:'Cinzel',serif; font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; border:1px solid #8b1a1a; width:calc(100% - 28px); }
+  .complete-btn:active { background:#6b1414; }
+
+  /* ── Lift tracker ── */
+  .loadout-section { padding:16px; }
+  .exercise-category { margin-bottom:16px; }
+  .cat-label { font-family:'Cinzel',serif; font-size:9px; font-weight:700; color:#a07840; letter-spacing:3px; text-transform:uppercase; margin-bottom:8px; }
+  .exercise-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:6px; }
+  .exercise-btn { padding:10px 12px; background:#1a1f2e; border:1px solid #2a3040; text-align:left; transition:all 0.15s; }
+  .exercise-btn.selected { border-color:#8b1a1a; background:#1a0d0d; }
+  .exercise-btn-name { font-family:'Cinzel',serif; font-weight:700; font-size:11px; color:#c8d4e0; }
+  .exercise-btn-cat  { font-family:'EB Garamond',serif; font-style:italic; font-size:10px; color:#a07840; }
+  .add-exercise-row  { display:flex; gap:8px; margin-top:8px; }
+  .add-exercise-input { flex:1; padding:10px 12px; background:#1a1f2e; border:1px solid #2a3040; font-family:'EB Garamond',serif; font-size:14px; color:#c8d4e0; }
+  .add-exercise-input:focus { border-color:#8b1a1a; }
+  .add-exercise-btn  { padding:10px 14px; background:#a07840; color:#0d0f14; font-family:'Cinzel',serif; font-weight:700; font-size:11px; letter-spacing:1px; border:1px solid #a07840; }
+
+  .log-set-overlay { position:fixed; inset:0; background:rgba(10,12,18,0.92); display:flex; align-items:flex-end; z-index:200; }
+  .log-set-panel   { background:#141820; border:1px solid #2a3040; border-bottom:none; border-radius:0; padding:20px; width:100%; max-width:430px; margin:0 auto; box-shadow:0 -4px 24px rgba(0,0,0,0.5); }
+  .log-set-title   { font-family:'Cinzel',serif; font-size:20px; font-weight:700; color:#c8d4e0; margin-bottom:4px; }
+  .log-set-prev    { font-family:'EB Garamond',serif; font-style:italic; font-size:12px; color:#8b1a1a; margin-bottom:14px; }
+  .exercise-picker { display:grid; grid-template-columns:repeat(2,1fr); gap:6px; margin-bottom:14px; max-height:160px; overflow-y:auto; }
+  .ex-pick-btn     { padding:9px 10px; background:#1a1f2e; border:1px solid #2a3040; text-align:left; }
+  .ex-pick-btn.active { border-color:#8b1a1a; background:#1a0d0d; }
+  .ex-pick-name    { font-family:'Cinzel',serif; font-weight:700; font-size:11px; color:#c8d4e0; }
+  .ex-pick-prev    { font-family:'EB Garamond',serif; font-style:italic; font-size:10px; color:#a07840; }
+  .weight-reps-row { display:flex; gap:10px; margin-bottom:14px; }
+  .wr-group        { flex:1; }
+  .wr-label        { font-family:'Cinzel',serif; font-size:9px; font-weight:700; color:#8b1a1a; letter-spacing:1px; text-transform:uppercase; margin-bottom:5px; display:block; }
+  .wr-input        { width:100%; padding:12px; background:#1a1f2e; border:2px solid #2a3040; font-family:'Cinzel',serif; font-size:22px; color:#c8d4e0; text-align:center; }
+  .wr-input:focus  { border-color:#a07840; }
+  .log-set-confirm { width:100%; padding:14px; background:#8b1a1a; color:#e8dfc8; font-family:'Cinzel',serif; font-size:16px; font-weight:700; letter-spacing:2px; text-transform:uppercase; border:1px solid #8b1a1a; }
+  .log-set-confirm:disabled { opacity:0.4; }
+  .log-set-cancel  { width:100%; padding:10px; background:none; border:1px solid #2a3040; font-family:'Cinzel',serif; font-size:11px; font-weight:600; letter-spacing:1px; color:#8b9db0; margin-top:8px; text-transform:uppercase; }
+  .set-card        { background:#1a1f2e; border:1px solid #2a3040; padding:10px 12px; margin-bottom:8px; }
+  .set-card-ex     { font-family:'Cinzel',serif; font-weight:700; font-size:10px; color:#a07840; letter-spacing:1px; text-transform:uppercase; margin-bottom:3px; }
+  .set-card-detail { font-family:'Cinzel',serif; font-size:18px; color:#c8d4e0; }
+  .set-card-num    { font-family:'EB Garamond',serif; font-style:italic; font-size:11px; color:#8b1a1a; }
+  .lift-summary    { margin-top:8px; }
+  .lift-ex-row     { margin-bottom:6px; }
+  .lift-ex-name    { font-family:'Cinzel',serif; font-weight:700; font-size:12px; color:#c8d4e0; }
+  .lift-sets       { font-family:'EB Garamond',serif; font-size:12px; color:#8b1a1a; }
+
+  /* ── Post-workout ── */
+  .finish-overlay { position:fixed; inset:0; background:rgba(10,12,18,0.95); display:flex; align-items:center; justify-content:center; z-index:300; padding:20px; }
+  .finish-card    { background:#141820; border:1px solid #a0784066; padding:24px; width:100%; max-width:390px; }
+  .finish-title   { font-family:'Cinzel',serif; font-size:22px; font-weight:900; color:#c8d4e0; margin-bottom:4px; }
+  .finish-arc     { font-family:'EB Garamond',serif; font-style:italic; font-size:14px; color:#a07840; margin-bottom:16px; }
+  .finish-effort  { margin-bottom:16px; }
+  .finish-effort-q { font-family:'Cinzel',serif; font-size:11px; font-weight:700; color:#a07840; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px; }
+  .effort-grid    { display:grid; grid-template-columns:1fr 1fr; gap:6px; }
+  .effort-btn     { padding:10px 8px; background:#1a1f2e; border:1px solid #2a3040; text-align:left; }
+  .effort-btn.selected { border-color:#a07840; background:#1a1a0d; }
+  .effort-label   { font-family:'Cinzel',serif; font-size:11px; font-weight:700; color:#c8d4e0; }
+  .effort-desc    { font-family:'EB Garamond',serif; font-style:italic; font-size:10px; color:#8b9db0; margin-top:2px; }
+  .finish-notes-label { font-family:'Cinzel',serif; font-size:11px; font-weight:700; color:#a07840; letter-spacing:2px; text-transform:uppercase; margin-bottom:6px; }
+  .finish-notes   { width:100%; padding:10px 12px; background:#1a1f2e; border:1px solid #2a3040; font-family:'EB Garamond',serif; font-style:italic; font-size:14px; color:#c8d4e0; resize:none; height:70px; }
+  .finish-notes:focus { border-color:#a07840; }
+  .finish-save    { width:100%; padding:14px; background:#a07840; color:#0d0f14; font-family:'Cinzel',serif; font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; border:none; margin-top:14px; }
+  .finish-save:disabled { opacity:0.4; }
+
+  /* ── Journal ── */
+  .journal-list   { padding:14px; }
+  .journal-entry  { background:#1a1f2e; border:1px solid #2a3040; padding:14px; margin-bottom:10px; }
+  .journal-note   { font-family:'EB Garamond',serif; font-style:italic; font-size:13px; color:#8b9db0; border-left:2px solid #a0784055; padding-left:10px; margin-top:6px; }
+  .empty-state    { padding:40px 14px; text-align:center; }
+  .empty-icon     { font-size:40px; margin-bottom:12px; opacity:0.4; }
+  .empty-text     { font-family:'EB Garamond',serif; font-style:italic; font-size:16px; color:#8b9db0; }
+  .empty-sub      { font-family:'Cinzel',serif; font-size:10px; font-weight:600; letter-spacing:2px; color:#2a3040; text-transform:uppercase; margin-top:6px; }
+
+  /* ── API setup ── */
+  .api-setup { padding:20px 14px; }
+  .api-setup h1 { font-family:'Cinzel',serif; font-size:22px; font-weight:700; color:#c8d4e0; margin-bottom:10px; }
+  .api-setup p  { font-family:'EB Garamond',serif; font-size:15px; color:#8b9db0; margin-bottom:12px; line-height:1.6; }
+  .api-hint     { background:#141820; border:1px solid #2a3040; padding:14px; margin-bottom:16px; }
+  .api-hint-h   { font-family:'Cinzel',serif; font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:#a07840; margin-bottom:8px; }
+  .api-hint p, .api-hint pre { white-space:pre-wrap; font-family:'EB Garamond',serif; font-size:14px; color:#8b9db0; line-height:1.7; }
+  .api-input    { width:100%; padding:12px 14px; background:#141820; border:1px solid #2a3040; font-family:'EB Garamond',serif; font-size:14px; color:#c8d4e0; margin-bottom:12px; }
+  .api-input:focus { border-color:#a07840; }
+  .api-save     { width:100%; padding:14px; background:#a07840; color:#0d0f14; font-family:'Cinzel',serif; font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; border:none; }
+  .api-cancel   { width:100%; padding:10px; background:none; border:1px solid #2a3040; font-family:'Cinzel',serif; font-size:11px; font-weight:600; color:#8b9db0; margin-top:8px; letter-spacing:1px; text-transform:uppercase; }
+
+  .row    { display:flex; align-items:center; gap:8px; }
+  .spacer { flex:1; }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script type="module">
+import { h, render } from 'https://esm.sh/preact@10.19.3';
+import { useState, useEffect, useRef, useCallback } from 'https://esm.sh/preact@10.19.3/hooks';
+
+/* ═══════════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════════ */
+
+const COMPANION_IMG = {
+  geralt:    "crew/geralt.jpg",
+  yennefer:  "crew/yennefer.jpg",
+  triss:     "crew/triss.jpg",
+  dandelion: "crew/dandelion.jpg",
+  ciri:      "crew/ciri.jpg",
+  zoltan:    "crew/zoltan.jpg",
+  vesemir:   "crew/vesemir.jpg",
+  lambert:   "crew/lambert.jpg",
+  eskel:     "crew/eskel.jpg",
+  philippa:  "crew/philippa.jpg",
+  regis:     "crew/regis.jpg",
+  meve:      "crew/meve.jpg",
+};
+const ASHLEY_IMG = "crew/Ashley.png";
+
+function CompanionIcon({ id, size=32, style="" }) {
+  const src = COMPANION_IMG[id];
+  if(src) return h('img', {src, alt:id, style:`width:${size}px;height:${size}px;object-fit:cover;border-radius:50%;${style}`, onError:e=>{e.target.style.display="none";}});
+  const c = CREW.find(x=>x.id===id);
+  return h('span', {style:`font-size:${Math.round(size*0.75)}px`}, c?.icon||"⚔️");
+}
+
+const CREW = [
+  { id:"geralt",    name:"Geralt",    role:"Witcher",          icon:"⚔️", color:"#c8d4e0", rgb:"200,212,224", strengths:["strength","endurance","discipline"],     injuredQ:"Keeps happening. Finish what we started.",              healthyQ:"Contract's clear. Let's move." },
+  { id:"yennefer",  name:"Yennefer",  role:"Sorceress",        icon:"💜", color:"#9d4edd", rgb:"157,78,221",  strengths:["mobility","discipline","strategy"],      injuredQ:"Pain is information. Use it or ignore it.",             healthyQ:"Stop looking for permission. Go." },
+  { id:"triss",     name:"Triss",     role:"Healer",           icon:"🔥", color:"#b45309", rgb:"180,83,9",    strengths:["mobility","endurance","recovery"],       injuredQ:"The body heals faster than you think. Rest first.",     healthyQ:"You're ready. I can see it." },
+  { id:"dandelion", name:"Dandelion", role:"Bard",             icon:"🎵", color:"#d97706", rgb:"217,119,6",   strengths:["run","agility","morale"],                injuredQ:"Chronicling your suffering for my next ballad. It has forty verses.", healthyQ:"The great Dandelion himself is here to witness your triumph!" },
+  { id:"ciri",      name:"Ciri",      role:"Witcher-in-Training", icon:"⚡", color:"#16a34a", rgb:"22,163,74", strengths:["run","agility","combat"],               injuredQ:"Vesemir said pain is the lesson. So you're learning a lot.",  healthyQ:"Come on. I've already warmed up." },
+  { id:"zoltan",    name:"Zoltan",    role:"Warrior",          icon:"🪓", color:"#92400e", rgb:"146,64,14",   strengths:["strength","endurance","combat"],         injuredQ:"Dwarf constitution. You don't have it. Sad.",           healthyQ:"Right then. No nonsense today." },
+  { id:"vesemir",   name:"Vesemir",   role:"Master Witcher",   icon:"🛡️", color:"#6b7280", rgb:"107,114,128", strengths:["strength","discipline","endurance"],    injuredQ:"I've trained witchers with worse injuries. Begin.",      healthyQ:"Every day on the Path is a day earned. Prove it." },
+  { id:"lambert",   name:"Lambert",   role:"Witcher",          icon:"🐺", color:"#dc2626", rgb:"220,38,38",   strengths:["strength","combat","aggression"],        injuredQ:"Whining about it won't fix it. Moving might.",          healthyQ:"Could be worse. Could be better. Let's go." },
+  { id:"eskel",     name:"Eskel",     role:"Witcher",          icon:"🗡️", color:"#0369a1", rgb:"3,105,161",   strengths:["strength","endurance","patience"],       injuredQ:"Set a pace you can sustain.",                           healthyQ:"Good form. Keep it." },
+  { id:"philippa",  name:"Philippa",  role:"Spymaster",        icon:"🦉", color:"#7c3aed", rgb:"124,58,237",  strengths:["strategy","discipline","focus"],         injuredQ:"Interesting. Weakness is useful intelligence.",         healthyQ:"I've been watching. You're ready." },
+  { id:"regis",     name:"Regis",     role:"Vampire",          icon:"🦇", color:"#1e3a8a", rgb:"30,58,138",   strengths:["endurance","mobility","patience"],       injuredQ:"Centuries of perspective suggest this too shall pass.",  healthyQ:"The body adapts to what it encounters. Present it with a challenge." },
+  { id:"meve",      name:"Meve",      role:"Commander",        icon:"👑", color:"#b91c1c", rgb:"185,28,28",   strengths:["strength","endurance","combat"],         injuredQ:"A commander doesn't stop. Adjust your pace.",           healthyQ:"Weapons ready. Move." },
+];
+
+const WORKOUT_TYPES = [
+  { id:"strength", label:"Trials of the Grasses", icon:"⚗️", sub:"Heavy conditioning" },
+  { id:"run",      label:"On the Path",           icon:"🐾", sub:"Distance and pace"  },
+  { id:"mobility", label:"Signs and Balance",     icon:"🌀", sub:"Forms and precision" },
+  { id:"home",     label:"Witcher's Camp",        icon:"🔥", sub:"Field training"      },
+];
+
+const ARCS = [
+  {
+    id:"bruxa",
+    title:"The Bruxa of Beauclair",
+    loc:"Toussaint, Alba",
+    diff:"Uncommon",
+    xp:180,
+    icon:"🦇",
+    flavor:"\"She has been here longer than the vineyards. The villagers thought she was a blessing.\"",
+    desc:{
+      strength:"Bruxae move faster than any human threat. The only counter is to be stronger than anything they have ever encountered. You are building that margin today.",
+      run:"A bruxa does not chase. It teleports, reappears, and cuts. Your job is to be somewhere else before it arrives. Train the legs that make that possible.",
+      mobility:"Bruxae attack through the angles you leave open. Close them all. Every position you neglect is an invitation.",
+      home:"Toussaint's court has no weight room. You have the field behind the inn and whatever you carried in. It is enough.",
+    },
+    criteria:{
+      strength:"Compound lifts. No skipping the hard ones.",
+      run:"Track intervals. The bruxa doesn't let you cruise.",
+      mobility:"Full range holds. Find where the restriction is.",
+      home:"Bodyweight circuits. High output, minimal rest.",
+    },
+    traits:["speed","strength","precision"]
+  },
+  {
+    id:"frost",
+    title:"Contract: White Frost",
+    loc:"Skellige, Ard Skellig",
+    diff:"Rare",
+    xp:240,
+    icon:"❄️",
+    flavor:"\"The old texts do not describe a creature. They describe a direction.\"",
+    desc:{
+      strength:"Cold resistance is built through suffering. The Skelligers know this. Every heavy set is another degree of tolerance earned.",
+      run:"The wind off Hindarsfjall does not care about your pace plan. Run into it anyway.",
+      mobility:"Frozen joints are useless joints. Work the cold out. Maintain range when the body wants to contract.",
+      home:"A Skellige longhouse. The floor is stone. The wind is in the walls. You have no excuses that Crach an Craite would accept.",
+    },
+    criteria:{
+      strength:"Heavy sets, shorter rest. Build heat from within.",
+      run:"Wind-resistance pace. Sustained, not sprint.",
+      mobility:"Slow holds in full extension. Force the range.",
+      home:"Full body. No concessions to comfort.",
+    },
+    traits:["endurance","cold resistance","will"]
+  },
+  {
+    id:"crones",
+    title:"The Crones of Crookback Bog",
+    loc:"Velen, Crookback Bog",
+    diff:"Rare",
+    xp:220,
+    icon:"🌿",
+    flavor:"\"Do not run in the bog. You will not outrun what is in it. Think instead.\"",
+    desc:{
+      strength:"The Crones are patient. They have been patient for centuries. You need to be stronger than their patience runs out. Methodical. Heavy. Do not rush.",
+      run:"The bog is deceptive. Ground that looks solid will take you. Precise footwork, constant attention. Every stride is a decision.",
+      mobility:"Crookback Bog distorts the body as much as the mind. Maintain your physical reference points. Know where your limbs are.",
+      home:"The village of the orphans in the bog. You train with what the marsh provides. You adapt, or the bog takes you.",
+    },
+    criteria:{
+      strength:"Slow eccentrics. The Crones are patient. Match it.",
+      run:"Steady pace with agility focus. No autopilot.",
+      mobility:"Deliberate, held positions. Control over speed.",
+      home:"Adaptive circuits. Change the order mid-set.",
+    },
+    traits:["patience","precision","adaptability"]
+  },
+  {
+    id:"trials",
+    title:"Kaer Morhen: The Trials",
+    loc:"Kaer Morhen, the keep",
+    diff:"Common",
+    xp:160,
+    icon:"🏰",
+    flavor:"\"Most did not survive. The ones who did were not the strongest. They were the ones who did not stop.\"",
+    desc:{
+      strength:"The pendulum corridor. The obstacle course in full armour. Vesemir watching with the expression he reserves for disappointment. This is what built every witcher. It is what is building you.",
+      run:"The mountain circuit. Up from the keep, through the pass, back down the eastern ridge. Vesemir's record still stands. It does not have to stand today, but you will run it properly.",
+      mobility:"The forms come before the blade. Geralt's precision with the two swords comes from a foundation of range and control that took years to build. Begin that foundation now.",
+      home:"The courtyard at Kaer Morhen in the early morning, frost on the stone. No equipment. Just the body and what Vesemir taught.",
+    },
+    criteria:{
+      strength:"Full progressive overload. No abandoned sets.",
+      run:"Full distance. Consistent pace. No walk breaks.",
+      mobility:"Sword school forms. Precision over speed.",
+      home:"Kaer Morhen courtyard circuit. Everything counts.",
+    },
+    traits:["discipline","endurance","foundation"]
+  },
+  {
+    id:"wildhunt",
+    title:"The Wild Hunt Rides",
+    loc:"The Northern Kingdoms",
+    diff:"Rare",
+    xp:260,
+    icon:"🌑",
+    flavor:"\"You will not outfight them. You need to be too hard to catch.\"",
+    desc:{
+      strength:"Eredin's riders hit hard enough to shatter armour. The margin you need to survive is absolute. Build it. Every rep is preparation for something that does not negotiate.",
+      run:"The Hunt rides through the sky and takes what it wants. You run because the alternative is standing still. Do not stand still.",
+      mobility:"The Unseen Elder told Geralt to be unpredictable. An unpredictable body is a mobile one. Open the joints. Find the angles.",
+      home:"Nowhere to go. No equipment. The Hunt is hours away and you spend those hours becoming harder to kill.",
+    },
+    criteria:{
+      strength:"Maximum output. No conserving energy.",
+      run:"Long run at pace. No slowing down.",
+      mobility:"Full sequence. Do not skip the uncomfortable ones.",
+      home:"High intensity. The Hunt does not care that you are tired.",
+    },
+    traits:["urgency","power","survival"]
+  },
+  {
+    id:"foglets",
+    title:"Contract: Foglet Colony",
+    loc:"Velen, Oxenfurt Road",
+    diff:"Common",
+    xp:140,
+    icon:"🌫️",
+    flavor:"\"The fog is not the problem. What the fog is hiding is the problem.\"",
+    desc:{
+      strength:"Foglets are not individually dangerous. There are twelve of them. You clear them one by one, methodically, without letting the fog become an excuse to slow down.",
+      run:"The fog on the Oxenfurt Road lifts by noon. You run before it does, by feel, by memory, by training. Every metre is earned in near-zero visibility.",
+      mobility:"Foglets attack from concealment. Peripheral awareness starts with knowing where your own body is. Full range. No blind spots.",
+      home:"A farmhouse two miles from Oxenfurt. Abandoned. You have the barn, the field, and the fog. Work with it.",
+    },
+    criteria:{
+      strength:"Volume work. Multiple sets, controlled pace.",
+      run:"Sustained distance. No sprint, no walk.",
+      mobility:"Full sequence, methodical. Clear every restriction.",
+      home:"Bodyweight circuits. Complete each before moving on.",
+    },
+    traits:["patience","methodical","endurance"]
+  },
+  {
+    id:"brenna",
+    title:"The Battle of Brenna",
+    loc:"Brenna, Mahakam",
+    diff:"Uncommon",
+    xp:200,
+    icon:"⚔️",
+    flavor:"\"This is not a skirmish. This is the battle the North needed to win to survive. There is no pacing yourself.\"",
+    desc:{
+      strength:"A pitched battle has no programme. You push until the line holds or breaks. Everything you have, now.",
+      run:"Meve's cavalry covered fifteen miles that day. It was not a warm-up. It was the war. Run like the Northern Kingdoms depend on it.",
+      mobility:"Battle conditions demand range you did not know you needed until you needed it. Build it now, before the trumpet.",
+      home:"The field before Brenna. The army behind you. Whatever you have, you give it today.",
+    },
+    criteria:{
+      strength:"Everything. Full capacity.",
+      run:"Hard pace for full distance. No holding back.",
+      mobility:"Full sequence, full range. Battle-ready.",
+      home:"Maximum output. No modifications.",
+    },
+    traits:["power","courage","commitment"]
+  },
+];
+
+const MISSIONS = ARCS;
+
+const BRIEFINGS = {
+  bruxa:    { crew:"geralt",    line:"Bruxa. Higher vampire subtype. Fast, territorial, allergic to light in full form. The vineyard workers think it's a ghost. It isn't. What kind of training are we starting with?" },
+  frost:    { crew:"yennefer",  line:"The Frost is a dimensional collapse. The texts Aretuza holds on the subject are incorrect in ways that are going to get people killed. Train first. We will need to be ready." },
+  crones:   { crew:"regis",     line:"The Crones predate the current age by several centuries. I have encountered older things. Few of them were more dangerous. What are you doing today?" },
+  trials:   { crew:"vesemir",   line:"The course is laid out. You know what is expected. I will not be offering encouragement. I will be watching for the things you skip when you think no one is looking." },
+  wildhunt: { crew:"ciri",      line:"They ride at midnight. We have until then to be better than we were this morning. Stop thinking about it. What type of session?" },
+  foglets:  { crew:"zoltan",    line:"Twelve foglets on the Oxenfurt Road. Three farmers dead. Village board paid fifty orens. We'll do better than that. What are we starting with?" },
+  brenna:   { crew:"meve",      line:"The armies are positioned. We move at dawn. Between now and then you train. What type?" },
+};
+
+const DEFAULT_BRIEFING = { crew:"geralt", line:"Contract came in this morning. Details are on the notice board. What kind of training are we starting with?" };
+
+const BANTER = {
+  geralt: [
+    { at:"start", line:"Good." },
+    { at:"mid",   line:"Keep moving." },
+    { at:"push",  line:"Seen worse. Finish it." },
+  ],
+  yennefer: [
+    { at:"start", line:"The standard is not negotiable." },
+    { at:"mid",   line:"You are not done." },
+    { at:"push",  line:"This is where it counts. Don't disappoint me." },
+  ],
+  triss: [
+    { at:"start", line:"You're in better shape than you think. Go." },
+    { at:"mid",   line:"Halfway. The second half is where the work is." },
+    { at:"push",  line:"Push. Your body can take it. I've checked." },
+  ],
+  dandelion: [
+    { at:"start", line:"The great Dandelion has personally arranged the perfect training ambience for this session! You're welcome!" },
+    { at:"mid",   line:"I am composing a ballad about this very moment. The verse about your suffering is the strongest part." },
+    { at:"push",  line:"I have written forty-three battle poems. Not one of them was about someone who stopped. Don't ruin my record." },
+  ],
+  ciri: [
+    { at:"start", line:"I was doing drills at Kaer Morhen before breakfast. This is the main event. Keep up." },
+    { at:"mid",   line:"Vesemir used to make me run the course twice if I slowed down at the midpoint." },
+    { at:"push",  line:"The Hunt didn't catch me. This workout isn't going to either." },
+  ],
+  zoltan: [
+    { at:"start", line:"Right. Let's have none of that deliberating. Start." },
+    { at:"mid",   line:"A dwarf with a bad knee is still more consistent than most humans at full health." },
+    { at:"push",  line:"Finish it clean. You'll feel better for it." },
+  ],
+  vesemir: [
+    { at:"start", line:"Correct posture. From the beginning." },
+    { at:"mid",   line:"This is the part candidates wanted to quit. The ones who trained here didn't." },
+    { at:"push",  line:"The final sets are the only ones I am watching closely." },
+  ],
+  lambert: [
+    { at:"start", line:"Finally. Thought you were going to stall all morning." },
+    { at:"mid",   line:"Not bad. Still room to push." },
+    { at:"push",  line:"You're close. Don't ruin it now by half-finishing." },
+  ],
+  eskel: [
+    { at:"start", line:"Good form from the start. Don't let it drop." },
+    { at:"mid",   line:"Hold your pace." },
+    { at:"push",  line:"Almost. Finish it properly." },
+  ],
+  philippa: [
+    { at:"start", line:"I've been observing your patterns. Today you perform above them." },
+    { at:"mid",   line:"I expected you to slow here. Prove me wrong." },
+    { at:"push",  line:"The last push separates the useful from the adequate. I need you useful." },
+  ],
+  regis: [
+    { at:"start", line:"The body's adaptation to stress is one of its more admirable properties. Begin demonstrating it." },
+    { at:"mid",   line:"I have watched humans work for centuries. The ones who matter don't stop at the midpoint." },
+    { at:"push",  line:"In my experience, the limits people believe they have are almost never accurate." },
+  ],
+  meve: [
+    { at:"start", line:"Move." },
+    { at:"mid",   line:"Hold the pace. Don't let the line break." },
+    { at:"push",  line:"Finish. Clean." },
+  ],
+};
+
+const ROAD_EVENTS = [
+  { id:"r1", icon:"🔪", title:"Bandits on the Oxenfurt Road", text:"Three men with Nilfgaardian steel. They saw you coming. They stepped out anyway. Either they are very confident or very stupid.", choices:[{label:"Go through them fast",  xp:40, out:"It was stupid. You're through before they process what happened. +40 Orens"},{label:"Talk them down first",  xp:20, out:"Two of them walk away. One of them doesn't. The surviving two will remember it. +20 Orens"}] },
+  { id:"r2", icon:"🏚️", title:"An Abandoned Village", text:"Doors open. Fires still warm. No bodies. No blood. No sign of what took them or where they went.", choices:[{label:"Follow whatever trail exists", xp:50, out:"Three miles east. A leshen's territory. You mark it on the map for the notice board. +50 Orens"},{label:"Move on. This is not the contract.", xp:15, out:"Practical. You know what you were hired for. +15 Orens"}] },
+  { id:"r3", icon:"🔮", title:"Megascope Call from Philippa", text:"She says she needs a favour. She always says that. The favour is always more complicated than stated.", choices:[{label:"Hear her out",   xp:35, out:"The information is useful. You don't ask how she got it. +35 Orens"},{label:"Decline. Politely.", xp:10, out:"She will remember. You will probably regret it. +10 Orens"}] },
+  { id:"r4", icon:"📋", title:"Notice on the Village Board", text:"Monster contract. Third victim this week. The description is useless: 'something large, pale, moved wrong.' The payment is good.", choices:[{label:"Take the contract now",  xp:45, out:"You identify the spoor twenty minutes in. Wyvern. Nest nearby. Additional payment available. +45 Orens"},{label:"Note the location, move on", xp:20, out:"Methodical. You'll return when the current contract is complete. +20 Orens"}] },
+  { id:"r5", icon:"👤", title:"Travelers Who Are More Than They Appear", text:"A merchant and two guards. The merchant's hands are wrong. Too still. Guards don't sweat in this weather. Everyone sweats in this weather.", choices:[{label:"Confront them directly",  xp:55, out:"Higher vampires, both guards. The merchant was a hostage. You sort it out. No clean answers. +55 Orens"},{label:"Let them pass and watch",  xp:25, out:"You follow at distance. The hostage situation resolves itself badly. You intervene. +25 Orens"}] },
+  { id:"r6", icon:"⚡", title:"A Place of Power", text:"The air is wrong. Charged. A stone with an inscription in Elder Speech that Ciri would recognise if she were here. Power in the ground beneath it.", choices:[{label:"Draw from it",   xp:60, out:"The signs burn brighter for hours afterward. The dreams that night are strange. +60 Orens"},{label:"Leave it untouched", xp:15, out:"Respectful. Some things on the Path are not meant to be taken. +15 Orens"}] },
+  { id:"r7", icon:"🌧️", title:"Rain That Does Not Stop", text:"The kind that comes from the mountains and settles in for days. Cold. Horizontal. You were already three hours from the nearest shelter.", choices:[{label:"Push through to the destination",  xp:40, out:"You arrive wet, cold, and ahead of schedule. +40 Orens"},{label:"Make camp and wait it out",       xp:20, out:"Smart. A wet witcher is a slower witcher. +20 Orens"}] },
+  { id:"r8", icon:"🐺", title:"Lambert's Campfire", text:"You smell the camp before you see it. He is in a bad mood. He is always in a bad mood, but this is a specific kind of bad mood that means something went wrong on the road.", choices:[{label:"Share the fire and ask",   xp:30, out:"He tells you, eventually. The information is relevant to your current contract. +30 Orens"},{label:"Keep moving",               xp:15, out:"He notices. He will have a comment about it later. +15 Orens"}] },
+];
+
+const EFFORT = [
+  { v:"silver",  icon:"🗡️",  label:"Silver Sword",    desc:"Measured, professional" },
+  { v:"steel",   icon:"⚔️",  label:"Steel Sword",     desc:"Working harder, leaning in" },
+  { v:"signs",   icon:"✨",   label:"Signs Active",    desc:"The witcher edge is showing" },
+  { v:"mutagen", icon:"⚗️",  label:"Mutagen Surge",   desc:"Beyond normal limits" },
+  { v:"wolf",    icon:"🐺",  label:"White Wolf",      desc:"Total commitment" },
+];
+
+const ARC_MILESTONES = {
+  bruxa: {
+    strength:[
+      {l:"First Contact",      c:"Warm up complete",          s:"You smell the vineyard before you see it. Something is wrong with the air here. Chemical, sweet, metallic."},
+      {l:"First Set Complete", c:"Complete first exercise",   s:"The workers scattered when you arrived. Sensible. A bruxa at full strength can take a man's head before he registers movement."},
+      {l:"Into the Hard Work", c:"Complete second exercise",  s:"You find a feather in the cellar. Black, iridescent. She has been roosting here. She knows you are in her territory now."},
+      {l:"Halfway",            c:"Halfway through session",   s:"The light changes. She is watching. Bruxae do not attack immediately. They learn you first. Be worth learning from."},
+      {l:"Final Push",         c:"Last set remaining",        s:"She makes her move. What she encounters is not what she expected when you walked through those vineyard gates."},
+    ],
+    run:[
+      {l:"Leaving Beauclair",  c:"Warm up, start moving",     s:"The city gates behind you. The road into the vineyard country ahead. A bruxa is somewhere in those hills."},
+      {l:"First Mile",         c:"First interval complete",   s:"You find where the attacks happened. The bodies were moved, but the blood trail is clear. She is fast. You need to be faster."},
+      {l:"The Long Section",   c:"Midpoint reached",          s:"Three kilometres in. The road bends into shadow. You feel her before you hear her."},
+      {l:"Acceleration",       c:"Begin final intervals",     s:"She teleports twenty metres ahead of you and waits. She wants to see what you do. Show her."},
+      {l:"The Return",         c:"Final stretch",             s:"The contract is complete. The road back to Beauclair is clear. You run it anyway. Better to stay sharp."},
+    ],
+    mobility:[
+      {l:"Opening Forms",      c:"Start mobility work",       s:"The contract briefing was specific: bruxae attack through peripheral angles. Find yours. Then close them."},
+      {l:"Hip and Shoulder",   c:"First sequence done",       s:"A higher vampire moves with absolute economy. No wasted motion. Work toward the same standard."},
+      {l:"Deep Work",          c:"Midpoint",                  s:"The form that protects you most is the one you neglect most. You know which one that is."},
+      {l:"Integration",        c:"Begin final sequence",      s:"Every angle closed is one fewer entry point. You are building something the bruxa will not expect."},
+      {l:"Full Form",          c:"Final holds",               s:"The difference between a witcher and a victim is the space they do not leave open. You are nearly there."},
+    ],
+    home:[
+      {l:"Camp Setup",         c:"Begin session",             s:"A farmhouse table. A stone floor. The inn's courtyard in the early morning. You have what you brought."},
+      {l:"First Circuit",      c:"First round done",          s:"The locals watch from a distance. A witcher training. They have heard stories. Let them watch."},
+      {l:"Second Circuit",     c:"Midpoint",                  s:"The bruxa hunts at dusk. You have hours. Use them."},
+      {l:"Third Circuit",      c:"Begin final round",         s:"You are building a margin. The bruxa is faster than you. The margin is what keeps you alive."},
+      {l:"Contract Ready",     c:"Final effort",              s:"The vineyard gates are ahead. The sun is low. The contract begins now."},
+    ],
+  },
+  trials: {
+    strength:[
+      {l:"The Corridor",       c:"Warm up complete",          s:"Vesemir starts the pendulums at dawn. You step in when he nods. Not before."},
+      {l:"First Trial",        c:"First set complete",        s:"The candidates who tried to be fast failed here. The ones who were precise made it through."},
+      {l:"The Obstacle Course",c:"Second exercise complete",  s:"Full armour on the obstacle course. Vesemir's expression has not changed. That is either good or indeterminate."},
+      {l:"The Hard Part",      c:"Halfway",                   s:"This is where they stopped. The ones who became witchers did not stop here. That is the entirety of the distinction."},
+      {l:"Completion",         c:"Final sets",                s:"Vesemir is watching the form, not the weight. The weight will come. The form must already be there."},
+    ],
+    run:[
+      {l:"The Gate",           c:"Start",                     s:"The keep at your back. The mountain circuit ahead. Geralt's record is on a board in the hall. You have seen it."},
+      {l:"The Ascent",         c:"First interval",            s:"The pass at the halfway point is always into the wind. There is no sheltered route. Vesemir designed it that way."},
+      {l:"The Ridge",          c:"Midpoint",                  s:"You can see the keep from here. It looks closer than it is. That is also by design."},
+      {l:"The Descent",        c:"Final intervals",           s:"The descent is harder than the ascent. Candidates who saved energy for it were the ones who finished clean."},
+      {l:"The Courtyard",      c:"Final stretch",             s:"Vesemir is standing at the gate. He has been standing there every morning for thirty years. Run in properly."},
+    ],
+    mobility:[
+      {l:"Morning Forms",      c:"Start",                     s:"The forms predate the current order. They are older than Kaer Morhen itself. Begin at the beginning."},
+      {l:"Blade Forms",        c:"First sequence",            s:"Geralt's precision with two swords starts here. At the hip. In the shoulder. In the thoracic spine. Not in the wrist."},
+      {l:"Integration",        c:"Midpoint",                  s:"Vesemir says: the body that cannot be surprised is the body that has gone everywhere already. Keep going."},
+      {l:"Advanced Forms",     c:"Begin final sequence",      s:"These are the forms the candidates who failed could not yet do. You are doing them."},
+      {l:"Completion",         c:"Final holds",               s:"The trial of the forms is not graded on grace. It is graded on honesty. Every restriction you ignored is visible."},
+    ],
+    home:[
+      {l:"Courtyard Dawn",     c:"Begin",                     s:"Frost on the stone. No equipment. Just the body and what the keep taught you."},
+      {l:"First Circuit",      c:"Round one done",            s:"Lambert is already done and watching. He will not say it, but he is watching to see if you finish."},
+      {l:"Second Circuit",     c:"Midpoint",                  s:"The body starts to argue at the midpoint. Vesemir taught that the argument is part of the training."},
+      {l:"Third Circuit",      c:"Begin final",               s:"Eskel ran this circuit for three years before Vesemir changed it. The original was harder. Keep that in mind."},
+      {l:"Trial Complete",     c:"Final effort",              s:"The courtyard is quiet. The keep stands. You have done what it asked today."},
+    ],
+  },
+};
+
+Object.keys(BANTER).forEach(id => {
+  if(!ARC_MILESTONES[id]) {
+    ARCS.forEach(arc => {
+      if(!ARC_MILESTONES[arc.id]) ARC_MILESTONES[arc.id] = {};
+      WORKOUT_TYPES.forEach(wt => {
+        if(!ARC_MILESTONES[arc.id][wt.id]) {
+          ARC_MILESTONES[arc.id][wt.id] = [
+            {l:"First Step on the Path", c:"Warm up complete",         s:`The contract is clear. The work begins now.`},
+            {l:"Into the Contract",      c:"First exercise complete",  s:`This is what the Path asks. You answer it.`},
+            {l:"Halfway",                c:"Midpoint reached",         s:`The hardest part of any contract is the middle. Keep moving.`},
+            {l:"Final Push",             c:"Begin last section",       s:`You are close. Do not let the form go now.`},
+            {l:"Contract Complete",      c:"Final effort",             s:`The Path does not reward the adequate. Finish with everything you have.`},
+          ];
+        }
+      });
+    });
+  }
+});
+
+ARCS.forEach(arc => {
+  if(!ARC_MILESTONES[arc.id]) ARC_MILESTONES[arc.id] = {};
+  WORKOUT_TYPES.forEach(wt => {
+    if(!ARC_MILESTONES[arc.id][wt.id]) {
+      ARC_MILESTONES[arc.id][wt.id] = [
+        {l:"First Step on the Path", c:"Warm up complete",         s:`${arc.loc}. The contract is in hand. The work begins.`},
+        {l:"Into the Contract",      c:"First exercise complete",  s:`The ${arc.title} contract is underway. Keep the pace.`},
+        {l:"Halfway",                c:"Midpoint reached",         s:`Halfway through. This is where it counts.`},
+        {l:"Final Push",             c:"Begin last section",       s:`The end is close. Do not ease off now.`},
+        {l:"Contract Complete",      c:"Final effort",             s:`Everything you have. The Path is watching.`},
+      ];
+    }
+  });
+});
+
+const DEFAULT_MILESTONES = [
+  {l:"First Step on the Path", c:"Warm up complete",       s:"The work begins."},
+  {l:"Into the Contract",      c:"First section complete", s:"You are in it now."},
+  {l:"Halfway",                c:"Midpoint reached",       s:"This is where it counts."},
+  {l:"Final Push",             c:"Begin last section",     s:"Do not ease off."},
+  {l:"Contract Complete",      c:"Final effort",           s:"Everything you have."},
+];
+
+const EXERCISES = {
+  "Compound": ["Deadlift","Squat","Bench Press","Overhead Press","Barbell Row","Hip Thrust","Romanian Deadlift","Front Squat"],
+  "Push":     ["Push-up","Dumbbell Press","Skull Crusher","Tricep Dip","Lateral Raise","Cable Fly","Arnold Press"],
+  "Pull":     ["Pull-up","Dumbbell Row","Face Pull","Bicep Curl","Hammer Curl","Cable Row","Lat Pulldown"],
+  "Legs":     ["Lunge","Step Up","Leg Press","Leg Curl","Calf Raise","Bulgarian Split Squat","Box Jump","Glute Bridge"],
+  "Core":     ["Plank","Dead Bug","Hanging Knee Raise","Cable Crunch","Russian Twist","Pallof Press","Ab Wheel"],
+};
+
+/* ═══════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════ */
+const dayStamp  = () => { const n=new Date(); return `${n.getFullYear()}-${n.getMonth()}-${n.getDate()}`; };
+const weekKey   = () => {
+  const n=new Date();
+  const day=n.getDay();
+  const diff=n.getDate()-(day===0?6:day-1);
+  const mon=new Date(new Date().setDate(diff));
+  return `${mon.getFullYear()}-${String(mon.getMonth()+1).padStart(2,'0')}-${String(mon.getDate()).padStart(2,'0')}`;
+};
+const todayIdx  = () => { const d=new Date().getDay(); return d===0?6:d-1; };
+const hash      = s => { let h=0; for(let i=0;i<s.length;i++) h=((h<<5)-h+s.charCodeAt(i))|0; return Math.abs(h); };
+const pick      = a => a[Math.floor(Math.random()*a.length)];
+const diffColor = d => d==="Rare"?"#9d4edd":d==="Uncommon"?"#0369a1":"#16a34a";
+const fmt       = n => n>=1000000?(n/1000000).toFixed(0)+"M":n>=1000?(n/1000).toFixed(0)+"K":String(n);
+const fmtTime   = s => { const m=Math.floor(s/60),sec=s%60; return `${m}:${String(sec).padStart(2,'0')}`; };
+
+const LS = {
+  get: k => { try{ return JSON.parse(localStorage.getItem(k)); }catch{ return null; } },
+  set: (k,v) => { try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} },
+};
+
+function initState() {
+  const ch = {};
+  CREW.forEach(c => { ch[c.id]={hp:100,xp:0,level:1,status:"ready"}; });
+  return { char:{name:"Ashley",level:1,xp:0,total:0,reputation:30000}, ch, weekKey:weekKey(), weekW:[], allW:[], streak:0, best:0 };
+}
+
+function getDailyArc() {
+  const seed = dayStamp();
+  return ARCS[hash(seed) % ARCS.length];
+}
+
+/* ═══════════════════════════════════════════════════
+   COMPONENTS
+═══════════════════════════════════════════════════ */
+
+function BriefingSection({ apiKey, onSelectWorkoutType }) {
+  const todayArc   = getDailyArc();
+  const briefing   = BRIEFINGS[todayArc?.id] || DEFAULT_BRIEFING;
+  const companion  = CREW.find(c=>c.id===briefing.crew) || CREW[0];
+
+  const [feed,     setFeed]     = useState([{type:"companion", cid:companion.id, text:briefing.line}]);
+  const [input,    setInput]    = useState("");
+  const [thinking, setThinking] = useState(false);
+  const feedRef = useRef(null);
+
+  useEffect(()=>{ if(feedRef.current) feedRef.current.scrollTop=feedRef.current.scrollHeight; },[feed,thinking]);
+
+  async function sendMsg() {
+    const text=input.trim(); if(!text||thinking) return;
+    setInput("");
+    setFeed(f=>[...f,{type:"player",text}]);
+    if(!apiKey) {
+      const b=BANTER[companion.id]||[];
+      const line=b.find(x=>x.at==="start")?.line||"Move.";
+      setTimeout(()=>setFeed(f=>[...f,{type:"companion",cid:companion.id,text:line}]),700);
+      return;
+    }
+    setThinking(true);
+    try {
+      const history=feed.map(f=>{
+        if(f.type==="companion") return `${companion.name}: "${f.text}"`;
+        if(f.type==="player") return `Ashley: "${f.text}"`;
+        return "";
+      }).filter(Boolean).join("\n");
+
+      const voiceMap = {
+        geralt:    "Short declarative sentences. Observational. Dry. Never inspirational. Does not reassure unless earned. Notices specific details. Occasionally just 'Hmm.'",
+        yennefer:  "Cold, precise. States requirements not suggestions. Contemptuous of hesitation. Respects actual results. Does not offer encouragement. Offers standards.",
+        triss:     "Warmer than Yennefer but not soft. Has survived Kaer Morhen. Practical. Believes in preparation. Occasionally a dark reference to things she has seen.",
+        dandelion: "Verbose, self-referential, genuinely excited. Will insert himself into the narrative. References his own work. Means well. Occasionally actually useful.",
+        ciri:      "Competitive, direct, not interested in excuses. Has done harder things than this workout and knows it. Slightly impatient. Will not wait.",
+        zoltan:    "Blunt, warm, pragmatic. Calls things what they are. Has no patience for ceremony or hesitation. Short sentences. Occasional mild profanity.",
+        vesemir:   "Demanding but not cruel. Has trained witchers for a century. Knows the body's limits precisely. Sets real standards. Everything is a lesson.",
+        lambert:   "Sarcastic, abrasive, not wrong. Will tell you if you are slacking. Will also tell you if you are doing well, once, briefly, without making it a thing.",
+        eskel:     "Minimal words. Steady. When he speaks it changes the scene. No encouragement for its own sake. Precise.",
+        philippa:  "Calculates everything. Tells you what you need to know, not what you want to hear. Has her own agenda. Watching.",
+        regis:     "Philosophical, unhurried. Centuries of perspective. Will draw unexpected connections between the workout and something ancient. Never panics. Occasionally unsettling.",
+        meve:      "Soldier's directness. No ceremony. Already moving. Expects you to keep up. Brief.",
+      };
+
+      const sys=`You are ${companion.name} from The Witcher, delivering the pre-contract briefing inside a workout app called On the Path.
+
+Ashley is about to do a real physical workout. She has not chosen the type yet. Your job is to set the scene for today's contract and make the workout feel like stepping onto the Path.
+
+TODAY'S CONTRACT: "${todayArc?.title}" at ${todayArc?.loc}
+YOUR ROLE: ${companion.role}
+CONVERSATION SO FAR:
+${history}
+
+This is a two-way conversation. She can respond, ask questions, push back. React in character. Keep each response under 3 sentences. No monologues. No em dashes. No inspirational fitness language.
+
+YOUR VOICE:
+${voiceMap[companion.id]||"In character. Present. Direct."}
+
+No JSON. Speak as ${companion.name} only. 3 sentences maximum.`;
+
+      const res=await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,system:sys,messages:[
+          ...feed.map(f=>({role:f.type==="player"?"user":"assistant",content:f.text})),
+          {role:"user",content:text}
+        ]})
+      });
+      const data=await res.json();
+      if(data.error) throw new Error(data.error.message);
+      const reply=data.content?.[0]?.text||"...";
+      setFeed(f=>[...f,{type:"companion",cid:companion.id,text:reply}]);
+    } catch(err) {
+      setFeed(f=>[...f,{type:"companion",cid:companion.id,text:"Megascope's down. Choose your workout type."}]);
+    } finally { setThinking(false); }
+  }
+
+  return h('div',{class:"briefing-section"},
+    h('div',{class:"briefing-header"},
+      h(CompanionIcon,{id:companion.id,size:44,style:"border:2px solid "+companion.color+";flex-shrink:0;"}),
+      h('div',null,
+        h('div',{class:"briefing-arc"},`Contract Today: ${todayArc?.title||"On the Path"}`),
+        h('div',{style:"font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:#c8d4e0"},companion.name)
+      )
+    ),
+    h('div',{class:"briefing-feed",ref:feedRef},
+      feed.map((item,i)=>{
+        if(item.type==="companion") {
+          const c=CREW.find(x=>x.id===item.cid)||companion;
+          return h('div',{key:i,class:"briefing-msg banter-in"},
+            h(CompanionIcon,{id:c.id,size:36,style:"flex-shrink:0;border:2px solid "+c.color+";"}),
+            h('div',{class:"briefing-bubble"},
+              h('div',{class:"briefing-who",style:`color:${c.color}`},c.name),
+              h('div',{class:"briefing-text"},`"${item.text}"`)
+            )
+          );
+        }
+        return h('div',{key:i,class:"briefing-player slide-up"},
+          h('div',{class:"briefing-p-who"},"Ashley"),
+          h('div',{class:"briefing-p-text"},item.text)
+        );
+      }),
+      thinking&&h('div',{class:"briefing-msg pulsing"},
+        h('span',{style:"font-size:22px"},companion.icon),
+        h('div',{class:"briefing-bubble"},h('div',{class:"briefing-thinking"},"..."))
+      )
+    ),
+    h('div',{class:"briefing-input-row"},
+      h('input',{class:"briefing-input",value:input,placeholder:`Speak to ${companion.name}...`,onInput:e=>setInput(e.target.value),onKeyDown:e=>{if(e.key==="Enter"){e.preventDefault();sendMsg();}},disabled:thinking}),
+      h('button',{class:"briefing-send",disabled:!input.trim()||thinking,onClick:sendMsg},"➤")
+    ),
+    h('div',{class:"workout-type-grid"},
+      WORKOUT_TYPES.map(wt=>
+        h('button',{key:wt.id,class:"wt-btn",onClick:()=>onSelectWorkoutType(wt.id)},
+          h('div',{class:"wt-icon"},wt.icon),
+          h('div',{class:"wt-label"},wt.label),
+          h('div',{class:"wt-sub"},todayArc?.title||"On the Path")
+        )
+      )
+    )
+  );
+}
+
+function NavBar({ view, setView }) {
+  const tabs = [{id:"home",icon:"📋",label:"Contract"},{id:"party",icon:"⚔️",label:"Party"},{id:"journal",icon:"📜",label:"Log"}];
+  return h('nav',{class:"navbar"},
+    tabs.map(t=>h('button',{key:t.id,class:`nav-btn${view===t.id?" active":""}`,onClick:()=>setView(t.id)},
+      h('span',{class:"nav-icon"},t.icon),
+      h('span',{class:"nav-label"},t.label)
+    ))
+  );
+}
+
+function HomeView({ gs, setGs, onStartWorkout, apiKey }) {
+  const [expanded, setExpanded] = useState(null);
+  const [workoutType, setWorkoutType] = useState(null);
+  const arc = getDailyArc();
+  const wk  = gs.weekKey===weekKey() ? gs.weekW : [];
+  const doneIds = (gs.allW||[]).filter(w=>w.stamp===dayStamp()).map(w=>w.arcId);
+  const injured = CREW.filter(c=>gs.ch[c.id]?.hp<50);
+  const today = todayIdx();
+
+  const days=["M","T","W","T","F","S","S"];
+  const doneMap={};
+  (gs.allW||[]).forEach(w=>{
+    if(w.dayIdx!==undefined) doneMap[w.dayIdx]=true;
+  });
+  const thisWeekW = gs.weekKey===weekKey()?(gs.weekW||[]):[];
+  const wDays=["mon","tue","wed","thu","fri","sat","sun"];
+  thisWeekW.forEach(w=>{ if(w.day) doneMap[wDays.indexOf(w.day)]=-1; });
+
+  function handleStartWorkout(type) {
+    if(onStartWorkout) onStartWorkout(arc, type);
+  }
+
+  return h('div',{class:"view fade-in"},
+    h('div',{class:"stat-row"},
+      h('div',{class:"stat-card"},
+        h('div',{class:"stat-val"},`${gs.char?.level||1}`),
+        h('div',{class:"stat-label"},"Rank")
+      ),
+      h('div',{class:"stat-card"},
+        h('div',{class:"stat-val"},fmt(gs.char?.reputation||0)),
+        h('div',{class:"stat-label"},"Reputation")
+      ),
+      h('div',{class:"stat-card"},
+        h('div',{class:"stat-val"},`${gs.streak||0}`),
+        h('div',{class:"stat-label"},"Streak")
+      )
+    ),
+
+    h('div',{class:"week-card"},
+      h('div',{class:"section-head"},"This Week on the Path"),
+      h('div',{class:"week-days"},
+        days.map((d,i)=>{
+          const done=thisWeekW.some(w=>w.stamp&&new Date(w.date).getDay()===(i===6?0:i+1));
+          const isT=i===today;
+          return h('div',{key:i,class:"day-dot"},
+            h('div',{class:"day-label",style:`color:${done?"#a07840":isT?"#c8d4e0":"#2a3040"}`},d),
+            h('div',{class:"day-mark",style:`color:${done?"#a07840":isT?"#c8d4e0":"#2a304088"}`},done?"✓":isT?"◆":"·")
+          );
+        })
+      ),
+      h('div',{class:"progress-track"},h('div',{class:"progress-fill",style:`width:${Math.min(100,(thisWeekW.length/4)*100)}%`})),
+      h('div',{class:"progress-text"},thisWeekW.length>=4?"Contract quota fulfilled this week.":`${4-thisWeekW.length} session${4-thisWeekW.length!==1?"s":""} remaining on the Path this week.`)
+    ),
+
+    injured.length>0&&h('div',{class:"injured-card"},
+      h('div',{class:"injured-h"},"Companions Down"),
+      injured.map(c=>h('div',{key:c.id,class:"row",style:"margin-bottom:8px"},
+        h(CompanionIcon,{id:c.id,size:36}),
+        h('div',{style:"flex:1"},
+          h('div',{style:"font-family:'Cinzel',serif;font-weight:700;color:#8b1a1a;font-size:13px"},c.name),
+          h('div',{style:"font-family:'EB Garamond',serif;font-style:italic;color:#8b1a1a;font-size:12px"},`"${c.injuredQ}"`)
+        ),
+        h('div',{style:"color:#8b1a1a;font-weight:700;font-size:12px;font-family:'Cinzel',serif"},`HP ${gs.ch[c.id]?.hp}`)
+      ))
+    ),
+
+    h('div',{style:"margin:0 14px 12px"},
+      h('div',{class:"section-head"},"Today's Contract"),
+      h('div',{style:"font-family:'EB Garamond',serif;font-style:italic;font-size:12px;color:#8b9db0;margin-bottom:14px;margin-top:-6px"},"Rotates at midnight. Choose your approach above."),
+      h('div',{class:"mission-card",style:`opacity:${doneIds.includes(arc.id)?0.55:1}`},
+        h('div',{class:"mission-top",onClick:()=>setExpanded(expanded===arc.id?null:arc.id)},
+          h('div',{style:"font-size:26px;line-height:1"},arc.icon),
+          h('div',{style:"flex:1"},
+            h('div',{class:"row",style:"flex-wrap:wrap;gap:6px;margin-bottom:3px"},
+              h('div',{class:"mission-title"},`${doneIds.includes(arc.id)?"Completed: ":""}${arc.title}`),
+              h('div',{class:"tag tag-diff",style:`color:${diffColor(arc.diff)};border-color:${diffColor(arc.diff)};background:${diffColor(arc.diff)}11`},arc.diff)
+            ),
+            h('div',{class:"mission-loc"},arc.loc),
+            h('div',{class:"row",style:"gap:6px;margin-top:5px;flex-wrap:wrap"},
+              h('span',{class:"tag tag-oren"},`${fmt(arc.xp*100)} Orens`),
+              h('span',{style:"font-family:'Cinzel',serif;font-size:9px;font-weight:700;background:#141820;color:#a07840;padding:2px 8px;border:1px solid #2a3040;letter-spacing:1px"},"All workout types")
+            )
+          ),
+          h('div',{class:"chevron"},expanded===arc.id?"▲":"▼")
+        ),
+        expanded===arc.id&&h('div',{class:"mission-body"},
+          h('div',{class:"mission-flavor"},arc.flavor),
+          WORKOUT_TYPES.map(wt=>
+            h('div',{key:wt.id,class:"mission-type-desc"},
+              h('div',{class:"row",style:"gap:6px;margin-bottom:4px"},
+                h('span',{style:"font-size:14px"},wt.icon),
+                h('div',{class:"mission-type-label"},wt.label)
+              ),
+              h('div',{class:"mission-type-text"},arc.desc[wt.id])
+            )
+          )
+        )
+      )
+    ),
+
+    h('div',{style:"padding:0 14px 20px"},
+      h('div',{class:"section-head"},"Begin Today's Contract"),
+      !workoutType&&h(BriefingSection,{apiKey,onSelectWorkoutType:type=>{ setWorkoutType(type); handleStartWorkout(type); }})
+    )
+  );
+}
+
+function PartyView({ gs, setGs }) {
+  const [selected, setSelected] = useState(new Set(Object.keys(gs.ch||{}).filter(id=>{
+    const c=CREW.find(x=>x.id===id); return c&&gs.ch[id]?.hp>=50;
+  }).slice(0,4)));
+
+  function toggleSelect(id) {
+    setSelected(prev=>{
+      const next=new Set(prev);
+      if(next.has(id)) { if(next.size>1) next.delete(id); }
+      else { if(next.size<4) next.add(id); else { const arr=[...next]; arr.shift(); arr.push(id); return new Set(arr); } }
+      return next;
+    });
+  }
+
+  useEffect(()=>{
+    setGs(g=>({...g,party:[...selected]}));
+  },[selected]);
+
+  return h('div',{class:"view fade-in"},
+    h('div',{style:"padding:14px 14px 8px"},
+      h('div',{class:"section-head"},"Your Party"),
+      h('div',{style:"font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:#8b9db0;margin-top:-4px"},"Select up to 4 companions for today's contract")
+    ),
+    h('div',{class:"party-grid"},
+      CREW.map(c=>{
+        const chs=gs.ch[c.id]||{hp:100,xp:0,level:1};
+        const isSel=selected.has(c.id);
+        const isInj=chs.hp<50;
+        return h('div',{key:c.id,class:`companion-card${isSel?" selected":""}${isInj?" injured":""}`,onClick:()=>!isInj&&toggleSelect(c.id)},
+          h('div',{class:"companion-sel"},isSel?"✓":""),
+          h(CompanionIcon,{id:c.id,size:44,style:`border:2px solid ${isSel?c.color:"#2a3040"};`}),
+          h('div',{class:"companion-name"},c.name),
+          h('div',{class:"companion-role"},c.role),
+          h('div',{class:"hp-bar-track"},h('div',{class:"hp-bar-fill",style:`width:${chs.hp}%;background:${chs.hp>60?"#16a34a":chs.hp>30?"#d97706":"#8b1a1a"}`})),
+          h('div',{class:"companion-xp"},`Lv.${chs.level} | ${fmt(chs.xp)} XP`)
+        );
+      })
+    )
+  );
+}
+
+function WorkoutView({ mission, workoutType, gs, setGs, apiKey, onFinish, onAbandon }) {
+  const arc = ARCS.find(a=>a.id===mission?.id) || mission;
+  const wt  = WORKOUT_TYPES.find(w=>w.id===workoutType) || WORKOUT_TYPES[0];
+  const milestones = ARC_MILESTONES[arc?.id]?.[workoutType] || DEFAULT_MILESTONES;
+  const partyIds   = gs.party || CREW.filter(c=>(gs.ch[c.id]?.hp||0)>=50).slice(0,4).map(c=>c.id);
+  const crewObjs   = partyIds.map(id=>CREW.find(c=>c.id===id)).filter(Boolean);
+
+  const [msIdx,    setMsIdx]   = useState(0);
+  const [feed,     setFeed]    = useState([]);
+  const [input,    setInput]   = useState("");
+  const [thinking, setThinking]= useState(false);
+  const [elapsed,  setElapsed] = useState(0);
+  const [event,    setEvent]   = useState(null);
+  const [evDone,   setEvDone]  = useState([]);
+  const [sets,     setSets]    = useState([]);
+  const [logSetOpen,setLogSetOpen]=useState(false);
+  const [curEx,    setCurEx]   = useState(null);
+  const [weightVal,setWeightVal]=useState("");
+  const [repsVal,  setRepsVal] = useState("");
+  const feedRef = useRef(null);
+
+  const banterFeed = [];
+  crewObjs.forEach(c=>{
+    const b=BANTER[c.id]||[];
+    b.forEach(bl=>banterFeed.push({...bl,id:c.id}));
+  });
+
+  const events = pick(ROAD_EVENTS) ? [
+    ROAD_EVENTS[Math.floor(Math.random()*ROAD_EVENTS.length)],
+    ROAD_EVENTS[Math.floor(Math.random()*ROAD_EVENTS.length)],
+  ] : [];
+
+  function addFeed(item) { setFeed(f=>[...f,item]); }
+
+  useEffect(()=>{
+    const ms=milestones[0];
+    if(ms) addFeed({type:"milestone",label:ms.l,text:ms.s});
+    const ts=[
+      setInterval(()=>setElapsed(e=>e+1),1000),
+      setTimeout(()=>{ const m=banterFeed.find(b=>b.at==="start"); if(m) addFeed({type:"banter",cid:m.id,text:m.line}); },3000),
+      setTimeout(()=>{ const ms=banterFeed.filter(b=>b.at==="mid"); if(ms.length){const m=pick(ms); addFeed({type:"banter",cid:m.id,text:m.line});} },90000),
+      setTimeout(()=>{ const ms=banterFeed.filter(b=>b.at==="push"); if(ms.length){const m=pick(ms); addFeed({type:"banter",cid:m.id,text:m.line});} },240000),
+      setTimeout(()=>{ if(!evDone.includes(0)&&events[0]) setEvent({...events[0],idx:0}); },120000),
+      setTimeout(()=>{ if(!evDone.includes(1)&&events[1]) setEvent({...events[1],idx:1}); },300000),
+    ];
+    return()=>{ ts.forEach(t=>{ if(typeof t==="number"&&t>1000) clearTimeout(t); else clearInterval(t); }); };
+  },[]);
+
+  useEffect(()=>{ if(feedRef.current) feedRef.current.scrollTop=feedRef.current.scrollHeight; },[feed,thinking]);
+
+  function advanceMilestone() {
+    const next=msIdx+1;
+    if(next<milestones.length) {
+      setMsIdx(next);
+      addFeed({type:"milestone",label:milestones[next].l,text:milestones[next].s});
+    }
+  }
+
+  function chooseEvent(choice,idx) {
+    addFeed({type:"event_result",text:choice.out});
+    setEvDone(d=>[...d,idx]);
+    setEvent(null);
+    const newGs={...gs};
+    newGs.char={...newGs.char,xp:(newGs.char.xp||0)+choice.xp,reputation:(newGs.char.reputation||0)+choice.xp*10};
+    setGs(newGs);
+  }
+
+  async function sendMsg() {
+    const text=input.trim(); if(!text||thinking) return;
+    setInput(""); addFeed({type:"player",text});
+    if(!apiKey) {
+      const ms=banterFeed.filter(b=>b.at==="mid");
+      if(ms.length){const m=pick(ms); setTimeout(()=>addFeed({type:"banter",cid:m.id,text:m.line}),700);}
+      return;
+    }
+    setThinking(true);
+    try {
+      const phase=msIdx===0?"just beginning the contract":msIdx>=milestones.length-1?"nearly done, final push":`${msIdx} of ${milestones.length} milestones complete`;
+      const recent=feed.slice(-6).map(f=>{
+        if(f.type==="player") return `Ashley: "${f.text}"`;
+        if(f.type==="banter"){const c=CREW.find(x=>x.id===f.cid); return c?`${c.name}: "${f.text}"`:""; }
+        return "";
+      }).filter(Boolean).join("\n");
+
+      const voiceGuide = crewObjs.map(c=>{
+        const voices={
+          geralt:"Short sentences. Factual. Dry. Rarely reacts emotionally. Notices specific details. 'Hmm.' when appropriate.",
+          yennefer:"Cold, precise. Commands rather than asks. Does not explain herself unless it serves a purpose. Respects results.",
+          triss:"Warmer but professional. Medical metaphors when relevant. Acts fast when needed. Not soft.",
+          dandelion:"Always narrating his own experience. Terrified but present. Occasionally brilliant. References his ballads.",
+          ciri:"Aggressive and fast. Acts before thinking. Competitive with everyone including herself. Not interested in excuses.",
+          zoltan:"Short sentences, working-man directness. Occasional mild profanity. Gets on with it. Warm underneath.",
+          vesemir:"Everything is a lesson. Calm under pressure. Has seen worse. Demanding but not cruel.",
+          lambert:"Sarcastic. Will complain. Will also not stop. Respects consistency without saying so. Occasionally just blunt honesty.",
+          eskel:"Almost silent. When he speaks it changes the scene. Minimal. Precise.",
+          philippa:"Reveals information strategically. Always three steps ahead. Watching. Has her own agenda.",
+          regis:"Long perspective. Nothing surprises him. Occasionally disturbing. Philosophical.",
+          meve:"Tactical. Brief. Already moving. Leads from the front.",
+        };
+        return `${c.name} (${c.role}): ${voices[c.id]||"In character, direct."}`;
+      }).join("\n");
+
+      const sys=`You are running a live Witcher roleplay session inside a workout app called On the Path.
+
+Ashley is doing a real physical workout right now. Her effort IS the contract. The lifting, the running, the grinding is the fighting and the hunting. That is canonical.
+
+CURRENT CONTRACT: "${arc.title}" at ${arc.loc}
+WORKOUT TYPE: ${wt.label} (${workoutType==="strength"?"heavy lifting":workoutType==="run"?"running and cardio":workoutType==="mobility"?"mobility and forms":"camp-style bodyweight training"})
+PHASE: ${phase}. Elapsed: ${Math.floor(elapsed/60)} min.
+HER COMPANIONS: ${crewObjs.map(c=>c.name+" ("+c.role+")").join(", ")}
+
+RECENT SCENE:
+${recent||"(the contract has just begun)"}
+
+YOUR JOB: You are a collaborative GM and NPC voice. The companions are present in the scene. They encounter monsters, make difficult choices, find things that raise questions, have moments of tension with each other. Pull Ashley into all of it. This is not a wellness app. This is the Path.
+
+WHAT TO DRIVE:
+- Monster encounters related to the contract. The target is out there.
+- Companion conflict. These people do not always agree. Let that show.
+- Discoveries that complicate the contract. Something is worse than reported.
+- Moral ambiguity. There is no clean heroism in this world. Let the grey in.
+
+HOW TO RESPOND:
+- Pick 1-2 companions from this list only: ${crewObjs.map(c=>c.name).join(", ")}
+- Make them act in the scene. Not comment on the workout.
+- Drive the scene. Something is happening or about to happen.
+- Keep it to 2-4 lines total. No monologues. No em dashes.
+- If Ashley is in a hard phase, let the contract stakes match.
+- The Witcher world is brutal and morally complex. Do not sanitise it.
+
+CHARACTER VOICES:
+${voiceGuide}
+
+Respond ONLY as JSON, no markdown:
+{"responses":[{"crew":"Name","text":"what they say or do"}]}
+Maximum 2 responses.`;
+
+      const res=await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",
+        headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,system:sys,messages:[
+          ...feed.slice(-8).map(f=>{
+            if(f.type==="player") return {role:"user",content:f.text};
+            if(f.type==="banter") return {role:"assistant",content:`{"responses":[{"crew":"${CREW.find(x=>x.id===f.cid)?.name||f.cid}","text":"${f.text}"}]}`};
+            return null;
+          }).filter(Boolean),
+          {role:"user",content:text}
+        ]})
+      });
+      const data=await res.json();
+      if(data.error) throw new Error(data.error.message);
+      const rawText=data.content?.[0]?.text||"{}";
+      let parsed;
+      try{ parsed=JSON.parse(rawText.replace(/```json|```/g,"").trim()); }catch{ parsed={responses:[{crew:crewObjs[0]?.name||"Geralt",text:rawText}]}; }
+      (parsed.responses||[]).forEach(r=>{
+        const c=CREW.find(x=>x.name===r.crew)||crewObjs[0];
+        if(c) addFeed({type:"banter",cid:c.id,text:r.text});
+      });
+    } catch(err) {
+      addFeed({type:"banter",cid:crewObjs[0]?.id||"geralt",text:"Megascope's out. Keep moving."});
+    } finally { setThinking(false); }
+  }
+
+  const showLiftLog = workoutType==="strength";
+
+  return h('div',{class:"view",style:"display:flex;flex-direction:column;height:100%;"},
+    h('div',{class:"workout-header"},
+      h('div',{class:"row"},
+        h('div',{style:"font-size:22px"},arc.icon),
+        h('div',{style:"flex:1"},
+          h('div',{class:"workout-title"},arc.title),
+          h('div',{class:"workout-meta"},
+            h('div',{class:"workout-timer"},fmtTime(elapsed)),
+            h('div',{class:"workout-loc"},arc.loc),
+            h('span',{style:"font-size:12px"},wt.icon),
+            h('span',{style:"font-family:'Cinzel',serif;font-size:10px;font-weight:600;color:#8b9db0;letter-spacing:1px"},wt.label)
+          )
+        )
+      )
+    ),
+
+    h('div',{class:"milestone-track"},
+      milestones.map((_,i)=>h('div',{key:i,class:`ms-dot${i<msIdx?" done":i===msIdx?" curr":""}` }))
+    ),
+
+    event&&h('div',{style:"padding:8px 14px;flex-shrink:0"},
+      h('div',{class:"feed-event enc-pop"},
+        h('div',{class:"feed-event-title"},`${event.icon} ${event.title}`),
+        h('div',{class:"feed-event-text"},event.text),
+        h('div',{class:"feed-event-choices"},
+          event.choices.map((ch,i)=>h('button',{key:i,class:"feed-event-choice",onClick:()=>chooseEvent(ch,event.idx)},ch.label))
+        )
+      )
+    ),
+
+    h('div',{class:"workout-feed",ref:feedRef},
+      feed.map((item,i)=>{
+        if(item.type==="milestone") return h('div',{key:i,class:"feed-item"},
+          h('div',{class:"feed-milestone"},
+            h('div',{class:"feed-ms-label"},item.label),
+            h('div',{class:"feed-ms-text"},item.text)
+          )
+        );
+        if(item.type==="banter") {
+          const c=CREW.find(x=>x.id===item.cid);
+          return h('div',{key:i,class:"feed-item"},
+            h('div',{class:"feed-banter"},
+              h(CompanionIcon,{id:item.cid,size:30,style:`border:2px solid ${c?.color||"#2a3040"};flex-shrink:0;`}),
+              h('div',{class:"feed-banter-bubble"},
+                h('div',{class:"feed-banter-who",style:`color:${c?.color||"#a07840"}`},c?.name||item.cid),
+                h('div',{class:"feed-banter-text"},`"${item.text}"`)
+              )
+            )
+          );
+        }
+        if(item.type==="player") return h('div',{key:i,class:"feed-item"},
+          h('div',{class:"feed-player"},
+            h('div',{class:"feed-p-who"},"Ashley"),
+            h('div',{class:"feed-p-text"},item.text)
+          )
+        );
+        if(item.type==="event_result") return h('div',{key:i,class:"feed-item"},
+          h('div',{class:"feed-event-result"},item.text)
+        );
+        return null;
+      }),
+      thinking&&h('div',{class:"feed-item pulsing"},
+        h('div',{class:"feed-banter"},
+          h('span',{style:"font-size:22px"},crewObjs[0]?.icon||"⚔️"),
+          h('div',{class:"feed-banter-bubble"},h('div',{class:"briefing-thinking"},"..."))
+        )
+      )
+    ),
+
+    showLiftLog&&sets.length>0&&h('div',{style:"padding:8px 14px;max-height:120px;overflow-y:auto;flex-shrink:0;border-top:1px solid #2a3040"},
+      sets.map((s,i)=>h('div',{key:i,class:"set-card"},
+        h('div',{class:"set-card-ex"},s.exName),
+        h('div',{class:"set-card-detail"},`${s.kg}kg × ${s.reps}`),
+        h('div',{class:"set-card-num"},`Set ${i+1}`)
+      ))
+    ),
+
+    h('div',{class:"workout-input-row"},
+      showLiftLog&&h('button',{style:"padding:9px 12px;background:#1a1f2e;border:1px solid #2a3040;color:#a07840;font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:1px;flex-shrink:0;",onClick:()=>setLogSetOpen(true)},"+ LOG SET"),
+      h('input',{class:"workout-input",value:input,placeholder:"Speak to your companions...",onInput:e=>setInput(e.target.value),onKeyDown:e=>{if(e.key==="Enter"){e.preventDefault();sendMsg();}},disabled:thinking}),
+      h('button',{class:"workout-send",disabled:!input.trim()||thinking,onClick:sendMsg},"➤")
+    ),
+
+    msIdx<milestones.length-1
+      ? h('button',{style:"margin:4px 14px 8px;padding:10px;background:#1a1f2e;border:1px solid #2a3040;color:#a07840;font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;",onClick:advanceMilestone},"ADVANCE: "+milestones[msIdx+1]?.c)
+      : h('button',{class:"complete-btn",onClick:()=>onFinish&&onFinish(elapsed,sets)},"Contract Complete"),
+
+    logSetOpen&&h('div',{class:"log-set-overlay"},
+      h('div',{class:"log-set-panel"},
+        h('div',{class:"log-set-title"},"Log Set"),
+        h('div',{class:"log-set-prev"},curEx ? `Exercise: ${curEx}` : "Select exercise"),
+        h('div',{class:"exercise-picker"},
+          Object.entries(EXERCISES).flatMap(([cat,exs])=>exs.map(ex=>
+            h('button',{key:ex,class:`ex-pick-btn${curEx===ex?" active":""}`,onClick:()=>setCurEx(ex)},
+              h('div',{class:"ex-pick-name"},ex),
+              h('div',{class:"ex-pick-prev",style:"color:#8b9db0"},cat)
+            )
+          ))
+        ),
+        h('div',{class:"weight-reps-row"},
+          h('div',{class:"wr-group"},
+            h('label',{class:"wr-label"},"kg"),
+            h('input',{class:"wr-input",type:"number",value:weightVal,onInput:e=>setWeightVal(e.target.value),placeholder:"0",inputmode:"decimal"})
+          ),
+          h('div',{class:"wr-group"},
+            h('label',{class:"wr-label"},"Reps"),
+            h('input',{class:"wr-input",type:"number",value:repsVal,onInput:e=>setRepsVal(e.target.value),placeholder:"0",inputmode:"numeric"})
+          )
+        ),
+        h('button',{class:"log-set-confirm",disabled:!curEx||!weightVal||!repsVal,onClick:()=>{
+          setSets(s=>[...s,{exId:curEx,exName:curEx,kg:Number(weightVal),reps:Number(repsVal)}]);
+          setWeightVal(""); setRepsVal(""); setLogSetOpen(false);
+          addFeed({type:"milestone",label:"Set Logged",text:`${curEx}: ${weightVal}kg × ${repsVal}`});
+        }},"Log Set"),
+        h('button',{class:"log-set-cancel",onClick:()=>setLogSetOpen(false)},"Cancel")
+      )
+    )
+  );
+}
+
+function FinishOverlay({ arc, workoutType, elapsed, sets, onSave }) {
+  const wt = WORKOUT_TYPES.find(w=>w.id===workoutType)||WORKOUT_TYPES[0];
+  const [effort, setEffort] = useState(null);
+  const [notes,  setNotes]  = useState("");
+
+  return h('div',{class:"finish-overlay enc-pop"},
+    h('div',{class:"finish-card"},
+      h('div',{class:"finish-title"},"Contract Complete"),
+      h('div',{class:"finish-arc"},`${arc.icon} ${arc.title} — ${wt.label}`),
+      h('div',{style:"font-family:'EB Garamond',serif;font-style:italic;font-size:13px;color:#8b9db0;margin-bottom:14px;"},`${Math.floor(elapsed/60)} min on the Path`),
+      h('div',{class:"finish-effort"},
+        h('div',{class:"finish-effort-q"},"How was the effort?"),
+        h('div',{class:"effort-grid"},
+          EFFORT.map(e=>h('div',{key:e.v,class:`effort-btn${effort===e.v?" selected":""}`,onClick:()=>setEffort(e.v)},
+            h('div',{class:"effort-label"},`${e.icon} ${e.label}`),
+            h('div',{class:"effort-desc"},e.desc)
+          ))
+        )
+      ),
+      h('div',{class:"finish-notes-label"},"Field Notes"),
+      h('textarea',{class:"finish-notes",value:notes,onInput:e=>setNotes(e.target.value),placeholder:"What happened on the Path today..."}),
+      h('button',{class:"finish-save",disabled:!effort,onClick:()=>onSave({effort,notes,sets})},"Save to the Log")
+    )
+  );
+}
+
+function JournalView({ gs }) {
+  const allW = gs.allW||[];
+  if(!allW.length) return h('div',{class:"view fade-in"},
+    h('div',{class:"empty-state"},
+      h('div',{class:"empty-icon"},"📜"),
+      h('div',{class:"empty-text"},"The Path has no record yet."),
+      h('div',{class:"empty-sub"},"Complete your first contract")
+    )
+  );
+  const sorted=[...allW].reverse();
+  return h('div',{class:"view fade-in"},
+    h('div',{class:"journal-list"},
+      h('div',{class:"section-head",style:"padding-top:14px"},"Contracts Completed"),
+      sorted.map(w=>{
+        const ef=EFFORT.find(e=>e.v===w.effort);
+        const party=(w.crewIds||[]).map(id=>CREW.find(c=>c.id===id)).filter(Boolean);
+        return h('div',{key:w.id,class:"journal-entry"},
+          h('div',{class:"row",style:"margin-bottom:8px"},
+            h('span',{style:"font-size:22px"},w.icon||"⚔️"),
+            h('div',{style:"flex:1"},
+              h('div',{style:"font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:#c8d4e0"},w.title||"Contract"),
+              h('div',{style:"font-family:'EB Garamond',serif;color:#8b1a1a;font-size:12px;font-style:italic"},new Date(w.date).toLocaleDateString("en-IE",{weekday:"long",month:"long",day:"numeric"}))
+            ),
+            h('div',{style:"font-family:'Cinzel',serif;color:#a07840;font-size:14px"},`${fmt((w.xp||0)*100)}ø`)
+          ),
+          h('div',{class:"row",style:"gap:4px;margin-bottom:6px"},
+            party.map(c=>h(CompanionIcon,{key:c.id,id:c.id,size:26})),
+            h('span',{style:"font-family:'EB Garamond',serif;color:#8b9db088;font-size:12px;margin-left:4px"},`${ef?.icon||""} ${ef?.label||""}`)
+          ),
+          w.notes&&h('div',{class:"journal-note"},`"${w.notes}"`),
+          w.sets&&w.sets.length>0&&h('div',{class:"lift-summary"},
+            (()=>{
+              const byEx={};
+              w.sets.forEach(s=>{ if(!byEx[s.exId]) byEx[s.exId]={name:s.exName,sets:[]}; byEx[s.exId].sets.push(s); });
+              return Object.values(byEx).map(ex=>h('div',{key:ex.name,class:"lift-ex-row"},
+                h('span',{class:"lift-ex-name"},ex.name+": "),
+                h('span',{class:"lift-sets"},ex.sets.map(s=>`${s.kg}kg x${s.reps}`).join(" · "))
+              ));
+            })()
+          )
+        );
+      })
+    )
+  );
+}
+
+function ApiSetup({ currentKey, onSave, onCancel }) {
+  const [key,setKey]=useState(currentKey||"");
+  return h('div',{class:"view fade-in"},
+    h('div',{class:"api-setup"},
+      h('div',{style:"font-family:'Cinzel',serif;font-size:9px;font-weight:700;color:#8b1a1a;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px"},"Megascope Configuration"),
+      h('h1',null,"Live Companion Comms"),
+      h('p',null,"Add your Claude API key to unlock live in-character responses from your companions. Geralt will observe. Yennefer will set standards. Dandelion will narrate his own experience of your suffering."),
+      h('p',{style:"margin-top:-8px"},"Your key is stored only on this device and never sent anywhere except the Anthropic API."),
+      h('div',{class:"api-hint"},
+        h('div',{class:"api-hint-h"},"How to get your key"),
+        h('pre',null,"1. Go to console.anthropic.com\n2. Sign in or create a free account\n3. Click API Keys in the sidebar\n4. Create a new key\n5. Paste it below")
+      ),
+      h('input',{class:"api-input",type:"password",value:key,onInput:e=>setKey(e.target.value),placeholder:"sk-ant-..."}),
+      h('button',{class:"api-save",onClick:()=>onSave(key)},"Save Key"),
+      currentKey&&h('button',{class:"api-cancel",onClick:onCancel},"Cancel")
+    )
+  );
+}
+
+/* ═══════════════════════════════════════════════════
+   APP
+═══════════════════════════════════════════════════ */
+
+function App() {
+  const [gs,      setGsRaw]  = useState(()=>{ const s=LS.get("witcher_gs"); return s||initState(); });
+  const [view,    setView]    = useState("home");
+  const [apiKey,  setApiKey]  = useState(()=>LS.get("witcher_api")||"");
+  const [showApi, setShowApi] = useState(false);
+  const [workout, setWorkout] = useState(null);
+  const [finishing,setFinishing]=useState(null);
+
+  function setGs(updater) {
+    setGsRaw(prev=>{
+      const next=typeof updater==="function"?updater(prev):updater;
+      LS.set("witcher_gs",next);
+      return next;
+    });
+  }
+
+  useEffect(()=>{
+    const cur=gs.weekKey; const now=weekKey();
+    if(cur!==now) setGs(g=>({...g,weekKey:now,weekW:[]}));
+  },[]);
+
+  function startWorkout(arc,type) {
+    setWorkout({arc,type});
+    setView("workout");
+  }
+
+  function finishWorkout(elapsed,sets) {
+    setFinishing({elapsed,sets});
+  }
+
+  function saveWorkout({effort,notes,sets}) {
+    if(!finishing||!workout) return;
+    const arc=workout.arc;
+    const party=gs.party||CREW.filter(c=>(gs.ch[c.id]?.hp||0)>=50).slice(0,4).map(c=>c.id);
+    const earned=arc.xp;
+    const stamp=dayStamp();
+
+    const entry={
+      id:Date.now().toString(),
+      arcId:arc.id,
+      title:arc.title,
+      icon:arc.icon,
+      type:workout.type,
+      date:new Date().toISOString(),
+      stamp,
+      day:["sun","mon","tue","wed","thu","fri","sat"][new Date().getDay()],
+      dayIdx:todayIdx(),
+      elapsed:finishing.elapsed,
+      xp:earned,
+      effort,
+      notes,
+      sets,
+      crewIds:party,
+    };
+
+    setGs(g=>{
+      const newChar={...g.char,xp:(g.char.xp||0)+earned,total:(g.char.total||0)+earned,reputation:(g.char.reputation||30000)+earned*100};
+      const newLevel=Math.floor(newChar.xp/200)+1;
+      newChar.level=newLevel;
+
+      const newCh={...g.ch};
+      party.forEach(id=>{
+        if(newCh[id]) newCh[id]={...newCh[id],xp:(newCh[id].xp||0)+(earned/party.length),level:Math.floor((newCh[id].xp||0)/150)+1};
+      });
+
+      const wk=g.weekKey===weekKey()?g.weekW:[];
+      const newWk=[...wk,{stamp,date:entry.date,day:entry.day,arcId:arc.id}];
+
+      const lastW=[...g.allW||[]].reverse().slice(0,30);
+      const consecutive=lastW.reduce((acc,w,i)=>{
+        if(i===0) return 1;
+        const prev=lastW[i-1];
+        const diff=new Date(w.date)-new Date(prev.date);
+        return diff<86400000*2?acc+1:acc;
+      },0);
+
+      return {
+        ...g,
+        char:newChar,
+        ch:newCh,
+        weekKey:weekKey(),
+        weekW:newWk,
+        allW:[...(g.allW||[]),entry],
+        streak:consecutive,
+        best:Math.max(g.best||0,consecutive),
+      };
+    });
+
+    setFinishing(null);
+    setWorkout(null);
+    setView("journal");
+  }
+
+  const levelTitles=["Apprentice","Trial-Taker","Medallion-Holder","Contract Hunter","Path-Walker","Seasoned Witcher","Master of the Path","White Wolf"];
+  const levelTitle=levelTitles[Math.min((gs.char?.level||1)-1,levelTitles.length-1)];
+
+  if(showApi) return h('div',{id:"app-inner",style:"display:flex;flex-direction:column;height:100%"},
+    h('div',{class:"topbar"},
+      h('div',{class:"topbar-title"},"On the Path"),
+      h('div',{class:"topbar-sub"},levelTitle)
+    ),
+    h(ApiSetup,{currentKey:apiKey,onSave:k=>{setApiKey(k);LS.set("witcher_api",k);setShowApi(false);},onCancel:()=>setShowApi(false)})
+  );
+
+  if(workout&&view==="workout") return h('div',{id:"app-inner",style:"display:flex;flex-direction:column;height:100%"},
+    h('div',{class:"topbar"},
+      h('div',{class:"topbar-title"},"On the Path"),
+      h('button',{style:"font-family:'Cinzel',serif;font-size:10px;font-weight:600;color:#8b9db0;letter-spacing:1px;padding:4px 8px;border:1px solid #2a3040;background:none;",onClick:()=>{setWorkout(null);setView("home");}},"Abandon")
+    ),
+    h(WorkoutView,{
+      mission:workout.arc,
+      workoutType:workout.type,
+      gs,setGs,apiKey,
+      onFinish:finishWorkout,
+      onAbandon:()=>{setWorkout(null);setView("home");}
+    }),
+    finishing&&h(FinishOverlay,{arc:workout.arc,workoutType:workout.type,elapsed:finishing.elapsed,sets:finishing.sets,onSave:saveWorkout})
+  );
+
+  return h('div',{id:"app-inner",style:"display:flex;flex-direction:column;height:100%"},
+    h('div',{class:"topbar"},
+      h('div',{class:"topbar-title"},"On the Path"),
+      h('div',{style:"display:flex;align-items:center;gap:8px"},
+        h('div',{class:"topbar-sub"},levelTitle),
+        h('button',{style:"font-family:'Cinzel',serif;font-size:9px;font-weight:700;color:"+(apiKey?"#a07840":"#8b1a1a")+";letter-spacing:1px;padding:3px 8px;border:1px solid "+(apiKey?"#a0784066":"#8b1a1a66")+";background:none;",onClick:()=>setShowApi(true)},apiKey?"LINKED":"MEGASCOPE")
+      )
+    ),
+    view==="home"  &&h(HomeView,   {gs,setGs,onStartWorkout:startWorkout,apiKey}),
+    view==="party" &&h(PartyView,  {gs,setGs}),
+    view==="journal"&&h(JournalView,{gs}),
+    h(NavBar,{view,setView})
+  );
+}
+
+let ready=false;
+function boot() {
+  if(ready) return; ready=true;
+  const el=document.getElementById("app");
+  if(el) render(h(App,null),el);
+}
+
+if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot);
+else boot();
+
+const check=setInterval(()=>{
+  if(window.preact||document.getElementById("app")) { boot(); clearInterval(check); }
+},100);
+</script>
+</body>
+</html>
