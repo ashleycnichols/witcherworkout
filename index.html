@@ -279,13 +279,40 @@ import { useState, useEffect, useRef, useCallback } from 'https://esm.sh/preact@
    DATA
 ═══════════════════════════════════════════════════ */
 
+const COMPANION_IMG = {
+  geralt:    "crew/geralt.webp",
+  yennefer:  "crew/yennefer.webp",
+  triss:     "crew/triss.webp",
+  dandelion: "crew/dandelion.webp",
+  ciri:      "crew/ciri.webp",
+  zoltan:    "crew/zoltan.webp",
+  vesemir:   "crew/vesemir.webp",
+  lambert:   "crew/lambert.webp",
+  eskel:     "crew/eskel.webp",
+  philippa:  "crew/philippa.webp",
+  regis:     "crew/regis.webp",
+  roach:     "crew/roach.webp",
+};
+
 function CompanionIcon({ id, size=32, style="" }) {
-  const c = CREW.find(x=>x.id===id);
-  const initial = c ? c.name[0].toUpperCase() : "?";
+  const src = COMPANION_IMG[id];
+  const c   = CREW.find(x=>x.id===id);
   const color   = c?.color || "#8b9db0";
+  const initial = c ? c.name[0].toUpperCase() : "?";
   const fontSize = Math.round(size * 0.38);
+  const base = `width:${size}px;height:${size}px;border-radius:50%;border:2px solid ${color}55;box-sizing:border-box;flex-shrink:0;${style}`;
+  if(src) return h('img', {
+    src, alt: id,
+    style: `${base}object-fit:cover;display:block;`,
+    onError: e => {
+      const el = e.target;
+      el.style.display = "none";
+      const fb = el.parentNode.querySelector(".companion-fb");
+      if(fb) fb.style.display = "flex";
+    }
+  });
   return h('div', {
-    style:`width:${size}px;height:${size}px;border-radius:50%;background:#141820;display:flex;align-items:center;justify-content:center;flex-shrink:0;border:2px solid ${color}55;font-family:'Cinzel',serif;font-size:${fontSize}px;font-weight:700;color:${color};letter-spacing:0;box-sizing:border-box;${style}`
+    style:`${base}background:#141820;display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-size:${fontSize}px;font-weight:700;color:${color};`
   }, initial);
 }
 
@@ -301,7 +328,7 @@ const CREW = [
   { id:"eskel",     name:"Eskel",     role:"Witcher",          icon:"🗡️", color:"#0369a1", rgb:"3,105,161",   strengths:["strength","endurance","patience"],       injuredQ:"Set a pace you can sustain.",                           healthyQ:"Good form. Keep it." },
   { id:"philippa",  name:"Philippa",  role:"Spymaster",        icon:"🦉", color:"#7c3aed", rgb:"124,58,237",  strengths:["strategy","discipline","focus"],         injuredQ:"Interesting. Weakness is useful intelligence.",         healthyQ:"I've been watching. You're ready." },
   { id:"regis",     name:"Regis",     role:"Vampire",          icon:"🦇", color:"#1e3a8a", rgb:"30,58,138",   strengths:["endurance","mobility","patience"],       injuredQ:"Centuries of perspective suggest this too shall pass.",  healthyQ:"The body adapts to what it encounters. Present it with a challenge." },
-  { id:"meve",      name:"Meve",      role:"Commander",        icon:"👑", color:"#b91c1c", rgb:"185,28,28",   strengths:["strength","endurance","combat"],         injuredQ:"A commander doesn't stop. Adjust your pace.",           healthyQ:"Weapons ready. Move." },
+  { id:"roach",     name:"Roach",     role:"Geralt's Horse",   icon:"🐴", color:"#8b6914", rgb:"139,105,20",  strengths:["endurance","run","loyalty"],             injuredQ:"She's limping. You owe her better terrain than this.",  healthyQ:"She's ready. She's always ready. The question is whether you are." },
 ];
 
 const WORKOUT_TYPES = [
@@ -357,23 +384,23 @@ const CONTRACTS = {
       ],
     },
     {
-      id:"st_brenna",
+      id:"st_roach",
       type:"strength",
-      title:"The Field Before Brenna",
-      loc:"Brenna, Mahakam",
-      diff:"Rare",
-      xp:240,
-      icon:"⚔️",
-      companion:"meve",
-      briefingLine:"The armies move at dawn. Between now and then, you build the body that survives what comes next.",
-      flavor:"\"This is not a skirmish. The Northern Kingdoms do not have another army. Give everything.\" — Meve",
-      desc:"Meve's soldiers train the night before a pitched battle. Not because they have to. Because the ones who don't are the ones who don't come back. You are one of her soldiers tonight.",
+      title:"Roach Needs a Farrier",
+      loc:"Novigrad, the trade road",
+      diff:"Uncommon",
+      xp:200,
+      icon:"🐴",
+      companion:"roach",
+      briefingLine:"She threw a shoe on the Novigrad road. The farrier won't see her until you've done something useful with your morning.",
+      flavor:"\"Every witcher on the Path knows: Roach waits for no one, but she always comes back.\"",
+      desc:"Geralt never travels light. Neither does Roach. While she rests at the stable, you don't. This is what the time before a long road looks like — loading up before the weight of the journey lands.",
       milestones:[
-        {l:"Formation",           c:"Warm up",                  s:"The camp is quiet except for the weapons being checked. Meve walks the line. She stops at you. 'Ready?' It is not a question."},
-        {l:"First Drill",         c:"First exercise done",       s:"The other soldiers are watching. Not to judge — to calibrate. They want to know who they're going into battle with."},
-        {l:"War Conditioning",    c:"Second exercise done",      s:"A pitched battle has no programming. Your body needs to have already done this before it needs to do it for real."},
-        {l:"Halfway",             c:"Midpoint",                  s:"Meve passes you again. Doesn't slow down. But she nods. That nod means something in her army."},
-        {l:"Battle Ready",        c:"Last section",              s:"'Finish. Clean.' Two words. Everything she asks of her captains. Be one of them."},
+        {l:"Stable Yard",         c:"Warm up",                  s:"Roach watches you from her stall with the expression she reserves for people wasting her time. Begin."},
+        {l:"First Set",           c:"First exercise done",       s:"She stamps once. Not encouragement exactly. But she's still watching. That counts for something."},
+        {l:"Grinding Through",    c:"Second exercise done",      s:"Geralt loads Roach's saddlebags the same way he lifts — methodically, no wasted motion. Aim for that."},
+        {l:"Halfway",             c:"Midpoint",                  s:"She turns her head away. Either she's bored or she's decided you're doing fine. With Roach, there's no real difference."},
+        {l:"Road Ready",          c:"Last section",              s:"The farrier is done. Roach is shod. The road is waiting. Finish what you started before you get back in the saddle."},
       ],
     },
     {
@@ -726,10 +753,10 @@ const BANTER = {
     { at:"mid",   line:"I have watched humans work for centuries. The ones who matter don't stop at the midpoint." },
     { at:"push",  line:"In my experience, the limits people believe they have are almost never accurate." },
   ],
-  meve: [
-    { at:"start", line:"Move." },
-    { at:"mid",   line:"Hold the pace. Don't let the line break." },
-    { at:"push",  line:"Finish. Clean." },
+  roach: [
+    { at:"start", line:"She stamps once. That means go." },
+    { at:"mid",   line:"Roach has covered more ground today than you have. Think about that." },
+    { at:"push",  line:"She doesn't stop when the road gets hard. Neither do you." },
   ],
 };
 
@@ -843,7 +870,7 @@ function BriefingSection({ contract, apiKey, onBegin, onBack }) {
         eskel:     "Minimal words. When he speaks it changes the scene. No encouragement for its own sake.",
         philippa:  "Calculates everything. Tells you what you need to know, not what you want to hear. Has her own agenda.",
         regis:     "Philosophical, unhurried. Centuries of perspective. Will draw unexpected connections. Occasionally unsettling.",
-        meve:      "Soldier's directness. No ceremony. Already moving. Brief.",
+        roach:     "Roach doesn't speak. Narrate what she does — stamping, ear position, proximity. She is always present and always has an opinion.",
       };
 
       const sys=`You are ${companion.name} from The Witcher, delivering the pre-contract briefing inside a workout app called On the Path.
@@ -1246,7 +1273,7 @@ function WorkoutView({ mission, workoutType, gs, setGs, apiKey, onFinish, onAban
           eskel:"Almost silent. When he speaks it changes the scene. Minimal. Precise.",
           philippa:"Reveals information strategically. Always three steps ahead. Watching. Has her own agenda.",
           regis:"Long perspective. Nothing surprises him. Occasionally disturbing. Philosophical.",
-          meve:"Tactical. Brief. Already moving. Leads from the front.",
+          roach:"Roach communicates through action, not words. Describe what she does. A stamp, a look, moving closer or pulling away.",
         };
         return `${c.name} (${c.role}): ${voices[c.id]||"In character, direct."}`;
       }).join("\n");
