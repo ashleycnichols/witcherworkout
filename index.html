@@ -270,6 +270,9 @@
   .empty-icon     { font-size:46px; margin-bottom:12px; opacity:0.6; }
   .empty-text     { font-style:italic; font-size:19px; color:var(--muted); }
   .empty-sub      { font-family:'Cinzel',serif; font-size:13px; font-weight:700; letter-spacing:2px; color:var(--house-hi); text-transform:uppercase; margin-top:8px; }
+  .ex-pick-btn.today { border-color:var(--gold-bright); background:var(--gold-bg); }
+  .ex-pick-btn.today.active { border-color:var(--house); background:var(--raised); }
+  .del-btn { font-family:'Cinzel',serif; font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--ember); padding:8px 10px; min-height:40px; }
   .lift-ex-name { font-family:'Cinzel',serif; font-weight:700; font-size:14px; color:var(--text); }
   .lift-sets    { font-size:15px; color:var(--house-hi); }
 
@@ -372,7 +375,7 @@ const WORKOUT_TYPES = [
 let MISSIONS = {
   strength: [
     {
-      id:"st_gate", type:"strength", title:"Warding the Lower Gate", loc:"Czocha, the lower gate and courtyard", diff:"Hazardous", rep:200, mins:55, icon:"🏰",
+      id:"st_gate", type:"strength", ex:["Squat", "Bench Press", "Barbell Row", "Plank"], title:"Warding the Lower Gate", loc:"Czocha, the lower gate and courtyard", diff:"Hazardous", rep:200, mins:55, icon:"🏰",
       sum:"Squat, bench press, barbell row, plank. About 55 min.",
       briefingLine:"The lower gate wards are a practice assignment. They are also a test, and I do not repeat tests. Warm up properly, Sterling, or do not start.",
       flavor:"\"A ward holds because someone keeps holding it.\" Professor Wulfric",
@@ -386,7 +389,7 @@ let MISSIONS = {
       ],
     },
     {
-      id:"st_reliquary", type:"strength", title:"Carry the Reliquary", loc:"Escort route, Czocha to the Wroclaw Conflux", diff:"Hazardous", rep:210, mins:50, icon:"📦",
+      id:"st_reliquary", type:"strength", ex:["Deadlift", "Farmer's Carry", "Overhead Press", "Pull-up"], title:"Carry the Reliquary", loc:"Escort route, Czocha to the Wroclaw Conflux", diff:"Hazardous", rep:210, mins:50, icon:"📦",
       sum:"Deadlift, farmer's carry, overhead press, pull-ups. About 50 min.",
       briefingLine:"You will carry a sealed crate across the grounds. No levitation, because levitation fails when you most need it. Lift, carry, and do not complain.",
       flavor:"\"Everything valuable is heavier than it looks.\" Professor Wulfric",
@@ -400,7 +403,7 @@ let MISSIONS = {
       ],
     },
     {
-      id:"st_phalsbourg", type:"strength", title:"Hold the Line", loc:"A treaty site on the old Phalsbourg border", diff:"Restricted", rep:230, mins:60, icon:"⚔️",
+      id:"st_phalsbourg", type:"strength", ex:["Front Squat", "Dumbbell Press", "Romanian Deadlift", "Hanging Knee Raise"], title:"Hold the Line", loc:"A treaty site on the old Phalsbourg border", diff:"Restricted", rep:230, mins:60, icon:"⚔️",
       sum:"Front squat, dumbbell press, Romanian deadlift, knee raises. About 60 min.",
       briefingLine:"A staged standoff at a treaty site, with the Seniors playing both delegations. Heavy day. I referee Fireball, so I know exactly what a half-hearted effort looks like.",
       flavor:"\"The Peace of Phalsbourg is held together by people who are tired and standing up anyway.\" Peer 06",
@@ -414,7 +417,7 @@ let MISSIONS = {
       ],
     },
     {
-      id:"st_wyvern", type:"strength", beast:true, title:"The Wyvern Nest", loc:"Cliffs above a high Silesian valley", diff:"Restricted", rep:220, mins:55, icon:"🐉",
+      id:"st_wyvern", type:"strength", ex:["Hip Thrust", "Bulgarian Split Squat", "Lat Pulldown", "Pallof Press"], beast:true, title:"The Wyvern Nest", loc:"Cliffs above a high Silesian valley", diff:"Restricted", rep:220, mins:55, icon:"🐉",
       sum:"Hip thrust, split squat, lat pulldown, Pallof press. About 55 min.",
       briefingLine:"Wyvern! Fascinating creatures. Technically I am supposed to say it is perfectly safe. It is mostly safe. Lower body today, and wear your good boots.",
       flavor:"\"Learn the difference between a drake and a wyvern before one of them teaches you.\" Peer 05",
@@ -716,11 +719,11 @@ BANTER = applyNames(BANTER);
 FIELD_EVENTS = applyNames(FIELD_EVENTS);
 
 const EFFORT = [
-  { v:"patrol",  icon:"🚶", label:"Routine Patrol",   desc:"Steady and controlled" },
-  { v:"duty",    icon:"🗝️", label:"Active Duty",      desc:"Working hard, leaning in" },
-  { v:"wand",    icon:"🪄", label:"Wand Drawn",       desc:"Properly pushed" },
-  { v:"combat",  icon:"⚔️", label:"Combat Posture",   desc:"Beyond comfortable" },
-  { v:"keys",    icon:"🔑", label:"All Keys Turned",  desc:"Total commitment" },
+  { v:"patrol",  icon:"🚶", label:"Routine Patrol",   desc:"Steady and controlled", mult:0.8 },
+  { v:"duty",    icon:"🗝️", label:"Active Duty",      desc:"Working hard, leaning in", mult:1 },
+  { v:"wand",    icon:"🪄", label:"Wand Drawn",       desc:"Properly pushed", mult:1.2 },
+  { v:"combat",  icon:"⚔️", label:"Combat Posture",   desc:"Beyond comfortable", mult:1.4 },
+  { v:"keys",    icon:"🔑", label:"All Keys Turned",  desc:"Total commitment", mult:1.6 },
 ];
 
 // INVENTED: the path from candidate to Guardian. Thresholds are Order reputation points.
@@ -826,6 +829,44 @@ function toMessages(hist, text, opener) {
   return msgs;
 }
 const noDashes = t => String(t||"").replace(/[\u2013\u2014]/g,",");
+
+/* ── Rest chime ── iOS only allows sound after a tap, so unlockAudio() runs when a set is logged.
+   The phone's silent switch will mute it. */
+let audioCtx=null;
+function unlockAudio(){ try{ audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==="suspended") audioCtx.resume(); }catch{} }
+function chime(){
+  try{
+    if(navigator.vibrate) navigator.vibrate([120,80,120]);
+    if(!audioCtx) return;
+    const t=audioCtx.currentTime;
+    [[0,784],[0.22,1046]].forEach(([d,f])=>{
+      const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+      o.type="sine"; o.frequency.value=f;
+      g.gain.setValueAtTime(0.0001,t+d); g.gain.exponentialRampToValueAtTime(0.35,t+d+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+d+0.4);
+      o.connect(g); g.connect(audioCtx.destination); o.start(t+d); o.stop(t+d+0.45);
+    });
+  }catch{}
+}
+
+/* ── Backup ── a JSON file with the training history (the API key is never included). */
+async function exportBackup(gs){
+  const data=JSON.stringify({app:"crossed-keys",version:1,exportedAt:new Date().toISOString(),gs},null,1);
+  const name=`crossed-keys-backup-${localDay(new Date())}.json`;
+  try{
+    const file=new File([data],name,{type:"application/json"});
+    if(navigator.canShare && navigator.canShare({files:[file]})){ await navigator.share({files:[file],title:"Crossed Keys backup"}); return "shared"; }
+  }catch(e){ if(e && e.name==="AbortError") return "cancelled"; }
+  const url=URL.createObjectURL(new Blob([data],{type:"application/json"}));
+  const a=document.createElement("a"); a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),2000);
+  return "downloaded";
+}
+function parseBackup(text){
+  const obj=JSON.parse(text);
+  const g=obj && (obj.gs||obj);
+  if(!g || !Array.isArray(g.allW)) throw new Error("That file is not a Crossed Keys backup.");
+  return { gs:g, exportedAt:obj.exportedAt||null };
+}
 
 // Storage: new keys for the game state, but the API key and old history carry over from the previous app.
 const KEY_GS  = "crossedkeys_gs";
@@ -1096,7 +1137,7 @@ function HomeView({ gs, setGs, onStartWorkout, apiKey }) {
       ),
       h('div',{class:"stat-card"},
         h('div',{class:"stat-val"},`${computeStreak(gs.allW)}`),
-        h('div',{class:"stat-label"},"Streak")
+        h('div',{class:"stat-label"},`Streak, best ${Math.max(gs.best||0,computeStreak(gs.allW))}`)
       )
     ),
     rank.next&&h('div',{style:"padding:0 14px 8px"},
@@ -1247,6 +1288,18 @@ function WorkoutView({ mission, workoutType, gs, setGs, apiKey, onFinish, starte
     }
     return()=>{ clearInterval(clock); clearTimeout(t1); document.removeEventListener("visibilitychange",tick); };
   },[]);
+
+  // Keep the screen awake during the session (supported on recent iOS).
+  useEffect(()=>{
+    let lock=null, gone=false;
+    const req=async()=>{ try{ if("wakeLock" in navigator && document.visibilityState==="visible" && !gone) lock=await navigator.wakeLock.request("screen"); }catch{} };
+    const onVis=()=>{ if(document.visibilityState==="visible") req(); };
+    req(); document.addEventListener("visibilitychange",onVis);
+    return()=>{ gone=true; document.removeEventListener("visibilitychange",onVis); try{ lock&&lock.release(); }catch{} };
+  },[]);
+
+  // Chime once when the rest timer runs out.
+  useEffect(()=>{ if(restEnd && rest===0){ chime(); setRestEnd(0); } },[rest,restEnd]);
 
   // Save progress so an iOS reload does not lose the session.
   useEffect(()=>{
@@ -1451,8 +1504,8 @@ Maximum 2 responses.`;
         h('div',{class:"log-set-title"},"Log Set"),
         h('div',{class:"log-set-prev"},curEx ? (lastLift[curEx] ? `${curEx}. Last time: ${lastLift[curEx].kg}kg × ${lastLift[curEx].reps}` : `${curEx}. No previous sets yet`) : "Select an exercise"),
         h('div',{class:"exercise-picker"},
-          Object.entries(EXERCISES).flatMap(([cat,exs])=>exs.map(ex=>
-            h('button',{key:ex,class:`ex-pick-btn${curEx===ex?" active":""}`,onClick:()=>{
+          [["Today's mission",mission.ex||[]],...Object.entries(EXERCISES).map(([c,e])=>[c,e.filter(x=>!(mission.ex||[]).includes(x))])].flatMap(([cat,exs])=>exs.map(ex=>
+            h('button',{key:ex,class:`ex-pick-btn${curEx===ex?" active":""}${cat==="Today's mission"?" today":""}`,onClick:()=>{
               setCurEx(ex);
               const last=lastLift[ex];
               setWeightVal(last?String(last.kg):"");
@@ -1477,6 +1530,7 @@ Maximum 2 responses.`;
           setGs(g=>({...g,lastLift:{...(g.lastLift||{}),[curEx]:{kg:Number(weightVal),reps:Number(repsVal),date:new Date().toISOString()}}}));
           setRepsVal("");
           setLogSetOpen(false);
+          unlockAudio();
           startRest(90);
           addFeed({type:"milestone",label:"Set Logged",text:`${curEx}: ${weightVal}kg × ${repsVal}. Rest timer started.`});
         }},"Log Set"),
@@ -1497,7 +1551,8 @@ function FinishOverlay({ mission, workoutType, elapsed, bonus, eventRep, onSave 
       h('div',{class:"finish-title"},"Mission Complete"),
       h('div',{class:"finish-arc"},`${mission.icon} ${mission.title} (${wt.label})`),
       h('div',{class:"hint",style:"font-size:15px;margin-bottom:14px"},`${Math.floor(elapsed/60)} min in the field. +${earned+(eventRep||0)} Order Rep${bonus?` (includes +${bonus}% team bonus)`:""}${eventRep?`, with ${eventRep} from field events`:""}.`),
-      h('div',{class:"finish-q"},"How hard was it?"),
+      h('div',{class:"finish-q",style:"margin-bottom:2px"},"How hard was it?"),
+      h('div',{class:"hint",style:"font-size:14px;margin-bottom:8px"},"Harder efforts grow Body and Craft faster."),
       h('div',{class:"effort-grid"},
         EFFORT.map(e=>h('div',{key:e.v,class:`effort-btn${effort===e.v?" selected":""}`,onClick:()=>setEffort(e.v)},
           h('div',{class:"effort-label"},`${e.icon} ${e.label}`),
@@ -1511,14 +1566,55 @@ function FinishOverlay({ mission, workoutType, elapsed, bonus, eventRep, onSave 
   );
 }
 
-function JournalView({ gs }) {
+function BackupCard({ gs, setGs, msg, setMsg }) {
+  const fileRef=useRef(null);
+  async function onExport(){ const r=await exportBackup(gs); setMsg(r==="cancelled"?"":r==="shared"?"Backup ready. Save it to Files or send it to yourself.":"Backup downloaded."); }
+  function onFile(e){
+    const f=e.target.files&&e.target.files[0]; e.target.value=""; if(!f) return;
+    const rd=new FileReader();
+    rd.onload=()=>{
+      try{
+        const {gs:g,exportedAt}=parseBackup(String(rd.result));
+        const when=exportedAt?new Date(exportedAt).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"}):"an unknown date";
+        if(!confirm(`Replace everything on this phone with the backup from ${when} (${g.allW.length} field reports)?`)) return;
+        const base=freshState();
+        setGs({...base,...g,char:{...base.char,...(g.char||{})},ch:{...base.ch,...(g.ch||{})},lastLift:g.lastLift||{}});
+        setMsg("Backup restored.");
+      }catch(err){ setMsg(err.message||"Could not read that file."); }
+    };
+    rd.readAsText(f);
+  }
+  return h('div',{class:"journal-entry",style:"border-left-color:var(--house)"},
+    h('div',{class:"section-head",style:"margin-bottom:4px"},"Backup"),
+    h('div',{class:"hint",style:"font-size:14px;margin-bottom:10px"},"Your history lives only on this phone. Save a backup now and then. Your API key is never included."),
+    h('div',{class:"row",style:"gap:8px"},
+      h('button',{class:"ghost-btn",style:"flex:1",onClick:onExport},"Save backup"),
+      h('button',{class:"ghost-btn",style:"flex:1",onClick:()=>fileRef.current&&fileRef.current.click()},"Restore")
+    ),
+    h('input',{type:"file",accept:"application/json,.json",ref:fileRef,style:"display:none",onChange:onFile}),
+    msg&&h('div',{class:"hint",style:"font-size:14px;margin-top:8px;color:var(--house-hi)"},msg)
+  );
+}
+
+function JournalView({ gs, setGs }) {
   const allW = gs.allW||[];
+  const [msg,setMsg]=useState("");   // lives here so it survives the list redrawing after a restore
+  function remove(w){
+    if(!confirm(`Delete "${w.title||"this report"}" from ${new Date(w.date).toLocaleDateString("en-GB",{day:"numeric",month:"long"})}? Its reputation will be removed too.`)) return;
+    setGs(g=>({
+      ...g,
+      allW:(g.allW||[]).filter(x=>x.id!==w.id),
+      weekW:(g.weekW||[]).filter(x=>!(x.date===w.date)),
+      char:{...g.char, rep:Math.max(0,(g.char.rep||0)-(w.rep||0)), body:Math.max(0,(g.char.body||0)-(w.body||0)), craft:Math.max(0,(g.char.craft||0)-(w.craft||0))},
+    }));
+  }
   if(!allW.length) return h('div',{class:"view fade-in"},
     h('div',{class:"empty-state"},
       h('div',{class:"empty-icon"},"📜"),
       h('div',{class:"empty-text"},"No field reports on file."),
       h('div',{class:"empty-sub"},"Complete your first mission")
-    )
+    ),
+    h('div',{style:"padding:0 16px 24px"},h(BackupCard,{gs,setGs,msg,setMsg}))
   );
   const sorted=[...allW].reverse();
   return h('div',{class:"view fade-in"},
@@ -1531,7 +1627,7 @@ function JournalView({ gs }) {
         return h('div',{key:w.id,class:"journal-entry"},
           h('div',{class:"row",style:"margin-bottom:8px"},
             h('span',{style:"font-size:30px"},w.icon||"🗝️"),
-            h('div',{style:"flex:1"},
+            h('div',{style:"flex:1;min-width:0"},
               h('div',{class:"display",style:"font-size:14px;font-weight:700;color:var(--text)"},w.title||"Mission"),
               h('div',{style:"color:var(--house-hi);font-size:14px;font-style:italic"},`${wt?wt.label+", ":""}${new Date(w.date).toLocaleDateString("en-GB",{weekday:"long",month:"long",day:"numeric"})}`)
             ),
@@ -1551,9 +1647,13 @@ function JournalView({ gs }) {
                 h('span',{class:"lift-sets"},ex.sets.map(s=>`${s.kg}kg x${s.reps}`).join(" · "))
               ));
             })()
+          ),
+          h('div',{style:"text-align:right;margin-top:6px"},
+            h('button',{class:"del-btn",onClick:()=>remove(w)},"Delete")
           )
         );
-      })
+      }),
+      h(BackupCard,{gs,setGs,msg,setMsg})
     )
   );
 }
@@ -1619,21 +1719,23 @@ function App() {
     const party=(gs.party||[]).filter(id=>CREW.find(c=>c.id===id));
     const bonus=teamBonus(party,mission.type);
     const earned=Math.round(mission.rep*(1+bonus/100));
-    const total=earned+(finishing.eventRep||0);
-    const stamp=dayStamp();
     const bc=(WORKOUT_TYPES.find(w=>w.id===mission.type)||WORKOUT_TYPES[0]).bodyCraft;
-
+    const total=earned+(finishing.eventRep||0);
+    const mult=(EFFORT.find(e=>e.v===effort)||{mult:1}).mult;
+    const bodyGain=Math.round(bc.body*5*mult), craftGain=Math.round(bc.craft*5*mult);
+    const stamp=dayStamp();
+    
     const entry={
       id:Date.now().toString(),
       arcId:mission.id, title:mission.title, icon:mission.icon, type:mission.type,
       date:new Date().toISOString(), stamp,
       day:["sun","mon","tue","wed","thu","fri","sat"][new Date().getDay()],
       dayIdx:todayIdx(),
-      elapsed:finishing.elapsed, rep:total, effort, notes, sets:finishing.sets, crewIds:party,
+      elapsed:finishing.elapsed, rep:total, body:bodyGain, craft:craftGain, effort, notes, sets:finishing.sets, crewIds:party,
     };
 
     setGs(g=>{
-      const newChar={...g.char,rep:(g.char.rep||0)+total,body:(g.char.body||0)+bc.body*5,craft:(g.char.craft||0)+bc.craft*5};
+      const newChar={...g.char,rep:(g.char.rep||0)+total,body:(g.char.body||0)+bodyGain,craft:(g.char.craft||0)+craftGain};
       const newCh={...g.ch};
       party.forEach(id=>{
         const prev=newCh[id]||{xp:0,level:1};
@@ -1678,7 +1780,7 @@ function App() {
     )),
     view==="home"   &&h(HomeView,   {gs,setGs,onStartWorkout:startWorkout,apiKey}),
     view==="party"  &&h(PartyView,  {gs}),
-    view==="journal"&&h(JournalView,{gs}),
+    view==="journal"&&h(JournalView,{gs,setGs}),
     h(NavBar,{view,setView})
   );
 }
