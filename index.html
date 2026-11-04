@@ -298,7 +298,7 @@ import { useState, useEffect, useRef, useCallback } from 'https://esm.sh/preact@
    Anything marked INVENTED is this app's own material, not canon.
 ═══════════════════════════════════════════════════ */
 
-const HERO = { name:"Sterling", full:"Sterling Ashbourne" };
+const HERO = { id:"sterling", name:"Sterling", full:"Sterling Ashbourne", role:"Probationary Keybearer", color:"#17695f" };
 
 /* To give a peer their real name and look: edit name / role in PEERS below,
    then upload crew/<id>.webp (example: crew/p01.webp) to the repo. */
@@ -327,7 +327,7 @@ const PEERS = [
 ];
 
 const CREW = PEERS;                       // selectable teammates
-const ALL_FOLK = [TRAINER, ...PEERS];     // everyone who can appear in a scene
+const ALL_FOLK = [TRAINER, ...PEERS, HERO];     // everyone who can appear in a scene
 
 const COMPANION_IMG = {};
 ALL_FOLK.forEach(c => { COMPANION_IMG[c.id] = `crew/${c.id}.webp`; });
@@ -888,7 +888,7 @@ FORMAT: Two-way conversation. Reply in character. Under 3 sentences. No monologu
           );
         }
         return h('div',{key:i,class:"briefing-player slide-up"},
-          h('div',{class:"briefing-p-who"},HERO.name),
+          h('div',{class:"row",style:"gap:8px;margin-bottom:4px"},h(CompanionIcon,{id:HERO.id,size:30}),h('div',{class:"briefing-p-who",style:"margin:0"},HERO.name)),
           h('div',{class:"briefing-p-text"},item.text)
         );
       }),
@@ -1334,7 +1334,7 @@ Maximum 2 responses.`;
         }
         if(item.type==="player") return h('div',{key:i,class:"feed-item"},
           h('div',{class:"feed-player"},
-            h('div',{class:"feed-p-who"},HERO.name),
+            h('div',{class:"row",style:"gap:8px;margin-bottom:4px"},h(CompanionIcon,{id:HERO.id,size:30}),h('div',{class:"feed-p-who",style:"margin:0"},HERO.name)),
             h('div',{class:"feed-p-text"},item.text)
           )
         );
@@ -1595,7 +1595,7 @@ function App() {
 
   return h('div',{id:"app-inner",style:"display:flex;flex-direction:column;height:100%"},
     Top(h('div',{style:"display:flex;align-items:center;gap:8px"},
-      h('div',{class:"topbar-sub"},HERO.name),
+      h(CompanionIcon,{id:HERO.id,size:34,style:"border:2px solid #cfe3de;"}),h('div',{class:"topbar-sub"},HERO.name),
       h('button',{class:"pill-btn",style:`color:${apiKey?"#9fe6da":"#f3d27f"};border-color:${apiKey?"#9fe6da99":"#f3d27faa"}`,onClick:()=>setShowApi(true)},apiKey?"Narrator on":"Narrator off")
     )),
     view==="home"   &&h(HomeView,   {gs,setGs,onStartWorkout:startWorkout,apiKey}),
