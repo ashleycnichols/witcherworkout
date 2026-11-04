@@ -208,6 +208,10 @@
   .done-btn { width:100%; min-height:60px; background:var(--house-deep); color:#fff; font-family:var(--font-ui); font-size:17px; font-weight:700; letter-spacing:2px; text-transform:uppercase; box-shadow:0 2px 0 #4d1019; }
   .complete-btn { width:100%; min-height:60px; background:var(--gold-bright); color:#2a2006; font-family:var(--font-ui); font-size:17px; font-weight:700; letter-spacing:2px; text-transform:uppercase; box-shadow:0 2px 0 #9a7a25; }
 
+  .now-story { margin-top:10px; padding-top:10px; border-top:1px solid #d9b9bd; font-size:16px; line-height:1.45; color:var(--muted); }
+  .latest-line { padding:0 16px; margin-bottom:4px; }
+  .event-banner { display:flex; justify-content:space-between; align-items:center; gap:10px; margin:0 16px 6px; padding:12px 14px; min-height:52px; background:var(--ember-bg); border:2px solid var(--ember); color:var(--ember); font-size:16px; font-weight:700; text-align:left; flex-shrink:0; }
+  .event-banner-go { white-space:nowrap; font-size:14px; }
   .rest-chip { margin:0 16px 8px; padding:10px 14px; background:var(--gold-bg); border:2px solid var(--gold-bright); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
   .rest-time { font-family:var(--font-ui); font-size:24px; font-weight:700; color:var(--gold); }
 
@@ -1319,6 +1323,8 @@ function WorkoutView({ mission, workoutType, gs, setGs, apiKey, onFinish, starte
   const [feed,     setFeed]    = useState(sv.feed||[]);
   const [input,    setInput]   = useState("");
   const [thinking, setThinking]= useState(false);
+  const [chatOpen, setChatOpen]= useState(false);
+  const [eventOpen,setEventOpen]= useState(false);
   const [now,      setNow]     = useState(Date.now());
   const [event,    setEvent]   = useState(sv.event||null);
   const [eventRep, setEventRep]= useState(sv.eventRep||0);
@@ -1387,7 +1393,7 @@ function WorkoutView({ mission, workoutType, gs, setGs, apiKey, onFinish, starte
       state:{ msIdx, feed:feed.slice(-40), sets, event, eventRep, restEnd, evIdx:evIdx.current, evShown:evShown.current } });
   },[msIdx,feed,sets,event,eventRep,restEnd]);
 
-  useEffect(()=>{ if(feedRef.current) feedRef.current.scrollTop=feedRef.current.scrollHeight; },[feed,thinking]);
+  useEffect(()=>{ if(feedRef.current) feedRef.current.scrollTop=feedRef.current.scrollHeight; },[feed,thinking,chatOpen]);
 
   function advanceStep() {
     const next=msIdx+1;
@@ -1405,6 +1411,7 @@ function WorkoutView({ mission, workoutType, gs, setGs, apiKey, onFinish, starte
     addFeed({type:"event_result",text:choice.out});
     setEvent(null);
     setEventRep(r=>r+choice.rep);   // only banked if the mission is completed
+    setEventOpen(false);
   }
 
   async function sendMsg() {
@@ -1476,6 +1483,40 @@ No JSON, no markdown, no narration outside those lines. Keep each line under 40 
   const showLiftLog = workoutType==="strength";
   const allDone = msIdx>=steps.length;
   const cur = steps[Math.min(msIdx,steps.length-1)];
+  const latest = [...feed].reverse().find(f=>f.type==="banter"||f.type==="system"||f.type==="event_result");
+  const latestC = latest&&latest.type==="banter" ? ALL_FOLK.find(x=>x.id===latest.cid) : null;
+
+  function feedItem(item,i) {
+    if(item.type==="milestone") return h('div',{key:i,class:"feed-item"},
+      h('div',{class:"feed-milestone"},
+        h('div',{class:"feed-ms-label"},item.label),
+        h('div',{class:"feed-ms-text"},item.text)
+      )
+    );
+    if(item.type==="banter") {
+      const c=ALL_FOLK.find(x=>x.id===item.cid);
+      return h('div',{key:i,class:"feed-item"},
+        h('div',{class:"feed-banter"},
+          h(CompanionIcon,{id:item.cid,size:40}),
+          h('div',{class:"feed-banter-bubble"},
+            h('div',{class:"feed-banter-who",style:`color:${c?.color||"var(--gold)"}`},c?.name||item.cid),
+            h('div',{class:"feed-banter-text"},`"${item.text}"`)
+          )
+        )
+      );
+    }
+    if(item.type==="player") return h('div',{key:i,class:"feed-item"},
+      h('div',{class:"feed-player"},
+        h('div',{class:"feed-p-who"},HERO.name),
+        h('div',{class:"feed-p-text"},item.text)
+      )
+    );
+    if(item.type==="system") return h('div',{key:i,class:"sys-note"},`Narrator unavailable: ${item.text}`);
+    if(item.type==="event_result") return h('div',{key:i,class:"feed-item"},
+      h('div',{class:"feed-event-result"},item.text)
+    );
+    return null;
+  }
 
   return h('div',{class:"view",style:"display:flex;flex-direction:column;height:100%;overflow:hidden;"},
     h('div',{class:"workout-header"},
@@ -1493,87 +1534,92 @@ No JSON, no markdown, no narration outside those lines. Keep each line under 40 
       steps.map((_,i)=>h('div',{key:i,class:`ms-dot${i<msIdx?" done":i===msIdx?" curr":""}`}))
     ),
 
-    !allDone&&h('div',{class:"now-card"},
-      h('div',{class:"now-top"},
-        h('div',{class:"now-step"},`Step ${msIdx+1} of ${steps.length}`)
+    // One thing at a time: the current step, then the latest line from the cast.
+    h('div',{style:"flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px"},
+      !allDone&&h('div',{class:"now-card",style:"max-height:none"},
+        h('div',{class:"now-step"},`Step ${msIdx+1} of ${steps.length}`),
+        h('div',{class:"now-title"},cur.l),
+        h('div',{class:"now-do"},cur.d),
+        h('div',{class:"now-story"},cur.s)
       ),
-      h('div',{class:"now-title"},cur.l),
-      h('div',{class:"now-do"},cur.d)
+      allDone&&h('div',{class:"now-card"},
+        h('div',{class:"now-title"},"All steps done"),
+        h('div',{class:"now-do"},"Tap Mission Complete to file your report.")
+      ),
+
+      rest>0&&h('div',{class:"rest-chip"},
+        h('div',{style:"font-size:14px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase"},"Rest"),
+        h('div',{class:"rest-time"},fmtTime(rest)),
+        h('button',{class:"ghost-btn",onClick:()=>startRest(0)},"Skip")
+      ),
+
+      latest&&h('div',{class:"latest-line fade-in",key:feed.length},
+        latestC ? h('div',{class:"feed-banter"},
+          h(CompanionIcon,{id:latestC.id,size:40}),
+          h('div',{class:"feed-banter-bubble"},
+            h('div',{class:"feed-banter-who",style:`color:${latestC.color}`},latestC.name),
+            h('div',{class:"feed-banter-text"},`"${latest.text}"`)
+          )
+        ) : feedItem(latest,0)
+      ),
+      thinking&&h('div',{class:"hint pulsing",style:"padding:0 16px"},"Someone is about to answer..."),
+
+      h('div',{style:"padding:2px 16px 0"},
+        h('button',{class:"link-btn",onClick:()=>setChatOpen(true)},`Story and chat (${feed.filter(f=>f.type!=="milestone").length})`)
+      )
     ),
 
-    rest>0&&h('div',{class:"rest-chip"},
-      h('div',{class:"display",style:"font-size:13px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase"},"Rest"),
-      h('div',{class:"rest-time"},fmtTime(rest)),
-      h('button',{class:"ghost-btn",onClick:()=>startRest(0)},"Skip")
+    event&&h('button',{class:"event-banner",onClick:()=>setEventOpen(true)},
+      h('span',null,`${event.icon} ${event.title}`),
+      h('span',{class:"event-banner-go"},"Decide →")
     ),
 
-    event&&h('div',{style:"padding:0 16px 8px;flex-shrink:0;max-height:45vh;overflow-y:auto"},
-      h('div',{class:"feed-event enc-pop"},
-        h('div',{class:"feed-event-title"},`${event.icon} ${event.title}`),
+    h('div',{class:"action-bar",style:"display:flex;gap:8px;padding-bottom:max(10px,env(safe-area-inset-bottom))"},
+      showLiftLog&&h('button',{class:"log-btn",style:"min-height:60px;padding:0 14px",onClick:()=>setLogSetOpen(true)},"+ SET"),
+      allDone
+        ? h('button',{class:"complete-btn",style:"flex:1",onClick:()=>onFinish&&onFinish(elapsed,sets,eventRep)},"Mission Complete")
+        : h('button',{class:"done-btn",style:"flex:1",onClick:advanceStep},msIdx<steps.length-1?"✓ Step done":"✓ Last step done")
+    ),
+
+    // Field event: a small sheet you open when ready.
+    eventOpen&&event&&h('div',{class:"log-set-overlay",onClick:e=>{ if(e.target===e.currentTarget) setEventOpen(false); }},
+      h('div',{class:"log-set-panel"},
+        h('div',{class:"feed-event-title",style:"font-size:19px"},`${event.icon} ${event.title}`),
         h('div',{class:"feed-event-text"},event.text),
         h('div',{class:"feed-event-choices"},
           event.choices.map((ch,i)=>h('button',{key:i,class:"feed-event-choice",onClick:()=>chooseEvent(ch)},ch.label))
-        )
+        ),
+        h('button',{class:"log-set-cancel",onClick:()=>setEventOpen(false)},"Not now")
       )
     ),
 
-    h('div',{class:"workout-feed",ref:feedRef},
-      feed.map((item,i)=>{
-        if(item.type==="milestone") return h('div',{key:i,class:"feed-item"},
-          h('div',{class:"feed-milestone"},
-            h('div',{class:"feed-ms-label"},item.label),
-            h('div',{class:"feed-ms-text"},item.text)
-          )
-        );
-        if(item.type==="banter") {
-          const c=ALL_FOLK.find(x=>x.id===item.cid);
-          return h('div',{key:i,class:"feed-item"},
+    // Story and chat: the full feed plus the chat box.
+    chatOpen&&h('div',{class:"log-set-overlay",onClick:e=>{ if(e.target===e.currentTarget) setChatOpen(false); }},
+      h('div',{class:"log-set-panel",style:"height:85vh;display:flex;flex-direction:column;padding:14px 0 0"},
+        h('div',{class:"row",style:"padding:0 16px 8px;justify-content:space-between"},
+          h('div',{class:"log-set-title",style:"margin:0"},"Story and chat"),
+          h('button',{class:"ghost-btn",onClick:()=>setChatOpen(false)},"Close")
+        ),
+        h('div',{class:"workout-feed",ref:feedRef},
+          feed.map(feedItem),
+          thinking&&h('div',{class:"feed-item pulsing"},
             h('div',{class:"feed-banter"},
-              h(CompanionIcon,{id:item.cid,size:40}),
-              h('div',{class:"feed-banter-bubble"},
-                h('div',{class:"feed-banter-who",style:`color:${c?.color||"var(--gold)"}`},c?.name||item.cid),
-                h('div',{class:"feed-banter-text"},`"${item.text}"`)
-              )
+              h(CompanionIcon,{id:lead.id,size:40}),
+              h('div',{class:"feed-banter-bubble"},h('div',{class:"briefing-thinking"},"..."))
             )
-          );
-        }
-        if(item.type==="player") return h('div',{key:i,class:"feed-item"},
-          h('div',{class:"feed-player"},
-            h('div',{class:"row",style:"gap:8px;margin-bottom:4px"},h(CompanionIcon,{id:HERO.id,size:30}),h('div',{class:"feed-p-who",style:"margin:0"},HERO.name)),
-            h('div',{class:"feed-p-text"},item.text)
           )
-        );
-        if(item.type==="system") return h('div',{key:i,class:"sys-note"},`Narrator unavailable: ${item.text}`);
-        if(item.type==="event_result") return h('div',{key:i,class:"feed-item"},
-          h('div',{class:"feed-event-result"},item.text)
-        );
-        return null;
-      }),
-      thinking&&h('div',{class:"feed-item pulsing"},
-        h('div',{class:"feed-banter"},
-          h(CompanionIcon,{id:lead.id,size:40}),
-          h('div',{class:"feed-banter-bubble"},h('div',{class:"briefing-thinking"},"..."))
+        ),
+        showLiftLog&&sets.length>0&&h('div',{class:"set-strip"},
+          sets.map((st,i)=>h('div',{key:i,class:"set-chip"},
+            h('div',{class:"set-chip-ex"},`${i+1}. ${st.exName}`),
+            h('div',{class:"set-chip-d"},`${st.kg}kg × ${st.reps}`)
+          ))
+        ),
+        h('div',{class:"workout-input-row"},
+          h('input',{class:"workout-input",value:input,placeholder:"Talk to your team",onInput:e=>setInput(e.target.value),onKeyDown:e=>{if(e.key==="Enter"){e.preventDefault();sendMsg();}},disabled:thinking}),
+          h('button',{class:"workout-send",disabled:!input.trim()||thinking,onClick:sendMsg},"➤")
         )
       )
-    ),
-
-    showLiftLog&&sets.length>0&&h('div',{class:"set-strip"},
-      sets.map((s,i)=>h('div',{key:i,class:"set-chip"},
-        h('div',{class:"set-chip-ex"},`${i+1}. ${s.exName}`),
-        h('div',{class:"set-chip-d"},`${s.kg}kg × ${s.reps}`)
-      ))
-    ),
-
-    h('div',{class:"action-bar"},
-      allDone
-        ? h('button',{class:"complete-btn",onClick:()=>onFinish&&onFinish(elapsed,sets,eventRep)},"Mission Complete")
-        : h('button',{class:"done-btn",onClick:advanceStep},msIdx<steps.length-1?"✓ Step done":"✓ Last step done")
-    ),
-
-    h('div',{class:"workout-input-row"},
-      showLiftLog&&h('button',{class:"log-btn",onClick:()=>setLogSetOpen(true)},"+ SET"),
-      h('input',{class:"workout-input",value:input,placeholder:"Talk to your team (optional)",onInput:e=>setInput(e.target.value),onKeyDown:e=>{if(e.key==="Enter"){e.preventDefault();sendMsg();}},disabled:thinking}),
-      h('button',{class:"workout-send",disabled:!input.trim()||thinking,onClick:sendMsg},"➤")
     ),
 
     logSetOpen&&h('div',{class:"log-set-overlay"},
