@@ -214,6 +214,7 @@
   .feed-event-choices { display:flex; flex-direction:column; gap:8px; }
   .feed-event-choice  { padding:12px 14px; min-height:48px; background:var(--card); border:2px solid var(--line); font-size:17px; color:var(--text); text-align:left; }
   .feed-event-choice:active { border-color:var(--ember); }
+  .sys-note { margin:2px 0 10px; padding:8px 12px; border:1px dashed var(--ember); background:var(--ember-bg); color:var(--ember); font-size:14px; font-style:italic; }
   .feed-event-result  { font-style:italic; font-size:16px; color:var(--muted); margin-top:4px; padding-left:10px; border-left:3px solid var(--gold-bright); }
 
   .workout-input-row { display:flex; gap:8px; padding:8px 16px; padding-bottom:max(10px,env(safe-area-inset-bottom)); border-top:1px solid var(--line); flex-shrink:0; background:var(--card); }
@@ -289,7 +290,7 @@
 <div id="app"></div>
 <script type="module">
 import { h, render } from 'https://esm.sh/preact@10.19.3';
-import { useState, useEffect, useRef, useCallback } from 'https://esm.sh/preact@10.19.3/hooks';
+import { useState, useEffect, useRef } from 'https://esm.sh/preact@10.19.3/hooks';
 
 /* ═══════════════════════════════════════════════════
    DATA
@@ -762,23 +763,79 @@ const weekKey   = () => {
 const todayIdx  = () => { const d=new Date().getDay(); return d===0?6:d-1; };
 const hash      = s => { let h=0; for(let i=0;i<s.length;i++) h=((h<<5)-h+s.charCodeAt(i))|0; return Math.abs(h); };
 const pick      = a => a[Math.floor(Math.random()*a.length)];
-const diffColor = d => d==="Restricted"?"#a3262a":d==="Hazardous"?"#d4a84b":"#5f6f7d";
+const diffColor = d => d==="Restricted"?"#a3262a":d==="Hazardous"?"#97690f":"#5f6f7d";
 const fmt       = n => n>=1000000?(n/1000000).toFixed(0)+"M":n>=10000?(n/1000).toFixed(0)+"K":String(n);
 const fmtTime   = s => { const m=Math.floor(s/60),sec=s%60; return `${m}:${String(sec).padStart(2,'0')}`; };
 
 const LS = {
   get: k => { try{ return JSON.parse(localStorage.getItem(k)); }catch{ return null; } },
   set: (k,v) => { try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} },
+  del: k => { try{ localStorage.removeItem(k); }catch{} },
 };
+
+// Streak: training days in a row, allowing one rest day between sessions.
+const localDay = d => { const x=new Date(d); return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`; };
+const dayNum   = s => Math.round(new Date(s+"T12:00:00").getTime()/86400000);
+function computeStreak(allW) {
+  const days=[...new Set((allW||[]).filter(w=>w&&w.date).map(w=>localDay(w.date)))].sort().reverse();
+  if(!days.length) return 0;
+  if(dayNum(localDay(new Date()))-dayNum(days[0])>2) return 0;
+  let n=1;
+  for(let i=1;i<days.length;i++){ if(dayNum(days[i-1])-dayNum(days[i])<=2) n++; else break; }
+  return n;
+}
+
+const findMission = id => Object.values(MISSIONS).flat().find(m=>m.id===id);
+
+/* ── Claude API ── */
+const MODEL = "claude-sonnet-5-5";
+
+// Calls the API and turns failures into a plain-English message.
+async function callClaude(apiKey, system, messages, max_tokens) {
+  let res;
+  try {
+    res = await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:MODEL,max_tokens,system,messages})
+    });
+  } catch(e) { throw new Error("No connection. Check your signal and try again."); }
+  let data=null; try{ data=await res.json(); }catch{}
+  if(!res.ok || data?.error) {
+    const raw=data?.error?.message||"";
+    const low=raw.toLowerCase();
+    let msg;
+    if(res.status===401) msg="Your API key was rejected. Tap Narrator in the top bar to check it.";
+    else if(low.includes("credit")) msg="Your Anthropic account is out of credit. Top up at console.anthropic.com.";
+    else if(res.status===403) msg="This API key is not allowed to use the narrator.";
+    else if(res.status===429) msg="Too many requests right now. Wait a minute and try again.";
+    else if(res.status===404) msg="The narrator model could not be found. The app may need an update.";
+    else if(res.status>=500) msg="Anthropic's servers are busy. Try again shortly.";
+    else msg=`The narrator hit an error (${res.status}). ${raw}`.trim();
+    throw new Error(msg);
+  }
+  return (data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
+}
+
+// Builds a valid message list: starts with the user, alternates roles, ends with the new text.
+function toMessages(hist, text, opener) {
+  const msgs=[];
+  hist.forEach(m=>{ if(!m.content) return; if(msgs.length&&msgs[msgs.length-1].role===m.role) msgs[msgs.length-1].content+="\n"+m.content; else msgs.push({...m}); });
+  if(!msgs.length || msgs[0].role!=="user") msgs.unshift({role:"user",content:opener});
+  if(msgs[msgs.length-1].role==="user") msgs[msgs.length-1].content+="\n"+text; else msgs.push({role:"user",content:text});
+  return msgs;
+}
+const noDashes = t => String(t||"").replace(/[\u2013\u2014]/g,",");
 
 // Storage: new keys for the game state, but the API key and old history carry over from the previous app.
 const KEY_GS  = "crossedkeys_gs";
 const KEY_API = "crossedkeys_api";
+const KEY_ACTIVE = "crossedkeys_active";   // the workout in progress, so it survives a reload
 
 function freshState() {
   const ch = {};
   CREW.forEach(c => { ch[c.id]={xp:0,level:1}; });
-  return { char:{name:HERO.name,rep:0,body:0,craft:0}, ch, weekKey:weekKey(), weekW:[], allW:[], streak:0, best:0, party:null };
+  return { char:{name:HERO.name,rep:0,body:0,craft:0}, ch, weekKey:weekKey(), weekW:[], allW:[], streak:0, best:0, party:null, lastLift:{} };
 }
 function loadState() {
   const cur = LS.get(KEY_GS);
@@ -828,7 +885,7 @@ function BriefingSection({ mission, apiKey, onBegin, onBack }) {
     setInput("");
     setFeed(f=>[...f,{type:"player",text}]);
     if(!apiKey) {
-      const line=(BANTER[lead.id]||[]).find(x=>x.at==="start")?.line||"Move.";
+      const line=pick(BANTER[lead.id]||[{line:"Move."}]).line;
       setTimeout(()=>setFeed(f=>[...f,{type:"companion",cid:lead.id,text:line}]),700);
       return;
     }
@@ -855,20 +912,11 @@ ${feed.map(f=>f.type==="companion"?`${lead.name}: "${f.text}"`:`Sterling: "${f.t
 TONE: A mix of campus-caper humour and serious Guardian training. These are practice missions, but the stakes should feel real. Offer a concrete tip, a word of encouragement or some urging where it fits naturally.
 FORMAT: Two-way conversation. Reply in character. Under 3 sentences. No monologues. NEVER use em dashes or en dashes. No fitness-influencer language. No JSON. Speak as ${lead.name} only.`;
 
-      const res=await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST",
-        headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,system:sys,messages:[
-          ...feed.map(f=>({role:f.type==="player"?"user":"assistant",content:f.text})),
-          {role:"user",content:text}
-        ]})
-      });
-      const data=await res.json();
-      if(data.error) throw new Error(data.error.message);
-      const reply=(data.content?.[0]?.text||"...").replace(/[\u2013\u2014]/g,",");
+      const hist=feed.filter(f=>f.type!=="system").map(f=>({role:f.type==="player"?"user":"assistant",content:f.text}));
+      const reply=noDashes(await callClaude(apiKey, sys, toMessages(hist, text, "(Sterling arrives for the briefing.)"), 200)||"...");
       setFeed(f=>[...f,{type:"companion",cid:lead.id,text:reply}]);
     } catch(err) {
-      setFeed(f=>[...f,{type:"companion",cid:lead.id,text:"The owl post is down. We will do this the old way. Pick your team."}]);
+      setFeed(f=>[...f,{type:"system",text:err.message}]);
     } finally { setThinking(false); }
   }
 
@@ -909,6 +957,7 @@ FORMAT: Two-way conversation. Reply in character. Under 3 sentences. No monologu
             )
           );
         }
+        if(item.type==="system") return h('div',{key:i,class:"sys-note"},`Narrator unavailable: ${item.text}`);
         return h('div',{key:i,class:"briefing-player slide-up"},
           h('div',{class:"row",style:"gap:8px;margin-bottom:4px"},h(CompanionIcon,{id:HERO.id,size:30}),h('div',{class:"briefing-p-who",style:"margin:0"},HERO.name)),
           h('div',{class:"briefing-p-text"},item.text)
@@ -1046,7 +1095,7 @@ function HomeView({ gs, setGs, onStartWorkout, apiKey }) {
         h('div',{class:"stat-label"},"Order Rep")
       ),
       h('div',{class:"stat-card"},
-        h('div',{class:"stat-val"},`${gs.streak||0}`),
+        h('div',{class:"stat-val"},`${computeStreak(gs.allW)}`),
         h('div',{class:"stat-label"},"Streak")
       )
     ),
@@ -1139,36 +1188,44 @@ function PartyView({ gs }) {
   );
 }
 
-function WorkoutView({ mission, workoutType, gs, setGs, apiKey, onFinish }) {
+function WorkoutView({ mission, workoutType, gs, setGs, apiKey, onFinish, startedAt, saved }) {
   const wt    = WORKOUT_TYPES.find(w=>w.id===workoutType) || WORKOUT_TYPES[0];
   const steps = mission.steps;
   const lead  = leadFor(mission);
   const partyIds = (gs.party||[]).filter(id=>CREW.find(c=>c.id===id));
   const crewObjs = (partyIds.length?partyIds:suggestTeam(mission)).map(id=>CREW.find(c=>c.id===id)).filter(Boolean);
 
-  const [msIdx,    setMsIdx]   = useState(0);
-  const [feed,     setFeed]    = useState([]);
+  const sv = saved || {};
+  const [msIdx,    setMsIdx]   = useState(sv.msIdx||0);
+  const [feed,     setFeed]    = useState(sv.feed||[]);
   const [input,    setInput]   = useState("");
   const [thinking, setThinking]= useState(false);
-  const [elapsed,  setElapsed] = useState(0);
-  const [event,    setEvent]   = useState(null);
-  const [sets,     setSets]    = useState([]);
+  const [now,      setNow]     = useState(Date.now());
+  const [event,    setEvent]   = useState(sv.event||null);
+  const [eventRep, setEventRep]= useState(sv.eventRep||0);
+  const [sets,     setSets]    = useState(sv.sets||[]);
   const [logSetOpen,setLogSetOpen]=useState(false);
   const [curEx,    setCurEx]   = useState(null);
   const [weightVal,setWeightVal]=useState("");
   const [repsVal,  setRepsVal] = useState("");
-  const [rest,     setRest]    = useState(0);
-  const lastWeightByEx = useRef({});
+  const [restEnd,  setRestEnd] = useState(sv.restEnd||0);
+  const lastLift = gs.lastLift||{};
   const feedRef = useRef(null);
-  const evPlan  = useRef(null);
-  const evShown = useRef([false,false]);
+  const evIdx   = useRef(sv.evIdx||null);
+  const evShown = useRef(sv.evShown||[false,false]);
 
-  if(!evPlan.current) {
+  // Timers come from the clock, so they stay right when the phone locks.
+  const elapsed = Math.max(0,Math.floor((now-startedAt)/1000));
+  const rest    = restEnd ? Math.max(0,Math.ceil((restEnd-now)/1000)) : 0;
+  function startRest(sec){ setRestEnd(sec?Date.now()+sec*1000:0); }
+
+  if(!evIdx.current) {
     const a = Math.floor(Math.random()*FIELD_EVENTS.length);
     let b = Math.floor(Math.random()*FIELD_EVENTS.length);
     if(b===a) b=(a+1)%FIELD_EVENTS.length;
-    evPlan.current=[FIELD_EVENTS[a],FIELD_EVENTS[b]];
+    evIdx.current=[a,b];
   }
+  const evPlan = { current: evIdx.current.map(i=>FIELD_EVENTS[i]) };
 
   const banterFeed = [];
   [lead,...crewObjs].forEach(c=>{ (BANTER[c.id]||[]).forEach(bl=>banterFeed.push({...bl,id:c.id})); });
@@ -1180,17 +1237,22 @@ function WorkoutView({ mission, workoutType, gs, setGs, apiKey, onFinish }) {
   }
 
   useEffect(()=>{
-    addFeed({type:"milestone",label:steps[0].l,text:steps[0].s});
-    const clock=setInterval(()=>setElapsed(e=>e+1),1000);
-    const t1=setTimeout(()=>{ const m=banterFeed.find(b=>b.at==="start"&&b.id===lead.id)||banterFeed.find(b=>b.at==="start"); if(m) addFeed({type:"banter",cid:m.id,text:m.line}); },3000);
-    return()=>{ clearInterval(clock); clearTimeout(t1); };
+    const tick=()=>setNow(Date.now());
+    const clock=setInterval(tick,1000);
+    document.addEventListener("visibilitychange",tick);
+    let t1;
+    if(!saved) {   // fresh start, not a resumed session
+      addFeed({type:"milestone",label:steps[0].l,text:steps[0].s});
+      t1=setTimeout(()=>{ const pool=banterFeed.filter(b=>b.at==="start"&&b.id===lead.id); const m=pool.length?pick(pool):banterFeed.find(b=>b.at==="start"); if(m) addFeed({type:"banter",cid:m.id,text:m.line}); },3000);
+    }
+    return()=>{ clearInterval(clock); clearTimeout(t1); document.removeEventListener("visibilitychange",tick); };
   },[]);
 
+  // Save progress so an iOS reload does not lose the session.
   useEffect(()=>{
-    if(rest<=0) return;
-    const t=setTimeout(()=>setRest(r=>Math.max(0,r-1)),1000);
-    return()=>clearTimeout(t);
-  },[rest]);
+    LS.set(KEY_ACTIVE,{ missionId:mission.id, type:workoutType, startedAt,
+      state:{ msIdx, feed:feed.slice(-40), sets, event, eventRep, restEnd, evIdx:evIdx.current, evShown:evShown.current } });
+  },[msIdx,feed,sets,event,eventRep,restEnd]);
 
   useEffect(()=>{ if(feedRef.current) feedRef.current.scrollTop=feedRef.current.scrollHeight; },[feed,thinking]);
 
@@ -1203,13 +1265,13 @@ function WorkoutView({ mission, workoutType, gs, setGs, apiKey, onFinish }) {
       if(next===2 && !evShown.current[0]) { evShown.current[0]=true; setTimeout(()=>setEvent({...evPlan.current[0],idx:0}),2500); }
       if(next===4 && !evShown.current[1]) { evShown.current[1]=true; setTimeout(()=>setEvent({...evPlan.current[1],idx:1}),2500); }
     }
-    setRest(0);
+    startRest(0);
   }
 
   function chooseEvent(choice) {
     addFeed({type:"event_result",text:choice.out});
     setEvent(null);
-    setGs(g=>({...g,char:{...g.char,rep:(g.char.rep||0)+choice.rep}}));
+    setEventRep(r=>r+choice.rep);   // only banked if the mission is completed
   }
 
   async function sendMsg() {
@@ -1269,27 +1331,15 @@ Maximum 2 responses.`;
         if(f.type==="banter") return {role:"assistant",content:JSON.stringify({responses:[{crew:ALL_FOLK.find(x=>x.id===f.cid)?.name||f.cid,text:f.text}]})};
         return null;
       }).filter(Boolean);
-      // API requires alternating roles starting with user
-      const msgs=[]; hist.forEach(m=>{ if(msgs.length&&msgs[msgs.length-1].role===m.role){ msgs[msgs.length-1].content+="\n"+m.content; } else msgs.push(m); });
-      while(msgs.length&&msgs[0].role!=="user") msgs.shift();
-      if(msgs.length&&msgs[msgs.length-1].role==="user"){ msgs[msgs.length-1].content+="\n"+text; } else msgs.push({role:"user",content:text});
-
-      const res=await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST",
-        headers:{"Content-Type":"application/json","x-api-key":apiKey,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:300,system:sys,messages:msgs})
-      });
-      const data=await res.json();
-      if(data.error) throw new Error(data.error.message);
-      const rawText=data.content?.[0]?.text||"{}";
+      const rawText=(await callClaude(apiKey, sys, toMessages(hist, text, "(The mission begins.)"), 300))||"{}";
       let parsed;
       try{ parsed=JSON.parse(rawText.replace(/```json|```/g,"").trim()); }catch{ parsed={responses:[{crew:cast[0].name,text:rawText}]}; }
       (parsed.responses||[]).slice(0,2).forEach(r=>{
         const c=cast.find(x=>x.name===r.crew)||cast[0];
-        addFeed({type:"banter",cid:c.id,text:String(r.text||"").replace(/[\u2013\u2014]/g,",")});
+        addFeed({type:"banter",cid:c.id,text:noDashes(r.text)});
       });
     } catch(err) {
-      addFeed({type:"banter",cid:lead.id,text:"The owl post is down. Keep going. I will make a note."});
+      addFeed({type:"system",text:err.message});
     } finally { setThinking(false); }
   }
 
@@ -1324,7 +1374,7 @@ Maximum 2 responses.`;
     rest>0&&h('div',{class:"rest-chip"},
       h('div',{class:"display",style:"font-size:13px;font-weight:700;letter-spacing:2px;color:var(--muted);text-transform:uppercase"},"Rest"),
       h('div',{class:"rest-time"},fmtTime(rest)),
-      h('button',{class:"ghost-btn",onClick:()=>setRest(0)},"Skip")
+      h('button',{class:"ghost-btn",onClick:()=>startRest(0)},"Skip")
     ),
 
     event&&h('div',{style:"padding:0 16px 8px;flex-shrink:0;max-height:45vh;overflow-y:auto"},
@@ -1363,6 +1413,7 @@ Maximum 2 responses.`;
             h('div',{class:"feed-p-text"},item.text)
           )
         );
+        if(item.type==="system") return h('div',{key:i,class:"sys-note"},`Narrator unavailable: ${item.text}`);
         if(item.type==="event_result") return h('div',{key:i,class:"feed-item"},
           h('div',{class:"feed-event-result"},item.text)
         );
@@ -1385,7 +1436,7 @@ Maximum 2 responses.`;
 
     h('div',{class:"action-bar"},
       allDone
-        ? h('button',{class:"complete-btn",onClick:()=>onFinish&&onFinish(elapsed,sets)},"Mission Complete")
+        ? h('button',{class:"complete-btn",onClick:()=>onFinish&&onFinish(elapsed,sets,eventRep)},"Mission Complete")
         : h('button',{class:"done-btn",onClick:advanceStep},msIdx<steps.length-1?"✓ Step done":"✓ Last step done")
     ),
 
@@ -1398,16 +1449,16 @@ Maximum 2 responses.`;
     logSetOpen&&h('div',{class:"log-set-overlay"},
       h('div',{class:"log-set-panel"},
         h('div',{class:"log-set-title"},"Log Set"),
-        h('div',{class:"log-set-prev"},curEx ? `Exercise: ${curEx}` : "Select an exercise"),
+        h('div',{class:"log-set-prev"},curEx ? (lastLift[curEx] ? `${curEx}. Last time: ${lastLift[curEx].kg}kg × ${lastLift[curEx].reps}` : `${curEx}. No previous sets yet`) : "Select an exercise"),
         h('div',{class:"exercise-picker"},
           Object.entries(EXERCISES).flatMap(([cat,exs])=>exs.map(ex=>
             h('button',{key:ex,class:`ex-pick-btn${curEx===ex?" active":""}`,onClick:()=>{
               setCurEx(ex);
-              const last=lastWeightByEx.current[ex];
-              if(last) setWeightVal(String(last));
+              const last=lastLift[ex];
+              setWeightVal(last?String(last.kg):"");
             }},
               h('div',{class:"ex-pick-name"},ex),
-              h('div',{class:"ex-pick-prev"},lastWeightByEx.current[ex]?`last: ${lastWeightByEx.current[ex]}kg`:cat)
+              h('div',{class:"ex-pick-prev"},lastLift[ex]?`last: ${lastLift[ex].kg}kg × ${lastLift[ex].reps}`:cat)
             )
           ))
         ),
@@ -1423,10 +1474,10 @@ Maximum 2 responses.`;
         ),
         h('button',{class:"primary-btn",style:"font-size:15px",disabled:!curEx||!weightVal||!repsVal,onClick:()=>{
           setSets(s=>[...s,{exId:curEx,exName:curEx,kg:Number(weightVal),reps:Number(repsVal)}]);
-          lastWeightByEx.current={...lastWeightByEx.current,[curEx]:Number(weightVal)};
+          setGs(g=>({...g,lastLift:{...(g.lastLift||{}),[curEx]:{kg:Number(weightVal),reps:Number(repsVal),date:new Date().toISOString()}}}));
           setRepsVal("");
           setLogSetOpen(false);
-          setRest(90);
+          startRest(90);
           addFeed({type:"milestone",label:"Set Logged",text:`${curEx}: ${weightVal}kg × ${repsVal}. Rest timer started.`});
         }},"Log Set"),
         h('button',{class:"log-set-cancel",onClick:()=>setLogSetOpen(false)},"Cancel")
@@ -1435,7 +1486,7 @@ Maximum 2 responses.`;
   );
 }
 
-function FinishOverlay({ mission, workoutType, elapsed, bonus, onSave }) {
+function FinishOverlay({ mission, workoutType, elapsed, bonus, eventRep, onSave }) {
   const wt = WORKOUT_TYPES.find(w=>w.id===workoutType)||WORKOUT_TYPES[0];
   const [effort, setEffort] = useState(null);
   const [notes,  setNotes]  = useState("");
@@ -1445,7 +1496,7 @@ function FinishOverlay({ mission, workoutType, elapsed, bonus, onSave }) {
     h('div',{class:"finish-card"},
       h('div',{class:"finish-title"},"Mission Complete"),
       h('div',{class:"finish-arc"},`${mission.icon} ${mission.title} (${wt.label})`),
-      h('div',{class:"hint",style:"font-size:15px;margin-bottom:14px"},`${Math.floor(elapsed/60)} min in the field. +${earned} Order Rep${bonus?` (includes +${bonus}% team bonus)`:""}`),
+      h('div',{class:"hint",style:"font-size:15px;margin-bottom:14px"},`${Math.floor(elapsed/60)} min in the field. +${earned+(eventRep||0)} Order Rep${bonus?` (includes +${bonus}% team bonus)`:""}${eventRep?`, with ${eventRep} from field events`:""}.`),
       h('div',{class:"finish-q"},"How hard was it?"),
       h('div',{class:"effort-grid"},
         EFFORT.map(e=>h('div',{key:e.v,class:`effort-btn${effort===e.v?" selected":""}`,onClick:()=>setEffort(e.v)},
@@ -1532,10 +1583,15 @@ function ApiSetup({ currentKey, onSave, onCancel }) {
 
 function App() {
   const [gs,      setGsRaw]  = useState(()=>loadState());
-  const [view,    setView]    = useState("home");
+  const [workout, setWorkout] = useState(()=>{
+    const a=LS.get(KEY_ACTIVE);
+    if(a && Date.now()-a.startedAt < 12*3600*1000) { const m=findMission(a.missionId); if(m) return {mission:m,type:a.type,startedAt:a.startedAt,saved:a.state}; }
+    LS.del(KEY_ACTIVE);
+    return null;
+  });
+  const [view,    setView]    = useState(()=>workout?"workout":"home");
   const [apiKey,  setApiKey]  = useState(()=>LS.get(KEY_API)||LS.get("witcher_api")||"");
   const [showApi, setShowApi] = useState(false);
-  const [workout, setWorkout] = useState(null);
   const [finishing,setFinishing]=useState(null);
 
   function setGs(updater) {
@@ -1553,8 +1609,9 @@ function App() {
     if(gs.weekKey!==weekKey()) setGs(g=>({...g,weekKey:weekKey(),weekW:[]}));
   },[]);
 
-  function startWorkout(mission,type) { setWorkout({mission,type}); setView("workout"); }
-  function finishWorkout(elapsed,sets) { setFinishing({elapsed,sets}); }
+  function startWorkout(mission,type) { LS.del(KEY_ACTIVE); setWorkout({mission,type,startedAt:Date.now(),saved:null}); setView("workout"); }
+  function finishWorkout(elapsed,sets,eventRep) { setFinishing({elapsed,sets,eventRep:eventRep||0}); }
+  function leaveWorkout() { LS.del(KEY_ACTIVE); setFinishing(null); setWorkout(null); setView("home"); }
 
   function saveWorkout({effort,notes}) {
     if(!finishing||!workout) return;
@@ -1562,6 +1619,7 @@ function App() {
     const party=(gs.party||[]).filter(id=>CREW.find(c=>c.id===id));
     const bonus=teamBonus(party,mission.type);
     const earned=Math.round(mission.rep*(1+bonus/100));
+    const total=earned+(finishing.eventRep||0);
     const stamp=dayStamp();
     const bc=(WORKOUT_TYPES.find(w=>w.id===mission.type)||WORKOUT_TYPES[0]).bodyCraft;
 
@@ -1571,11 +1629,11 @@ function App() {
       date:new Date().toISOString(), stamp,
       day:["sun","mon","tue","wed","thu","fri","sat"][new Date().getDay()],
       dayIdx:todayIdx(),
-      elapsed:finishing.elapsed, rep:earned, effort, notes, sets:finishing.sets, crewIds:party,
+      elapsed:finishing.elapsed, rep:total, effort, notes, sets:finishing.sets, crewIds:party,
     };
 
     setGs(g=>{
-      const newChar={...g.char,rep:(g.char.rep||0)+earned,body:(g.char.body||0)+bc.body*5,craft:(g.char.craft||0)+bc.craft*5};
+      const newChar={...g.char,rep:(g.char.rep||0)+total,body:(g.char.body||0)+bc.body*5,craft:(g.char.craft||0)+bc.craft*5};
       const newCh={...g.ch};
       party.forEach(id=>{
         const prev=newCh[id]||{xp:0,level:1};
@@ -1586,17 +1644,12 @@ function App() {
       const newWk=[...wk,{stamp,date:entry.date,day:entry.day,arcId:mission.id}];
       const allW=[...(g.allW||[]),entry];
 
-      const newest=[...allW].reverse();
-      let consecutive=0;
-      for(let i=0;i<newest.length&&i<60;i++){
-        if(i===0){ consecutive=1; continue; }
-        const gap=new Date(newest[i-1].date)-new Date(newest[i].date);
-        if(gap<86400000*2) consecutive++; else break;
-      }
+      const streak=computeStreak(allW);
 
-      return { ...g, char:newChar, ch:newCh, weekKey:weekKey(), weekW:newWk, allW, streak:consecutive, best:Math.max(g.best||0,consecutive) };
+      return { ...g, char:newChar, ch:newCh, weekKey:weekKey(), weekW:newWk, allW, streak, best:Math.max(g.best||0,streak) };
     });
 
+    LS.del(KEY_ACTIVE);
     setFinishing(null); setWorkout(null); setView("journal");
   }
 
@@ -1613,9 +1666,9 @@ function App() {
   );
 
   if(workout&&view==="workout") return h('div',{id:"app-inner",style:"display:flex;flex-direction:column;height:100%"},
-    Top(h('button',{class:"pill-btn",style:"color:#f3e4e6;border-color:#f3e4e688",onClick:()=>{ if(confirm("Leave this mission? Nothing will be saved.")){setWorkout(null);setView("home");} }},"Leave")),
-    h(WorkoutView,{ mission:workout.mission, workoutType:workout.type, gs, setGs, apiKey, onFinish:finishWorkout }),
-    finishing&&h(FinishOverlay,{mission:workout.mission,workoutType:workout.type,elapsed:finishing.elapsed,bonus:teamBonus((gs.party||[]),workout.mission.type),onSave:saveWorkout})
+    Top(h('button',{class:"pill-btn",style:"color:#f3e4e6;border-color:#f3e4e688",onClick:()=>{ if(confirm("Leave this mission? Nothing will be saved.")) leaveWorkout(); }},"Leave")),
+    h(WorkoutView,{ key:workout.startedAt, mission:workout.mission, workoutType:workout.type, startedAt:workout.startedAt, saved:workout.saved, gs, setGs, apiKey, onFinish:finishWorkout }),
+    finishing&&h(FinishOverlay,{mission:workout.mission,workoutType:workout.type,elapsed:finishing.elapsed,bonus:teamBonus((gs.party||[]),workout.mission.type),eventRep:finishing.eventRep,onSave:saveWorkout})
   );
 
   return h('div',{id:"app-inner",style:"display:flex;flex-direction:column;height:100%"},
