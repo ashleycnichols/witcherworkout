@@ -343,19 +343,20 @@ const FIA = {
 };
 const leadFor = m => m && m.beast ? FIA : WULFRIC;
 
-// 6 peer slots: Senior students, back at Czocha. Names are placeholders until real names arrive.
+// Six fellow Senior students, back at Czocha. "sendi:true" marks a fellow Sendivogian (Sterling's own house).
+// Rename freely: story text that says "Peer 01" etc. picks up the new name automatically.
 const PEERS = [
-  { id:"p01", name:"Peer 01", role:"Senior, Guardian path (Combat)", classmate:true,  icon:"🔥", color:"#c4432b", fit:["strength","home"],    tags:["Blunt","Brawler"],
-    voice:"Blunt and competitive. Old classroom rivalry with Sterling that is mostly affection. Short sentences. Teases, then helps." },
-  { id:"p02", name:"Peer 02", role:"Senior, Guardian path (Bound)",  classmate:true,  icon:"⛓️", color:"#7d4e96", fit:["mobility","strength"], tags:["Calm","Bound"],
+  { id:"p01", name:"Ines Vargas",    role:"Senior, Guardian path (Combat)", sendi:true,  icon:"🔥", color:"#c4432b", fit:["strength","home"],    tags:["Blunt","Brawler"],
+    voice:"Blunt and competitive. A long-running rivalry with Sterling that is mostly affection. Short sentences. Teases, then helps. Not above celebrating with a bottle afterwards." },
+  { id:"p02", name:"Liesl Morrow",   role:"Senior, Guardian path (Bound)",  sendi:true,  icon:"⛓️", color:"#7d4e96", fit:["mobility","strength"], tags:["Calm","Bound"],
     voice:"Calm, measured, a little eerie. Speaks softly and says things that land. Utterly loyal. Never rushes." },
-  { id:"p03", name:"Peer 03", role:"Senior, Curse Breaker path",           classmate:false, icon:"🧭", color:"#1f7fae", fit:["run","home"],          tags:["Chatty","Fast"],
-    voice:"Upbeat and talkative, usually eating something. Fast and knows it. Cheerful even in bad situations." },
-  { id:"p04", name:"Peer 04", role:"Senior, Magical Defence (wards)",      classmate:false, icon:"🛡️", color:"#5b8a35", fit:["mobility","home"],     tags:["Precise","Wards"],
-    voice:"Fussy perfectionist. Checks everything twice and says so. Corrects form and procedure. Secretly kind." },
-  { id:"p05", name:"Peer 05", role:"Senior, Cryptozoologist path",         classmate:false, icon:"🐾", color:"#8f7440", fit:["run","strength"],      tags:["Quiet","Tracker"],
-    voice:"Quiet and observational. Reads terrain and animals better than people. Uses animal comparisons. Speaks rarely." },
-  { id:"p06", name:"Peer 06", role:"Senior, Conflux Studies", classmate:true, icon:"📜", color:"#55769a", fit:["mobility","run"],      tags:["Sardonic","Treaties"],
+  { id:"p03", name:"Saoirse Quill",  role:"Senior, Curse Breaker path",     sendi:false, icon:"🧭", color:"#1f7fae", fit:["run","home"],          tags:["Chatty","Fast"],
+    voice:"Upbeat and talkative, laughs easily, usually eating something. Fast and knows it. Cheerful even in bad situations." },
+  { id:"p04", name:"Tomasz Brandt",  role:"Senior, Alchemy",                sendi:false, icon:"⚗️", color:"#5b8a35", fit:["mobility","home"],     tags:["Precise","Alchemy"],
+    voice:"Fussy perfectionist alchemist. Measures everything twice and says so. Corrects form and procedure the way he corrects a recipe. Secretly kind." },
+  { id:"p05", name:"Jonah Vasko",    role:"Senior, Cryptozoologist path",   sendi:false, icon:"🐾", color:"#8f7440", fit:["run","strength"],      tags:["Quiet","Tracker"],
+    voice:"Quiet and observational. Most at home outdoors at night. Reads terrain and animals better than people. Uses animal comparisons. Speaks rarely." },
+  { id:"p06", name:"Henrik Solberg", role:"Senior, Conflux Studies",        sendi:true,  icon:"📜", color:"#55769a", fit:["mobility","run"],      tags:["Sardonic","Treaties"],
     voice:"Sardonic. Cites treaty clauses and procedure at the worst moments. Dry wit. Surprisingly good in a crisis." },
 ];
 
@@ -575,7 +576,7 @@ let MISSIONS = {
       id:"hm_dorm", type:"home", title:"Dorm Room Breach", loc:"A converted tower dormitory", diff:"Hazardous", rep:190, mins:30, icon:"🛏️",
       sum:"A 4 round bodyweight circuit: 40 seconds on, 20 seconds off. About 30 min.",
       briefingLine:"No equipment, a locked dormitory door, and a first year who has been inside since breakfast. Breach it the honest way. I do not want to hear about your lack of gear.",
-      flavor:"\"If it needs fixing quickly and quietly, send a Guardian with no gear.\" Peer 01",
+      flavor:"\"If it needs fixing quickly and quietly, send a Senior with no gear.\" Peer 01",
       desc:"An improvised breach in a tower dormitory. No weights, no gear, no room to move, only your body and a stubborn lock.",
       steps:[
         {l:"Case the Room",       d:"Warm-up, 5 minutes. Jumping jacks 40 seconds, arm circles, 10 air squats, 10 push-ups on knees or toes.", s:"The door glows faintly. Somebody has left a note that says \"Please do not.\""},
@@ -1099,7 +1100,7 @@ function PeerRow({ c, type, selected, onClick, extra }) {
     h('div',{class:"peer-main"},
       h('div',{class:"companion-name"},c.name),
       h('div',{class:"companion-role"},c.role),
-      c.classmate&&h('div',{class:"classmate"},"Former classmate"),
+      c.sendi&&h('div',{class:"classmate"},"Fellow Sendivogian"),
       h(FitChips,{c,type}),
       extra&&h('div',{class:"companion-lv"},extra)
     ),
@@ -1131,7 +1132,7 @@ function PartyPickerModal({ mission, gs, setGs, onConfirm, onBack }) {
     h('div',{style:"padding:0 16px 4px;flex-shrink:0"},
       h('button',{class:"back-btn",onClick:onBack},"← Back"),
       h('div',{class:"section-head",style:"margin:0 0 2px"},"Pick Your Team"),
-      h('div',{class:"hint"},`Choose up to 4 for ${wt.label}. A gold badge means that Guardian's specialty matches today's workout.`)
+      h('div',{class:"hint"},`Choose up to 4 fellow students for ${wt.label}. A gold badge means their specialty matches today's workout.`)
     ),
     h('div',{class:"bonus-bar"},
       h('div',null,
@@ -1146,7 +1147,7 @@ function PartyPickerModal({ mission, gs, setGs, onConfirm, onBack }) {
       )
     ),
     h('div',{class:"footer-bar"},
-      h('button',{class:"primary-btn",onClick:confirm},`Start Mission (${selected.size} Guardian${selected.size!==1?"s":""})`)
+      h('button',{class:"primary-btn",onClick:confirm},`Start Mission with ${selected.size} student${selected.size!==1?"s":""}`)
     )
   );
 }
@@ -1402,7 +1403,7 @@ function WorkoutView({ mission, workoutType, gs, setGs, apiKey, onFinish, starte
         return "";
       }).filter(Boolean).join("\n");
       const cast=[lead,...crewObjs];
-      const voiceGuide = cast.map(c=>`${c.name} (${c.role}${c.classmate?", Sterling's former classmate":""}): ${c.voice}`).join("\n");
+      const voiceGuide = cast.map(c=>`${c.name} (${c.role}${c.sendi?", a fellow Sendivogian":""}): ${c.voice}`).join("\n");
 
       const sys=`You are the Game Master running a live roleplay inside a workout app called the Crossed Keys Training Log, set in the world of the College of Wizardry (Czocha College of Witchcraft and Wizardry, Lower Silesia, Poland).
 
@@ -1412,7 +1413,7 @@ CURRENT MISSION: "${mission.title}" at ${mission.loc}
 STORY: ${mission.desc}
 WORKOUT TYPE: ${wt.label} (${wt.short})
 PHASE: ${phase}. Elapsed: ${Math.floor(elapsed/60)} min. Current step: ${cur.l} (${cur.s})
-HER TEAM: ${crewObjs.map(c=>c.name+" ("+c.role+")").join(", ")}
+SENIOR STUDENTS WITH HER: ${crewObjs.map(c=>c.name+" ("+c.role+")").join(", ")}
 ABOUT ${lead.name.toUpperCase()}: ${lead.bio}
 WATCHING AND ENCOURAGING: ${lead.name} (tips, encouragement and urging come from this professor only${lead.id==='fia'?', because beasts are involved':''})
 
