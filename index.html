@@ -306,14 +306,16 @@ const HERO = { id:"sterling", name:"Sterling", full:"Sterling Ashbourne", role:"
 // Who briefs and encourages. Professor Wulfric handles everything except beast missions, which go to Professor Fia Mallow.
 // Add crew/wulfric.webp and crew/fia.webp when the photos are ready. Until then the circles show initials.
 const WULFRIC = {
-  id:"wulfric", name:"Professor Wulfric", initials:"PW", role:"Sterling's adoptive father. Briefs assignments", icon:"🗝️", color:"#97690f",
+  id:"wulfric", name:"Professor Wulfric", initials:"PW", role:"Magical Defence, Sendivogius monitor, Fireball referee. Your adoptive father", icon:"🗝️", color:"#97690f",
   fit:[], tags:["professor"], classmate:false,
-  voice:"Warm, steady and dry. Sterling's adoptive father, a professor who knows the Guardian Order well and is preparing her to join it, if she chooses. Sets high standards and says he is proud only rarely and sideways. Gives practical tips, calm encouragement and gentle urging. Calls her 'Sterling'. Understated humour. Never harsh.",
+  voice:"Terse and strict. Short, firm sentences. No excuses, no softness, no pointless questions. Pushes harder than is comfortable. Occasional dry remark. Rarely smiles, and shows his fondness for Sterling only in small understated ways: a flicker of pride, a practical tip, a bare 'Good.' Sometimes sounds like a Fireball referee (whistle, counting, penalties). Never gushes.",
+  bio:"Professor of Magical Defence at Czocha, monitor of the Sendivogius house and referee of Fireball. Strict, demanding and sometimes unfair-seeming, he pushes students to their limits and sometimes beyond. No patience for excuses, bruised egos or pointless theory. Believes Magical Defence should be called Magical Combat, because the best defence is a good offence. Rarely smiles and trusts almost no one. Insists on being called Professor Wulfric or Sir Wulfric and never gives his full name. Before Czocha he served in a highly specialised unit of the Guardian Order; that career ended in an incident he does not discuss. He has softened over the years and is quietly, fiercely fond of Sterling, his adopted daughter, but shows it through standards, practical help and rare dry warmth, never gushing. Never mention the incident or his dismissal unless Sterling raises it, and then answer briefly and carefully.",
 };
 const FIA = {
-  id:"fia", name:"Professor Fia Mallow", initials:"FM", role:"Professor of Beastology. Briefs creature assignments", icon:"🐉", color:"#4a6b3a",
+  id:"fia", name:"Professor Fia Mallow", initials:"FM", role:"Professor of Beastology. Takes over when beasts are involved", icon:"🐉", color:"#4a6b3a",
   fit:[], tags:["professor"], classmate:false,
-  voice:"Brisk, curious and completely unbothered by dangerous animals. Treats every creature with respect and a certain glee, and has strong opinions about tracks and droppings. Gives practical tips about animal behaviour and safety, and encourages in a hands-on, slightly eccentric way. Calls her 'Sterling'.",
+  voice:"Bubbly, distractible and endlessly curious. Says 'Fascinating!' and 'Let's see what happens!' Gives hands-on animal tips cheerfully with little thought for safety, then remembers she is supposed to care and adds a hasty disclaimer. Brings up jackalope droppings at any chance. Occasionally nervous about being sacked. Warm, a bit lonely, delighted to have company.",
+  bio:"Professor of Beastology at Czocha, in her second year of teaching. Mundaneborn, from a family of bankers who love her from a distance and do not understand her work. She spent years alone in the wilderness researching the droppings of the rare Arctic jackalope, with a theory that droppings produced under a full moon counter certain poisons. She teaches by experience: 'Fascinating! Let's see what happens!' She is loose about safety and discipline (a student was once nearly carried off by a gryphon) and is enthusiastic, scatterbrained and warm. Privately she worries about being sacked and is starting to hope Czocha could become a home and a family. She finds the title Professor Mallow stuffy and would rather be called Fia.",
 };
 const leadFor = m => m && m.beast ? FIA : WULFRIC;
 
@@ -371,7 +373,7 @@ let MISSIONS = {
     {
       id:"st_gate", type:"strength", title:"Warding the Lower Gate", loc:"Czocha, the lower gate and courtyard", diff:"Hazardous", rep:200, mins:55, icon:"🏰",
       sum:"Squat, bench press, barbell row, plank. About 55 min.",
-      briefingLine:"The wards on the lower gate are a practice assignment, but treat them like the real thing. Warm up properly first, Sterling. I will ask.",
+      briefingLine:"The lower gate wards are a practice assignment. They are also a test, and I do not repeat tests. Warm up properly, Sterling, or do not start.",
       flavor:"\"A ward holds because someone keeps holding it.\" Professor Wulfric",
       desc:"Overnight the wards on the lower gate began to sag. You are holding them up the honest way, under load, until the wardkeepers finish their repairs.",
       steps:[
@@ -385,7 +387,7 @@ let MISSIONS = {
     {
       id:"st_reliquary", type:"strength", title:"Carry the Reliquary", loc:"Escort route, Czocha to the Wroclaw Conflux", diff:"Hazardous", rep:210, mins:50, icon:"📦",
       sum:"Deadlift, farmer's carry, overhead press, pull-ups. About 50 min.",
-      briefingLine:"Today you carry a sealed crate across the grounds, and no levitation, because levitation wears off at the worst moment. This is what the work looks like, Sterling, most of the time.",
+      briefingLine:"You will carry a sealed crate across the grounds. No levitation, because levitation fails when you most need it. Lift, carry, and do not complain.",
       flavor:"\"Everything valuable is heavier than it looks.\" Professor Wulfric",
       desc:"A Bound Guardian escort moves a sealed artefact across hostile ground. The crate is warded against magic, which means it is carried by people.",
       steps:[
@@ -399,7 +401,7 @@ let MISSIONS = {
     {
       id:"st_phalsbourg", type:"strength", title:"Hold the Line", loc:"A treaty site on the old Phalsbourg border", diff:"Restricted", rep:230, mins:60, icon:"⚔️",
       sum:"Front squat, dumbbell press, Romanian deadlift, knee raises. About 60 min.",
-      briefingLine:"A staged standoff at a treaty site, with the Seniors playing both delegations. Heavy lifting today, so hold the line like you mean it.",
+      briefingLine:"A staged standoff at a treaty site, with the Seniors playing both delegations. Heavy day. I referee Fireball, so I know exactly what a half-hearted effort looks like.",
       flavor:"\"The Peace of Phalsbourg is held together by people who are tired and standing up anyway.\" Peer 06",
       desc:"A negotiation at a historic treaty site has turned tense. The Order sends a visible, solid line of Guardians. You are part of that line.",
       steps:[
@@ -413,7 +415,7 @@ let MISSIONS = {
     {
       id:"st_wyvern", type:"strength", beast:true, title:"The Wyvern Nest", loc:"Cliffs above a high Silesian valley", diff:"Restricted", rep:220, mins:55, icon:"🐉",
       sum:"Hip thrust, split squat, lat pulldown, Pallof press. About 55 min.",
-      briefingLine:"Wyvern first. A drake and a wyvern look alike from far away and behave very differently up close, so we are learning on a cliff. Lower body today, and wear your good boots.",
+      briefingLine:"Wyvern! Fascinating creatures. Technically I am supposed to say it is perfectly safe. It is mostly safe. Lower body today, and wear your good boots.",
       flavor:"\"Learn the difference between a drake and a wyvern before one of them teaches you.\" Peer 05",
       desc:"Reports say a wyvern has taken a ridge near a mundane footpath. You are climbing, hauling and holding ground on a steep, awkward cliff.",
       steps:[
@@ -430,7 +432,7 @@ let MISSIONS = {
     {
       id:"rn_lunacy", type:"run", beast:true, title:"Lunacy Watch", loc:"The forests of Lower Silesia, at dusk", diff:"Hazardous", rep:200, mins:40, icon:"🌕",
       sum:"Easy start, 6 hard efforts of 2 minutes, easy finish. About 40 min.",
-      briefingLine:"A practice pursuit of a werewolf under lunacy, played by the Seniors with far too much enthusiasm. Nobody is actually cursed. Probably. Pace yourself, then stop pacing yourself.",
+      briefingLine:"A werewolf practice pursuit! The Seniors are playing the wolf, and I have wolfsbane in my pockets just in case, which is proper procedure and also the only procedure I remember. Run!",
       flavor:"\"Wolfsbane in the pocket, shoes laced, and tell nobody where you are going.\" Peer 05",
       desc:"A werewolf has been reported near a village before the full moon. You and the team run the tree line, flush it out and drive it toward the wardline.",
       steps:[
@@ -444,7 +446,7 @@ let MISSIONS = {
     {
       id:"rn_patrol", type:"run", title:"The Long Patrol", loc:"The perimeter road around Czocha", diff:"Routine", rep:170, mins:40, icon:"🛤️",
       sum:"One steady run, 30 to 35 minutes at an easy talking pace. About 40 min.",
-      briefingLine:"A long patrol with nothing to find, which is the point. Learn to stay steady and observant when nothing is happening.",
+      briefingLine:"A long patrol with nothing to find. That is the point. Stay steady and keep your eyes open when nothing is happening, because that is when it happens.",
       flavor:"\"Most of the job is being somewhere unremarkable on time.\" Professor Wulfric",
       desc:"A routine perimeter patrol that has gone slightly long. No emergencies, only distance, weather, and a growing suspicion that the grounds are bigger than anyone admits.",
       steps:[
@@ -458,7 +460,7 @@ let MISSIONS = {
     {
       id:"rn_hobgoblin", type:"run", beast:true, title:"Hobgoblin Chase", loc:"The villages below the castle", diff:"Hazardous", rep:190, mins:35, icon:"🧌",
       sum:"A 25 minute run with 8 surges of 30 to 60 seconds. About 35 min.",
-      briefingLine:"One of my hobgoblins has escaped with a satchel again. They are faster than you, so be cleverer about it, and expect sulking when you catch it.",
+      briefingLine:"One of my hobgoblins has escaped with a satchel again. Fascinating, really, the planning that goes into it. They are faster than you, so be cleverer, and if the headmistress asks, this was a field safety exercise.",
       flavor:"\"It will stop. They always do, usually for snacks.\" Peer 03",
       desc:"A hobgoblin thief is darting through back lanes and orchards. Every time it breaks line of sight you surge. Every time you lose it, you slow, scan, and go again.",
       steps:[
@@ -472,7 +474,7 @@ let MISSIONS = {
     {
       id:"rn_ridge", type:"run", title:"Ridge Reconnaissance", loc:"The hills north of Czocha", diff:"Restricted", rep:220, mins:40, icon:"⛰️",
       sum:"8 uphill efforts of 60 to 90 seconds, walking or jogging down. About 40 min.",
-      briefingLine:"Hill work, because the high ground shows you things instruments cannot. Eight climbs, and I will be at the top with a flask and opinions.",
+      briefingLine:"Hill work. The high ground tells you things instruments cannot. Eight climbs. I will be at the top, and I will be counting.",
       flavor:"\"Every good view is paid for in advance.\" Peer 05",
       desc:"A series of repeated climbs up a ridge to check marker stones and gather readings, because the instruments cannot be trusted to do it alone.",
       steps:[
@@ -489,7 +491,7 @@ let MISSIONS = {
     {
       id:"mb_dawn", type:"mobility", title:"Wand Forms at Dawn", loc:"The castle's east terrace", diff:"Routine", rep:150, mins:25, icon:"🌅",
       sum:"Hips, spine and shoulders, plus slow breathing. About 25 min.",
-      briefingLine:"Physical Education calls these yoga-like wandcraft drills. I call it keeping the tool in repair. Slow and steady this morning, and watch your left shoulder.",
+      briefingLine:"Physical Education calls it yoga-like wandcraft drills. I call it maintenance. Your left shoulder drops when you are tired. Fix it.",
       flavor:"\"The body is the throne of magic. Keep it in repair.\" Czocha Handbook, Physical Education",
       desc:"Early morning on the terrace. Slow wandcraft forms, deep stretches, and the kind of discipline that makes next week's heavy day possible.",
       steps:[
@@ -503,7 +505,7 @@ let MISSIONS = {
     {
       id:"mb_breath", type:"mobility", title:"The Breathing Circle", loc:"A quiet room in the Mind Magic wing", diff:"Routine", rep:140, mins:20, icon:"🕯️",
       sum:"Box breathing, joint circles, gentle stretches. About 20 min.",
-      briefingLine:"Breathing practice before the heavier days. A clear head and loose joints. I would rather you did this than decide you do not need it.",
+      briefingLine:"Breathing practice. A clear head and loose joints. You will not skip it because you feel fine. Feeling fine is when people get careless.",
       flavor:"\"A mind that cannot be still will not stay steady under pressure.\" Professor Wulfric",
       desc:"A candlelit circle, controlled breathing, and slow joint work. This is recovery and focus training for a witchard who spends too much time tensed up.",
       steps:[
@@ -517,7 +519,7 @@ let MISSIONS = {
     {
       id:"mb_ritual", type:"mobility", title:"Ritual Circle Holds", loc:"The ritual hall beneath the keep", diff:"Hazardous", rep:170, mins:30, icon:"🔮",
       sum:"Long deep holds for hips, back and core. About 30 min.",
-      briefingLine:"Ritual Magic asks you to hold awkward positions for a very long time without twitching. Your hips will complain. Let them.",
+      briefingLine:"Ritual Magic asks you to hold awkward positions for a very long time without twitching. Your hips will complain. I do not care.",
       flavor:"\"The circle does not care if your legs have gone numb.\" Peer 02",
       desc:"A ritual rehearsal in which the real challenge is staying in awkward postures without twitching. Strength lives in the holds, not just the moves.",
       steps:[
@@ -531,7 +533,7 @@ let MISSIONS = {
     {
       id:"mb_infirmary", type:"mobility", title:"Infirmary Recovery Rounds", loc:"The castle infirmary", diff:"Routine", rep:130, mins:25, icon:"🩹",
       sum:"Foam rolling, easy walking and gentle stretching. About 25 min.",
-      briefingLine:"A recovery day. The infirmary nurse has been told to be firm with you. I expect you to enjoy none of it and benefit from all of it.",
+      briefingLine:"A recovery day. The nurse has been told to be firm with you. Rest is training. Do it properly, and I will see you tomorrow.",
       flavor:"\"Recovery is training with the volume turned down.\" Professor Wulfric",
       desc:"A recovery day after hard work. Slow rolling, easy walking, and gentle stretching to keep the engine in order.",
       steps:[
@@ -548,7 +550,7 @@ let MISSIONS = {
     {
       id:"hm_dorm", type:"home", title:"Dorm Room Breach", loc:"A converted tower dormitory", diff:"Hazardous", rep:190, mins:30, icon:"🛏️",
       sum:"A 4 round bodyweight circuit: 40 seconds on, 20 seconds off. About 30 min.",
-      briefingLine:"No equipment, a locked dormitory door, and a first year who has been inside since breakfast. Breach it the honest way.",
+      briefingLine:"No equipment, a locked dormitory door, and a first year who has been inside since breakfast. Breach it the honest way. I do not want to hear about your lack of gear.",
       flavor:"\"If it needs fixing quickly and quietly, send a Guardian with no gear.\" Peer 01",
       desc:"An improvised breach in a tower dormitory. No weights, no gear, no room to move, only your body and a stubborn lock.",
       steps:[
@@ -562,7 +564,7 @@ let MISSIONS = {
     {
       id:"hm_fireball", type:"home", title:"Fireball Practice", loc:"The practice pitch behind the castle", diff:"Hazardous", rep:190, mins:30, icon:"☄️",
       sum:"A 20 minute EMOM: jump squats, push-ups, mountain climbers, plank. About 30 min.",
-      briefingLine:"Peer 01 has organised a Fireball session and, for once, I approve. The Handbook says Fireball takes both body and magic in balance. I say it takes conditioning.",
+      briefingLine:"Peer 01 has organised a Fireball session, and I am refereeing. Yes, I will blow the whistle. Yes, I will notice if you coast.",
       flavor:"\"Every minute is a new play.\" Peer 01",
       desc:"A Fireball-style conditioning drill. Each minute has a job, and you get whatever time is left to breathe.",
       steps:[
@@ -576,7 +578,7 @@ let MISSIONS = {
     {
       id:"hm_corridor", type:"home", title:"Hold the Corridor", loc:"A castle corridor with no way around", diff:"Restricted", rep:210, mins:35, icon:"🚪",
       sum:"Push-up and squat pyramids to 8 and back, plus planks. About 35 min.",
-      briefingLine:"One corridor, one of you, and no way around. Take your time and keep it clean.",
+      briefingLine:"One corridor, one of you, and no way around. This is Magical Combat, not Magical Defence, whatever the timetable says. Hold it.",
       flavor:"\"A narrow place is a strong place.\" Peer 02",
       desc:"A bodyweight pyramid that rewards steady pacing. You build the wall one rep at a time, then take it apart again.",
       steps:[
@@ -590,7 +592,7 @@ let MISSIONS = {
     {
       id:"hm_alarm", type:"home", title:"Alarm Ward Intervals", loc:"The technomancy workshop", diff:"Hazardous", rep:180, mins:30, icon:"🚨",
       sum:"Four Tabata blocks of 20 seconds on, 10 seconds off. About 30 min.",
-      briefingLine:"Peer 04 has built an alarm ward that sounds when you slow down. You are the test subject. I have signed the form.",
+      briefingLine:"Peer 04 has built an alarm ward that sounds when you slow down. I signed the form. Do not make it beep.",
       flavor:"\"It only beeps when it works. Which is mostly now.\" Peer 04",
       desc:"Short, hard intervals set to a magical metronome. The alarm beeps if you coast. It is unpleasantly good at that.",
       steps:[
@@ -631,14 +633,20 @@ function teamBonus(ids, type) {
 
 let BANTER = {
   wulfric: [
-    { at:"start", line:"Warm up properly, Sterling. I would rather you were slow and sound than quick and torn." },
-    { at:"mid",   line:"You are halfway. Breathe out on the effort, and keep your shoulders away from your ears." },
-    { at:"push",  line:"That is the last stretch. You are doing better than you think, so finish it well." },
+    { at:"start", line:"Warm-up. Properly. I will not carry you to the infirmary because you were in a hurry." },
+    { at:"start", line:"No excuses today, Sterling. Start." },
+    { at:"mid",   line:"Halfway is not an achievement. It is a location. Keep moving." },
+    { at:"mid",   line:"Your form is slipping. Fix it, or I will make the session longer." },
+    { at:"push",  line:"Again. The best defence is a good offence, and you are not on offence yet." },
+    { at:"push",  line:"Good. Now do it once more, properly." },
   ],
   fia: [
-    { at:"start", line:"Nice and steady to begin with. A creature can smell panic, and so can I." },
-    { at:"mid",   line:"Halfway. Watch your footing and keep your breathing even. Nothing out here is as fast as it looks." },
-    { at:"push",  line:"Last push! Even the wyvern would be impressed. It would not say so, but it would be." },
+    { at:"start", line:"Fascinating! Let's see what happens! Mind your footing, but mostly just go." },
+    { at:"start", line:"Warm up first. I think. Yes, that is probably in the safety guidelines." },
+    { at:"mid",   line:"Halfway! I once watched a jackalope cross a whole glacier at this pace. Admittedly it was being chased." },
+    { at:"mid",   line:"You are doing wonderfully. If anyone asks, this was a supervised field exercise." },
+    { at:"push",  line:"Last push! Do not worry about the droppings, I will collect them later." },
+    { at:"push",  line:"Almost there! Nobody has been nearly carried off today, which is a personal best." },
   ],
   p01: [
     { at:"start", line:"Same class, same rivalry, different castle. Try to keep up." },
@@ -826,7 +834,9 @@ function BriefingSection({ mission, apiKey, onBegin, onBack }) {
     }
     setThinking(true);
     try {
-      const sys=`You are ${lead.name}, in the world of the College of Wizardry (Czocha College of Witchcraft and Wizardry, Lower Silesia, Poland). ${lead.id==="fia"?"You are the Professor of Beastology, and you brief any assignment that involves creatures.":"You are Sterling Ashbourne's adoptive father, a professor with close ties to the Guardian Order, and you brief her assignments."} You are delivering the pre-assignment briefing inside a workout app called the Crossed Keys Training Log.
+      const sys=`You are ${lead.name}, in the world of the College of Wizardry (Czocha College of Witchcraft and Wizardry, Lower Silesia, Poland). You are delivering the pre-assignment briefing inside a workout app called the Crossed Keys Training Log. ${lead.id==="fia"?"You brief any assignment that involves creatures.":"You brief her assignments."}
+
+ABOUT YOU: ${lead.bio}
 
 WHO STERLING IS: ${HERO.full}, a young Sendivogian witchard, recently graduated from Czocha, being trained as a candidate for the Guardian Order. Her adoptive father, Professor Wulfric, is preparing her and sets practice missions and assignments for her and the Senior students, who are back at school. She is building physical and magical strength. Today's workout is a practice mission. Missions involving beasts are briefed by Professor Fia Mallow, the Beastology professor.
 
@@ -1118,7 +1128,7 @@ function PartyView({ gs }) {
     ),
     h('div',{style:"padding:4px 16px 24px"},
       h('div',{class:"peer-list"},
-        h(PeerRow,{c:WULFRIC,type:"",selected:false,extra:"Briefs, encourages and urges you on"}),
+        h(PeerRow,{c:WULFRIC,type:"",selected:false,extra:"Briefs, pushes and urges you on"}),
         h(PeerRow,{c:FIA,type:"",selected:false,extra:"Takes over whenever beasts are involved"}),
         CREW.map(c=>{
           const chs=gs.ch[c.id]||{xp:0,level:1};
@@ -1228,6 +1238,7 @@ STORY: ${mission.desc}
 WORKOUT TYPE: ${wt.label} (${wt.short})
 PHASE: ${phase}. Elapsed: ${Math.floor(elapsed/60)} min. Current step: ${cur.l} (${cur.s})
 HER TEAM: ${crewObjs.map(c=>c.name+" ("+c.role+")").join(", ")}
+ABOUT ${lead.name.toUpperCase()}: ${lead.bio}
 WATCHING AND ENCOURAGING: ${lead.name} (tips, encouragement and urging come from this professor only${lead.id==='fia'?', because beasts are involved':''})
 
 RECENT SCENE:
