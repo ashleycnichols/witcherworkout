@@ -171,6 +171,18 @@
   .briefing-send:disabled { opacity:0.3; }
   .briefing-thinking { font-size:16px; color:var(--muted); padding:2px 4px; }
 
+  .brief-top { padding:0 16px; flex-shrink:0; }
+  .brief-top .stepbar { padding:2px 0 8px; }
+  .brief-hero { background:var(--card); border:1px solid var(--line); border-top:4px solid var(--house); padding:16px; margin-bottom:12px; }
+  .brief-who { font-size:18px; font-weight:700; }
+  .brief-title { font-family:var(--font-display); font-size:19px; font-weight:700; color:var(--text); line-height:1.25; }
+  .brief-text { font-size:20px; line-height:1.5; color:var(--text); }
+  .brief-card { background:var(--bg2); border:1px solid var(--line); padding:14px; margin-bottom:12px; }
+  .brief-wt { font-size:17px; font-weight:600; color:var(--house-hi); margin-bottom:4px; }
+  .brief-sum { font-size:17px; line-height:1.45; color:var(--text); }
+  .brief-steps { margin:10px 0 0 20px; }
+  .brief-steps li { font-size:16px; line-height:1.45; margin-bottom:8px; }
+  .link-btn { color:var(--house-hi); font-size:16px; font-weight:600; text-decoration:underline; padding:10px 0 2px; min-height:40px; }
   .plan-box { margin:0 16px 10px; background:var(--card); border:1px solid var(--line); padding:10px 14px; }
   .plan-box ol { padding-left:20px; }
   .plan-box li { font-size:16px; color:var(--text); line-height:1.4; margin-bottom:6px; }
@@ -825,7 +837,12 @@ async function callClaude(apiKey, system, messages, max_tokens) {
     else msg=`The narrator hit an error (${res.status}). ${raw}`.trim();
     throw new Error(msg);
   }
-  return (data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
+  let out=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n").trim();
+  if(data.stop_reason==="max_tokens") {   // cut off mid-sentence: keep only complete sentences
+    const end=Math.max(out.lastIndexOf(". "),out.lastIndexOf("! "),out.lastIndexOf("? "),out.lastIndexOf(".\n"));
+    if(end>20) out=out.slice(0,end+1);
+  }
+  return out;
 }
 
 // Builds a valid message list: starts with the user, alternates roles, ends with the new text.
@@ -836,6 +853,31 @@ function toMessages(hist, text, opener) {
   if(msgs[msgs.length-1].role==="user") msgs[msgs.length-1].content+="\n"+text; else msgs.push({role:"user",content:text});
   return msgs;
 }
+// Turns "Name: what they say" lines into feed items. Never shows raw code to the user.
+function parseCastLines(raw, cast){
+  const txt=String(raw||"").replace(/```[a-z]*|```/gi,"").trim();
+  const out=[];
+  const byName=n=>cast.find(c=>c.name===n)||cast[0];
+  if(txt.startsWith("{")) {
+    try{ const j=JSON.parse(txt); (j.responses||[]).forEach(r=>out.push({c:byName(r.crew),text:String(r.text||"")})); }catch{
+      const cut=t=>{ const e=Math.max(t.lastIndexOf("."),t.lastIndexOf("!"),t.lastIndexOf("?")); return e>10?t.slice(0,e+1):t; };   // reply was cut off
+      [...txt.matchAll(/"crew"\s*:\s*"([^"]+)"\s*,\s*"text"\s*:\s*"((?:[^"\\]|\\.)*)/g)].forEach(m=>out.push({c:byName(m[1]),text:cut(m[2].replace(/\\"/g,'"'))}));
+    }
+    if(out.length) return out.slice(0,2);
+  }
+  const aliases=[];
+  cast.forEach(c=>{ const short=c.name.replace(/^Professor\s+/,""); [c.name,short,short.split(" ")[0]].forEach(a=>aliases.push({a:a.toLowerCase(),c})); });
+  aliases.sort((x,y)=>y.a.length-x.a.length);
+  txt.split(/\n+/).forEach(line=>{
+    const l=line.replace(/\*\*/g,"").trim().replace(/^[-*•\s]+/,""); if(!l) return;
+    const hit=aliases.find(x=>l.toLowerCase().startsWith(x.a+":"));
+    if(hit) out.push({c:hit.c,text:l.slice(hit.a.length+1).trim()});
+    else if(out.length) out[out.length-1].text+=" "+l;
+    else out.push({c:cast[0],text:l});
+  });
+  return out.slice(0,2).map(o=>({...o,text:o.text.replace(/^["“']+|["”']+$/g,"").trim()})).filter(o=>o.text && !/^[\[{]/.test(o.text));
+}
+
 const noDashes = t => String(t||"").replace(/[\u2013\u2014]/g,",");
 
 /* ── Rest chime ── iOS only allows sound after a tap, so unlockAudio() runs when a set is logged.
@@ -925,9 +967,12 @@ function BriefingSection({ mission, apiKey, onBegin, onBack }) {
   const [input,    setInput]    = useState("");
   const [thinking, setThinking] = useState(false);
   const [showPlan, setShowPlan] = useState(false);
-  const feedRef = useRef(null);
+  const [chatOpen, setChatOpen] = useState(false);
+  const scrollRef = useRef(null);
+  const inputRef  = useRef(null);
 
-  useEffect(()=>{ if(feedRef.current) feedRef.current.scrollTop=feedRef.current.scrollHeight; },[feed,thinking]);
+  useEffect(()=>{ if(chatOpen&&scrollRef.current) scrollRef.current.scrollTop=scrollRef.current.scrollHeight; },[feed,thinking,chatOpen]);
+  useEffect(()=>{ if(chatOpen&&inputRef.current) inputRef.current.focus(); },[chatOpen]);
 
   async function sendMsg() {
     const text=input.trim(); if(!text||thinking) return;
@@ -962,63 +1007,68 @@ TONE: A mix of campus-caper humour and serious Guardian training. These are prac
 FORMAT: Two-way conversation. Reply in character. Under 3 sentences. No monologues. NEVER use em dashes or en dashes. No fitness-influencer language. No JSON. Speak as ${lead.name} only.`;
 
       const hist=feed.filter(f=>f.type!=="system").map(f=>({role:f.type==="player"?"user":"assistant",content:f.text}));
-      const reply=noDashes(await callClaude(apiKey, sys, toMessages(hist, text, "(Sterling arrives for the briefing.)"), 200)||"...");
+      const reply=noDashes(await callClaude(apiKey, sys, toMessages(hist, text, "(Sterling arrives for the briefing.)"), 300)||"...");
       setFeed(f=>[...f,{type:"companion",cid:lead.id,text:reply}]);
     } catch(err) {
       setFeed(f=>[...f,{type:"system",text:err.message}]);
     } finally { setThinking(false); }
   }
 
-  return h('div',{class:"view fade-in",style:"display:flex;flex-direction:column;height:100%;"},
-    h(StepBar,{now:1}),
-    h('div',{style:"padding:0 16px 8px;border-bottom:1px solid var(--line);flex-shrink:0"},
+  const chat = feed.slice(1);
+  const firstName = lead.name.replace(/^Professor\s+/,"").split(" ")[0];
+
+  return h('div',{class:"view fade-in",style:"display:flex;flex-direction:column;height:100%;overflow:hidden;"},
+    h('div',{class:"brief-top"},
       h('button',{class:"back-btn",onClick:onBack},"← Back"),
-      h('div',{class:"row",style:"gap:8px;margin:4px 0 6px"},
-        h('span',{style:"font-size:30px"},mission.icon),
-        h('div',null,
-          h('div',{class:"display",style:"font-size:14px;font-weight:700;color:var(--text)"},mission.title),
-          h('div',{class:"hint"},mission.loc)
-        )
+      h(StepBar,{now:1})
+    ),
+    h('div',{ref:scrollRef,style:"flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 16px 16px"},
+      h('div',{class:"brief-hero"},
+        h('div',{class:"row",style:"gap:14px;margin-bottom:12px"},
+          h(CompanionIcon,{id:lead.id,size:64}),
+          h('div',{style:"min-width:0"},
+            h('div',{class:"brief-who",style:`color:${lead.color}`},lead.name),
+            h('div',{class:"hint",style:"font-size:14px"},lead.id==="fia"?"Beastology":"Your briefing")
+          )
+        ),
+        h('div',{class:"brief-title"},`${mission.icon} ${mission.title}`),
+        h('div',{class:"hint",style:"margin-bottom:12px"},mission.loc),
+        h('div',{class:"brief-text"},`"${mission.briefingLine}"`)
       ),
-      h('div',{class:"row",style:"gap:6px"},
-        h('span',{style:"font-size:15px"},wt.icon),
-        h('span',{class:"display",style:"font-size:13px;font-weight:700;color:var(--house-hi);letter-spacing:1px;text-transform:uppercase"},wt.label),
-        h(Tag,{color:diffColor(mission.diff)},mission.diff),
-        h('span',{class:"hint",style:"margin-left:auto"},`~${mission.mins} min`)
-      )
-    ),
-    h('div',{style:"padding:8px 16px 0;flex-shrink:0"},
-      h('div',{class:"mc-sum",style:"margin:0 0 6px"},h('b',null,"You will do"),mission.sum),
-      h('button',{class:"ghost-btn",onClick:()=>setShowPlan(s=>!s)},showPlan?"Hide plan":"See full plan")
-    ),
-    showPlan&&h('div',{class:"plan-box",style:"margin-top:8px;max-height:150px;overflow-y:auto"},
-      h('ol',null,mission.steps.map((s,i)=>h('li',{key:i},h('b',{style:"color:var(--gold)"},s.l+": "),s.d)))
-    ),
-    h('div',{class:"briefing-feed",ref:feedRef,style:"flex:1;"},
-      feed.map((item,i)=>{
-        if(item.type==="companion") {
-          const c=ALL_FOLK.find(x=>x.id===item.cid)||lead;
+      h('div',{class:"brief-card"},
+        h('div',{class:"row",style:"justify-content:space-between;margin-bottom:6px"},
+          h('div',{class:"section-head",style:"margin:0"},"Today's workout"),
+          h(Tag,{color:diffColor(mission.diff)},mission.diff)
+        ),
+        h('div',{class:"brief-wt"},`${wt.icon} ${wt.label}, about ${mission.mins} min`),
+        h('div',{class:"brief-sum"},mission.sum),
+        h('button',{class:"link-btn",onClick:()=>setShowPlan(s=>!s)},showPlan?"Hide the steps":"Show all steps"),
+        showPlan&&h('ol',{class:"brief-steps"},mission.steps.map((st,i)=>h('li',{key:i},h('b',null,st.l+". "),st.d)))
+      ),
+      !chatOpen&&h('button',{class:"ghost-btn",style:"width:100%;margin-top:4px",onClick:()=>setChatOpen(true)},`Ask ${firstName} a question`),
+      chatOpen&&h('div',{style:"margin-top:6px"},
+        chat.map((item,i)=>{
+          if(item.type==="system") return h('div',{key:i,class:"sys-note"},`Narrator unavailable: ${item.text}`);
+          if(item.type==="player") return h('div',{key:i,class:"briefing-player slide-up"},
+            h('div',{class:"briefing-p-who"},HERO.name),
+            h('div',{class:"briefing-p-text"},item.text)
+          );
           return h('div',{key:i,class:"briefing-msg banter-in"},
-            h(CompanionIcon,{id:c.id,size:44}),
+            h(CompanionIcon,{id:lead.id,size:40}),
             h('div',{class:"briefing-bubble"},
-              h('div',{class:"briefing-who",style:`color:${c.color}`},c.name),
+              h('div',{class:"briefing-who",style:`color:${lead.color}`},lead.name),
               h('div',{class:"briefing-text"},`"${item.text}"`)
             )
           );
-        }
-        if(item.type==="system") return h('div',{key:i,class:"sys-note"},`Narrator unavailable: ${item.text}`);
-        return h('div',{key:i,class:"briefing-player slide-up"},
-          h('div',{class:"row",style:"gap:8px;margin-bottom:4px"},h(CompanionIcon,{id:HERO.id,size:30}),h('div',{class:"briefing-p-who",style:"margin:0"},HERO.name)),
-          h('div',{class:"briefing-p-text"},item.text)
-        );
-      }),
-      thinking&&h('div',{class:"briefing-msg pulsing"},
-        h(CompanionIcon,{id:lead.id,size:44}),
-        h('div',{class:"briefing-bubble"},h('div',{class:"briefing-thinking"},"..."))
+        }),
+        thinking&&h('div',{class:"briefing-msg pulsing"},
+          h(CompanionIcon,{id:lead.id,size:40}),
+          h('div',{class:"briefing-bubble"},h('div',{class:"briefing-thinking"},"..."))
+        )
       )
     ),
-    h('div',{class:"briefing-input-row"},
-      h('input',{class:"briefing-input",value:input,placeholder:apiKey?`Ask ${lead.name} anything (optional)...`:`Say something to ${lead.name} (optional)...`,onInput:e=>setInput(e.target.value),onKeyDown:e=>{if(e.key==="Enter"){e.preventDefault();sendMsg();}},disabled:thinking}),
+    chatOpen&&h('div',{class:"briefing-input-row"},
+      h('input',{ref:inputRef,class:"briefing-input",value:input,placeholder:`Ask ${firstName}...`,onInput:e=>setInput(e.target.value),onKeyDown:e=>{if(e.key==="Enter"){e.preventDefault();sendMsg();}},disabled:thinking}),
       h('button',{class:"briefing-send",disabled:!input.trim()||thinking,onClick:sendMsg},"➤")
     ),
     h('div',{class:"footer-bar"},
@@ -1110,8 +1160,10 @@ function Meter({ label, value, color }) {
   );
 }
 
-function HomeView({ gs, setGs, onStartWorkout, apiKey }) {
+function HomeView({ gs, setGs, onStartWorkout, apiKey, onFlow }) {
   const [step,    setStep]    = useState("home"); // "home" | "briefing" | "party"
+  useEffect(()=>{ onFlow&&onFlow(step!=="home"); },[step]);
+  useEffect(()=>()=>{ onFlow&&onFlow(false); },[]);
   const [selectedMission, setSelectedMission] = useState(null);
 
   const daily   = getDailyMissions();
@@ -1383,22 +1435,19 @@ HOW TO RESPOND:
 CHARACTER VOICES:
 ${voiceGuide}
 
-Respond ONLY as JSON, no markdown:
-{"responses":[{"crew":"Name","text":"what they say or do"}]}
-Maximum 2 responses.`;
+FORMAT: 1 or 2 lines only. Each line starts with the character's exact name, a colon, then what they say or do. For example:
+${lead.name}: Shoulders down. Again.
+No JSON, no markdown, no narration outside those lines. Keep each line under 40 words.`;
 
       const hist = feed.slice(-8).map(f=>{
         if(f.type==="player") return {role:"user",content:f.text};
-        if(f.type==="banter") return {role:"assistant",content:JSON.stringify({responses:[{crew:ALL_FOLK.find(x=>x.id===f.cid)?.name||f.cid,text:f.text}]})};
+        if(f.type==="banter") return {role:"assistant",content:`${ALL_FOLK.find(x=>x.id===f.cid)?.name||f.cid}: ${f.text}`};
         return null;
       }).filter(Boolean);
-      const rawText=(await callClaude(apiKey, sys, toMessages(hist, text, "(The mission begins.)"), 300))||"{}";
-      let parsed;
-      try{ parsed=JSON.parse(rawText.replace(/```json|```/g,"").trim()); }catch{ parsed={responses:[{crew:cast[0].name,text:rawText}]}; }
-      (parsed.responses||[]).slice(0,2).forEach(r=>{
-        const c=cast.find(x=>x.name===r.crew)||cast[0];
-        addFeed({type:"banter",cid:c.id,text:noDashes(r.text)});
-      });
+      const raw=await callClaude(apiKey, sys, toMessages(hist, text, "(The mission begins.)"), 450);
+      const lines=parseCastLines(raw, cast);
+      if(!lines.length) throw new Error("The reply came back empty. Try again.");
+      lines.forEach(o=>addFeed({type:"banter",cid:o.c.id,text:noDashes(o.text)}));
     } catch(err) {
       addFeed({type:"system",text:err.message});
     } finally { setThinking(false); }
@@ -1700,6 +1749,7 @@ function App() {
   const [view,    setView]    = useState(()=>workout?"workout":"home");
   const [apiKey,  setApiKey]  = useState(()=>LS.get(KEY_API)||LS.get("witcher_api")||"");
   const [showApi, setShowApi] = useState(false);
+  const [inFlow,  setInFlow]  = useState(false);   // true during briefing and team steps
   const [finishing,setFinishing]=useState(null);
 
   function setGs(updater) {
@@ -1786,10 +1836,10 @@ function App() {
       h(CompanionIcon,{id:HERO.id,size:34,style:"border:2px solid #ecd5d8;"}),h('div',{class:"topbar-sub"},HERO.name),
       h('button',{class:"pill-btn",style:`color:${apiKey?"#f3c6cc":"#f3d27f"};border-color:${apiKey?"#f3c6cc99":"#f3d27faa"}`,onClick:()=>setShowApi(true)},apiKey?"Narrator on":"Narrator off")
     )),
-    view==="home"   &&h(HomeView,   {gs,setGs,onStartWorkout:startWorkout,apiKey}),
+    view==="home"   &&h(HomeView,   {gs,setGs,onStartWorkout:startWorkout,apiKey,onFlow:setInFlow}),
     view==="party"  &&h(PartyView,  {gs}),
     view==="journal"&&h(JournalView,{gs,setGs}),
-    h(NavBar,{view,setView})
+    !(view==="home"&&inFlow)&&h(NavBar,{view,setView})
   );
 }
 
