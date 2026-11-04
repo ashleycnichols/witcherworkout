@@ -287,6 +287,14 @@
   .empty-sub      { font-family:var(--font-ui); font-size:13px; font-weight:700; letter-spacing:2px; color:var(--house-hi); text-transform:uppercase; margin-top:8px; }
   .ex-pick-btn.today { border-color:var(--gold-bright); background:var(--gold-bg); }
   .ex-pick-btn.today.active { border-color:var(--house); background:var(--raised); }
+  .log-tip { font-size:15px; line-height:1.4; color:var(--text); background:var(--gold-bg); border:1px solid var(--gold-bright); padding:8px 10px; margin:-4px 0 12px; }
+  .rec-card { background:var(--gold-bg); border:2px solid var(--gold-bright); padding:12px 14px; margin-bottom:14px; }
+  .rec-label { font-size:12px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase; color:var(--gold); margin-bottom:3px; }
+  .rec-text { font-size:17px; line-height:1.4; color:var(--text); }
+  .mission-card.recommended { border:2px solid var(--gold-bright); border-left:5px solid var(--gold-bright); }
+  .plan-row { display:flex; gap:8px; margin-bottom:10px; flex-wrap:wrap; }
+  .plan-pill { font-size:15px; font-weight:600; padding:6px 10px; border:1.5px solid var(--line); background:var(--bg); color:var(--muted); }
+  .plan-pill.met { border-color:var(--ok); color:var(--ok); background:#eaf4e8; }
   .del-btn { font-family:var(--font-ui); font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--ember); padding:8px 10px; min-height:40px; }
   .lift-ex-name { font-family:var(--font-ui); font-weight:700; font-size:14px; color:var(--text); }
   .lift-sets    { font-size:15px; color:var(--house-hi); }
@@ -346,17 +354,17 @@ const leadFor = m => m && m.beast ? FIA : WULFRIC;
 // Six fellow Senior students, back at Czocha. "sendi:true" marks a fellow Sendivogian (Sterling's own house).
 // Rename freely: story text that says "Peer 01" etc. picks up the new name automatically.
 const PEERS = [
-  { id:"p01", name:"Ines Vargas",    role:"Senior, Guardian path (Combat)", sendi:true,  icon:"🔥", color:"#c4432b", fit:["strength","home"],    tags:["Blunt","Brawler"],
+  { id:"p01", name:"Ines Vargas",    role:"Senior, Guardian path (Combat)", sendi:true,  icon:"🔥", color:"#c4432b", fit:["strength","vr"],    tags:["Blunt","Brawler"],
     voice:"Blunt and competitive. A long-running rivalry with Sterling that is mostly affection. Short sentences. Teases, then helps. Not above celebrating with a bottle afterwards." },
   { id:"p02", name:"Liesl Morrow",   role:"Senior, Guardian path (Bound)",  sendi:true,  icon:"⛓️", color:"#7d4e96", fit:["mobility","strength"], tags:["Calm","Bound"],
     voice:"Calm, measured, a little eerie. Speaks softly and says things that land. Utterly loyal. Never rushes." },
-  { id:"p03", name:"Saoirse Quill",  role:"Senior, Curse Breaker path",     sendi:false, icon:"🧭", color:"#1f7fae", fit:["run","home"],          tags:["Chatty","Fast"],
+  { id:"p03", name:"Saoirse Quill",  role:"Senior, Curse Breaker path",     sendi:false, icon:"🧭", color:"#1f7fae", fit:["run","pool"],          tags:["Chatty","Fast"],
     voice:"Upbeat and talkative, laughs easily, usually eating something. Fast and knows it. Cheerful even in bad situations." },
-  { id:"p04", name:"Tomasz Brandt",  role:"Senior, Alchemy",                sendi:false, icon:"⚗️", color:"#5b8a35", fit:["mobility","home"],     tags:["Precise","Alchemy"],
+  { id:"p04", name:"Tomasz Brandt",  role:"Senior, Alchemy",                sendi:false, icon:"⚗️", color:"#5b8a35", fit:["mobility","vr"],     tags:["Precise","Alchemy"],
     voice:"Fussy perfectionist alchemist. Measures everything twice and says so. Corrects form and procedure the way he corrects a recipe. Secretly kind." },
   { id:"p05", name:"Jonah Vasko",    role:"Senior, Cryptozoologist path",   sendi:false, icon:"🐾", color:"#8f7440", fit:["run","strength"],      tags:["Quiet","Tracker"],
     voice:"Quiet and observational. Most at home outdoors at night. Reads terrain and animals better than people. Uses animal comparisons. Speaks rarely." },
-  { id:"p06", name:"Henrik Solberg", role:"Senior, Conflux Studies",        sendi:true,  icon:"📜", color:"#55769a", fit:["mobility","run"],      tags:["Sardonic","Treaties"],
+  { id:"p06", name:"Henrik Solberg", role:"Senior, Conflux Studies",        sendi:true,  icon:"📜", color:"#55769a", fit:["pool","mobility"],      tags:["Sardonic","Treaties"],
     voice:"Sardonic. Cites treaty clauses and procedure at the worst moments. Dry wit. Surprisingly good in a crisis." },
 ];
 
@@ -384,175 +392,206 @@ function CompanionIcon({ id, size=32, style="" }) {
 }
 
 const WORKOUT_TYPES = [
-  { id:"strength", label:"Weightlifting", icon:"🏋️", sub:"Field Strength: barbell and dumbbell work", short:"barbell and dumbbell lifting", bodyCraft:{body:3,craft:1} },
-  { id:"run",      label:"Running",       icon:"🏃", sub:"Pursuit Conditioning: runs and intervals",  short:"running and intervals",       bodyCraft:{body:3,craft:1} },
-  { id:"mobility", label:"Mobility",      icon:"🧘", sub:"Wand Forms: stretching, breath, ritual discipline", short:"mobility, breathing and wand forms", bodyCraft:{body:1,craft:3} },
-  { id:"home",     label:"Home Workout",  icon:"🔥", sub:"Field Drills: bodyweight, no equipment",    short:"bodyweight circuits",         bodyCraft:{body:2,craft:2} },
+  { id:"strength", label:"Weightlifting", icon:"🏋️", sub:"Field Strength: your 3-day lifting plan", short:"weightlifting for strength and muscle", bodyCraft:{body:3,craft:1} },
+  { id:"run",      label:"Sprints",       icon:"⚡", sub:"Pursuit Drills: short, hard bursts",      short:"sprint intervals",                 bodyCraft:{body:3,craft:1} },
+  { id:"pool",     label:"Pool",          icon:"🏊", sub:"Lake Drills: swimming",                   short:"swimming",                         bodyCraft:{body:2,craft:2} },
+  { id:"vr",       label:"VR Workout",    icon:"🥽", sub:"Illusion Chamber: VR training",           short:"a VR fitness game",                bodyCraft:{body:2,craft:2} },
+  { id:"mobility", label:"Mobility",      icon:"🧘", sub:"Wand Forms and back care",                short:"mobility and back care",           bodyCraft:{body:1,craft:3} },
 ];
+const CONDITIONING = ["run","pool","vr"];
 
 /* Missions. Each has a real prescription in steps[]. Step 1 is always the warm-up.
    d = what to do, s = the story beat shown when the step starts.
+   ex = exercises for the Log Set picker, with target sets and rep range (lo to hi).
+   Plan: strength and muscle for a returning lifter. Three lifting days in rotation (lower, upper, full body),
+   no deadlifts (back-friendly swaps instead), plus one sprint, pool or VR session a week.
+   Progression: when every set reaches the top of the rep range, go up a little next time. The Log Set panel prompts this.
    Difficulty uses Order classifications: Routine, Hazardous, Restricted. */
 let MISSIONS = {
+  // Lifting days run in order: A, B, C, then back to A.
   strength: [
     {
-      id:"st_gate", type:"strength", ex:["Squat", "Bench Press", "Barbell Row", "Plank"], title:"Warding the Lower Gate", loc:"Czocha, the lower gate and courtyard", diff:"Hazardous", rep:200, mins:55, icon:"🏰",
-      sum:"Squat, bench press, barbell row, plank. About 55 min.",
-      briefingLine:"The lower gate wards are a practice assignment. They are also a test, and I do not repeat tests. Warm up properly, Sterling, or do not start.",
+      id:"st_gate", type:"strength", title:"Warding the Lower Gate", loc:"Czocha, the lower gate and courtyard", diff:"Hazardous", rep:200, mins:55, icon:"🏰",
+      ex:[{n:"Goblet Squat",sets:3,lo:8,hi:12},{n:"Hip Thrust",sets:3,lo:8,hi:12},{n:"Bulgarian Split Squat",sets:2,lo:8,hi:10},{n:"Leg Curl",sets:2,lo:10,hi:15}],
+      sum:"Lifting day A, legs and glutes: goblet squat, hip thrust, split squat, leg curl, back-care core. About 55 min.",
+      briefingLine:"Lower body today. The gate wards hold because the legs under them hold. Warm up properly, Sterling, and stop anything that hurts your back. That is an order, not a suggestion.",
       flavor:"\"A ward holds because someone keeps holding it.\" Professor Wulfric",
-      desc:"Overnight the wards on the lower gate began to sag. You are holding them up the honest way, under load, until the wardkeepers finish their repairs.",
+      desc:"Overnight the wards on the lower gate began to sag. You are holding them up the honest way, under load, until the repairs are done.",
       steps:[
-        {l:"Walk the Perimeter",  d:"Warm-up, 8 minutes. Easy bike or brisk walk, then 10 bodyweight squats, 10 arm circles each way, 10 hip hinges, 10 band pull-aparts or scapular push-ups.", s:"Wulfric hands you a lantern and walks the gate line with you. Nothing is wrong yet. That is when he makes you check twice."},
-        {l:"Hold the Arch",       d:"Back squat, 4 sets of 6 at a weight that leaves 1 to 2 reps in reserve. Rest 2 minutes between sets.", s:"The arch groans under a ward that is thinner than it should be. You plant your feet and take the weight."},
-        {l:"Push the Door",       d:"Bench press (or dumbbell press), 4 sets of 6 to 8. Rest 90 seconds between sets.", s:"A heavy oak door has jammed on the wrong side of a warding line. Someone has to push, and it is going to be you."},
-        {l:"Haul the Chain",      d:"Barbell row, 4 sets of 8. Rest 90 seconds between sets.", s:"The portcullis chain needs hauling by hand, because the winch was enchanted by a first year and will not stop singing."},
-        {l:"Brace the Keystone",  d:"Plank, 3 holds of 45 seconds. Rest 45 seconds. Finish with a 3 minute easy walk.", s:"Last job. You brace the keystone while the wardkeepers rune it shut. It takes exactly as long as it takes."},
+        {l:"Walk the Perimeter",  d:"Warm-up, 8 minutes. 5 minutes easy on the bike, then 12 glute bridges, 6 bird dogs each side, 10 bodyweight box squats. Do 2 light practice sets of goblet squats. All day: pick weights you could lift 2 to 3 more times at the end of each set.", s:"Wulfric hands you a lantern and walks the gate line with you. Nothing is wrong yet. That is when he makes you check twice."},
+        {l:"Hold the Arch",       d:"Goblet squat, 3 sets of 8 to 12. Hold one dumbbell at your chest, sit down between your heels, chest tall. Rest 90 seconds. (Leg press is a fine swap.)", s:"The arch groans under a ward that is thinner than it should be. You plant your feet and take the weight."},
+        {l:"Brace the Door",      d:"Hip thrust, 3 sets of 8 to 12. Upper back on a bench, bar or dumbbell on your hips, squeeze your glutes hard at the top for a second. Rest 90 seconds.", s:"A heavy oak door has jammed on the wrong side of a warding line. You set your back against the wall and drive it shut with your hips."},
+        {l:"Ledge Work",          d:"Bulgarian split squat, 2 sets of 8 to 10 each leg (bodyweight or light dumbbells), then leg curl machine, 2 sets of 10 to 15. Rest 60 to 90 seconds.", s:"The path narrows to a ledge along the wall. One leg at a time, with a drop on the left."},
+        {l:"Seal the Stones",     d:"Back-care core: dead bug, 2 sets of 8 each side, slow. Side plank, 2 holds of 20 to 30 seconds each side. Then walk 3 minutes.", s:"Last job. You brace the keystone while the wards are runed shut. Wulfric nods once."},
       ],
     },
     {
-      id:"st_reliquary", type:"strength", ex:["Deadlift", "Farmer's Carry", "Overhead Press", "Pull-up"], title:"Carry the Reliquary", loc:"Escort route, Czocha to the Wroclaw Conflux", diff:"Hazardous", rep:210, mins:50, icon:"📦",
-      sum:"Deadlift, farmer's carry, overhead press, pull-ups. About 50 min.",
-      briefingLine:"You will carry a sealed crate across the grounds. No levitation, because levitation fails when you most need it. Lift, carry, and do not complain.",
+      id:"st_reliquary", type:"strength", title:"Carry the Reliquary", loc:"Escort route, Czocha to the Wroclaw Conflux", diff:"Hazardous", rep:200, mins:55, icon:"📦",
+      ex:[{n:"Seated Dumbbell Press",sets:3,lo:8,hi:12},{n:"Lat Pulldown",sets:3,lo:8,hi:12},{n:"Incline Dumbbell Press",sets:3,lo:8,hi:12},{n:"Chest-Supported Row",sets:3,lo:10,hi:12},{n:"Lateral Raise",sets:2,lo:12,hi:15},{n:"Cable Curl",sets:2,lo:10,hi:15},{n:"Triceps Pushdown",sets:2,lo:10,hi:15}],
+      sum:"Lifting day B, shoulders, back and arms: shoulder press, pulldown, incline press, row, then arms. About 55 min.",
+      briefingLine:"Upper body. Shoulders, back, arms. You will carry a sealed crate across the grounds, no levitation, because levitation fails when you most need it. Lift, carry, and do not complain.",
       flavor:"\"Everything valuable is heavier than it looks.\" Professor Wulfric",
       desc:"A Bound Guardian escort moves a sealed artefact across hostile ground. The crate is warded against magic, which means it is carried by people.",
       steps:[
-        {l:"Inspect the Seals",   d:"Warm-up, 8 minutes. Easy cardio, then 10 hip hinges, 10 glute bridges, 8 goblet squats, 10 scapular pull-ups.", s:"You inspect the seals twice. The crate hums faintly and smells of old library."},
-        {l:"Lift the Crate",      d:"Deadlift, 4 sets of 5 with a working weight that is hard but clean. Build up with 2 lighter warm-up sets first. Rest 2 to 3 minutes.", s:"The crate comes off the floor, then the stone steps get steeper. You do not let go."},
-        {l:"Long Corridor",       d:"Farmer's carry, 4 walks of 30 to 40 metres with heavy dumbbells or kettlebells. Rest 60 seconds.", s:"Thirty metres of corridor, a draught that slams doors, and a portrait that comments on your posture."},
-        {l:"Raise the Banner",    d:"Overhead press, 3 sets of 8. Rest 90 seconds between sets.", s:"A hanging banner is blocking the checkpoint. You raise it and hold it so the crate can pass underneath."},
-        {l:"Climb the Wall",      d:"Pull-ups (or assisted or band-assisted), 3 sets near max, stopping 1 rep before failure. Finish with 2 minutes of easy breathing.", s:"The last stretch is a wall. The crate goes up on a rope and you go up after it."},
+        {l:"Inspect the Seals",   d:"Warm-up, 8 minutes. 4 minutes on the bike or rower at an easy pace, then arm circles, 15 band pull-aparts, 10 scapular push-ups. Do 2 light practice sets of shoulder press.", s:"You inspect the seals twice. The crate hums faintly and smells of old library."},
+        {l:"Raise the Banner",    d:"Seated dumbbell shoulder press, 3 sets of 8 to 12, back supported by the bench. Rest 90 seconds.", s:"A hanging banner blocks the checkpoint. You raise it overhead and hold it so the crate can pass underneath."},
+        {l:"Haul the Rope",       d:"Lat pulldown, 3 sets of 8 to 12. Pull to your upper chest, elbows down and back. Rest 90 seconds.", s:"The crate goes up the wall on a rope. You haul it hand over hand."},
+        {l:"Push and Pull",       d:"Incline dumbbell press, 3 sets of 8 to 12, and chest-supported row, 3 sets of 10 to 12. Alternate them, resting 60 seconds between.", s:"A jammed portcullis. Push it up, pull it back, push again, while Peer 01 offers opinions."},
+        {l:"Strap It Down",       d:"Arms and shoulders: lateral raise 2 sets of 12 to 15, cable curl 2 sets of 10 to 15, triceps pushdown 2 sets of 10 to 15. Rest 45 to 60 seconds.", s:"Straps tightened, crate delivered. Your arms are on fire. Wulfric says nothing, which means it was acceptable."},
       ],
     },
     {
-      id:"st_phalsbourg", type:"strength", ex:["Front Squat", "Dumbbell Press", "Romanian Deadlift", "Hanging Knee Raise"], title:"Hold the Line", loc:"A treaty site on the old Phalsbourg border", diff:"Restricted", rep:230, mins:60, icon:"⚔️",
-      sum:"Front squat, dumbbell press, Romanian deadlift, knee raises. About 60 min.",
-      briefingLine:"A staged standoff at a treaty site, with the Seniors playing both delegations. Heavy day. I referee Fireball, so I know exactly what a half-hearted effort looks like.",
+      id:"st_phalsbourg", type:"strength", title:"Hold the Line", loc:"A treaty site on the old Phalsbourg border", diff:"Restricted", rep:210, mins:55, icon:"⚔️",
+      ex:[{n:"Leg Press",sets:3,lo:10,hi:12},{n:"Dumbbell Bench Press",sets:3,lo:8,hi:12},{n:"Cable Row",sets:3,lo:10,hi:12},{n:"Back Extension",sets:2,lo:10,hi:12},{n:"Pallof Press",sets:2,lo:10,hi:12},{n:"Farmer's Carry",sets:3,lo:30,hi:40,unit:"metres"}],
+      sum:"Lifting day C, full body: leg press, bench press, cable row, back extension, core and carries. About 55 min.",
+      briefingLine:"A staged standoff at a treaty site, with the Seniors playing both delegations. Full body today. I referee Fireball, so I know exactly what a half-hearted effort looks like.",
       flavor:"\"The Peace of Phalsbourg is held together by people who are tired and standing up anyway.\" Peer 06",
-      desc:"A negotiation at a historic treaty site has turned tense. The Order sends a visible, solid line of Guardians. You are part of that line.",
+      desc:"A negotiation at a historic treaty site has turned tense. A visible, solid line of Guardians is needed. You are part of that line.",
       steps:[
-        {l:"Take Position",       d:"Warm-up, 8 minutes. Light cardio, 10 bodyweight squats, 10 good mornings, 10 push-ups, 30 seconds hanging from a bar or a doorway stretch.", s:"You take your place on the line. Both delegations look at you, then look at each other."},
-        {l:"Stand Firm",          d:"Front squat (or goblet squat), 4 sets of 6. Rest 2 minutes.", s:"One delegate leans in, trying to push through. You do not move."},
-        {l:"Press the Case",      d:"Dumbbell press (flat or incline), 3 sets of 10. Rest 90 seconds.", s:"Someone produces a document that is very probably forged. You push back, politely and with force."},
-        {l:"Reach for the Floor", d:"Romanian deadlift, 3 sets of 8 at a controlled tempo (3 seconds down). Rest 90 seconds.", s:"A dropped seal rolls across the stones. You get it without losing your footing or the line."},
-        {l:"Brace the Line",      d:"Hanging knee raises (or lying leg raises), 3 sets of 12. Walk 3 minutes to cool down.", s:"The stone is signed. Nobody thanks you. Wulfric will make a note anyway."},
-      ],
-    },
-    {
-      id:"st_wyvern", type:"strength", ex:["Hip Thrust", "Bulgarian Split Squat", "Lat Pulldown", "Pallof Press"], beast:true, title:"The Wyvern Nest", loc:"Cliffs above a high Silesian valley", diff:"Restricted", rep:220, mins:55, icon:"🐉",
-      sum:"Hip thrust, split squat, lat pulldown, Pallof press. About 55 min.",
-      briefingLine:"Wyvern! Fascinating creatures. Technically I am supposed to say it is perfectly safe. It is mostly safe. Lower body today, and wear your good boots.",
-      flavor:"\"Learn the difference between a drake and a wyvern before one of them teaches you.\" Peer 05",
-      desc:"Reports say a wyvern has taken a ridge near a mundane footpath. You are climbing, hauling and holding ground on a steep, awkward cliff.",
-      steps:[
-        {l:"Read the Tracks",     d:"Warm-up, 8 minutes. Easy walk or bike, then 10 glute bridges, 10 leg swings each side, 8 bodyweight lunges each leg.", s:"Peer 05 crouches by a print the size of a dinner plate and says only, \"Wyvern.\" The droppings confirm it."},
-        {l:"Up the Scree",        d:"Hip thrust, 4 sets of 8. Rest 90 seconds.", s:"The scree is loose and the angle is cruel. You drive up through the heels."},
-        {l:"Ledge Work",          d:"Bulgarian split squat, 3 sets of 8 each leg. Rest 90 seconds.", s:"The path narrows to a ledge. One leg at a time, with a drop on the left."},
-        {l:"Pull Up the Line",    d:"Lat pulldown (or assisted pull-up), 3 sets of 10. Rest 90 seconds.", s:"You haul a climbing line hand over hand while something above shifts and hisses."},
-        {l:"Hold Still",          d:"Pallof press, 3 sets of 12 each side, then a 3 minute walk.", s:"The wyvern watches you from the ridge. You hold position until it decides you are boring, and it leaves."},
+        {l:"Take Position",       d:"Warm-up, 8 minutes. 5 minutes easy cardio, then 10 bodyweight squats, 10 incline push-ups, 6 bird dogs each side. One light practice set of leg press.", s:"You take your place on the line. Both delegations look at you, then look at each other."},
+        {l:"Stand Firm",          d:"Leg press, 3 sets of 10 to 12. Feet shoulder width, lower until your knees reach about 90 degrees, keep your lower back flat on the pad. Rest 90 seconds.", s:"One delegate leans in, trying to push through. You do not move."},
+        {l:"Press the Case",      d:"Dumbbell bench press, 3 sets of 8 to 12. Rest 90 seconds.", s:"Someone produces a document that is very probably forged. You push back, politely and with force."},
+        {l:"Pull Rank",           d:"Seated cable row, 3 sets of 10 to 12, then back extension, 2 sets of 10 to 12, bodyweight, slow, only as far as is pain-free (glute bridges instead if your back complains). Rest 60 to 90 seconds.", s:"A dropped seal rolls across the stones. You get it without losing your footing or the line."},
+        {l:"Brace the Line",      d:"Pallof press, 2 sets of 10 to 12 each side, then farmer's carry, 3 walks of 30 to 40 metres with moderate dumbbells. Walk 3 minutes to finish.", s:"The stone is signed. Nobody thanks you. Wulfric will make a note anyway."},
       ],
     },
   ],
 
+  // Sprints level up every 3 completed sessions.
   run: [
     {
-      id:"rn_lunacy", type:"run", beast:true, title:"Lunacy Watch", loc:"The forests of Lower Silesia, at dusk", diff:"Hazardous", rep:200, mins:40, icon:"🌕",
-      sum:"Easy start, 6 hard efforts of 2 minutes, easy finish. About 40 min.",
-      briefingLine:"A werewolf practice pursuit! The Seniors are playing the wolf, and I have wolfsbane in my pockets just in case, which is proper procedure and also the only procedure I remember. Run!",
-      flavor:"\"Wolfsbane in the pocket, shoes laced, and tell nobody where you are going.\" Peer 05",
-      desc:"A werewolf has been reported near a village before the full moon. You and the team run the tree line, flush it out and drive it toward the wardline.",
-      steps:[
-        {l:"Into the Trees",      d:"Warm-up, 8 minutes. Easy jog at conversation pace, then 4 short strides of 15 seconds.", s:"The light goes amber, then grey. Somewhere ahead a dog is barking at nothing."},
-        {l:"Pick Up the Scent",   d:"Intervals 1 and 2: run hard for 2 minutes, jog easy for 90 seconds. Repeat twice. Hard means 8 out of 10 effort.", s:"There are claw marks on a tree at head height. You pick up the pace."},
-        {l:"Flush It Out",        d:"Intervals 3 and 4: hard for 2 minutes, easy for 90 seconds. Repeat twice.", s:"Something breaks cover in the undergrowth. You are not sure it is the wolf, and you are not stopping to check."},
-        {l:"Drive It to the Ward",d:"Intervals 5 and 6: hard for 2 minutes, easy for 90 seconds. Repeat twice. Make the last one your best.", s:"The wardline is a quarter mile ahead. The run is now a herding job."},
-        {l:"Stand Down",          d:"Cool-down, 8 minutes. Easy jog turning to a walk, then calf and quad stretches.", s:"The wolf slows at the ward and turns. The pursuit is over. Your lungs file a formal complaint."},
-      ],
-    },
-    {
-      id:"rn_patrol", type:"run", title:"The Long Patrol", loc:"The perimeter road around Czocha", diff:"Routine", rep:170, mins:40, icon:"🛤️",
-      sum:"One steady run, 30 to 35 minutes at an easy talking pace. About 40 min.",
-      briefingLine:"A long patrol with nothing to find. That is the point. Stay steady and keep your eyes open when nothing is happening, because that is when it happens.",
-      flavor:"\"Most of the job is being somewhere unremarkable on time.\" Professor Wulfric",
-      desc:"A routine perimeter patrol that has gone slightly long. No emergencies, only distance, weather, and a growing suspicion that the grounds are bigger than anyone admits.",
-      steps:[
-        {l:"Sign Out",            d:"Warm-up, 5 minutes. Walk briskly, then 2 minutes of very easy jogging.", s:"You sign out at the gatehouse. The porter writes down an incorrect time."},
-        {l:"First Leg",           d:"Run steady for 10 minutes. You should be able to speak in full sentences.", s:"Pine trees, a pond, a faint magical hum from somewhere underground. All normal."},
-        {l:"The Far Side",        d:"Run steady for 10 minutes. Keep the same pace, even if you feel good.", s:"You pass the old quarry. Something is moving inside it, probably a deer. Probably."},
-        {l:"Home Stretch",        d:"Run steady for 10 minutes. If you have energy, pick up the last 2 minutes.", s:"The towers of Czocha appear over the treeline. They never look any closer than they did an hour ago."},
-        {l:"Report In",           d:"Cool-down, 5 minutes. Walk and stretch calves and hips.", s:"You report no incidents. Wulfric writes it down as if it were interesting."},
-      ],
-    },
-    {
-      id:"rn_hobgoblin", type:"run", beast:true, title:"Hobgoblin Chase", loc:"The villages below the castle", diff:"Hazardous", rep:190, mins:35, icon:"🧌",
-      sum:"A 25 minute run with 8 surges of 30 to 60 seconds. About 35 min.",
-      briefingLine:"One of my hobgoblins has escaped with a satchel again. Fascinating, really, the planning that goes into it. They are faster than you, so be cleverer, and if the headmistress asks, this was a field safety exercise.",
+      id:"rn_hobgoblin", type:"run", beast:true, title:"Hobgoblin Chase", loc:"The villages below the castle", diff:"Routine", rep:170, mins:25, icon:"🧌",
+      sum:"Sprint level 1: 6 short sprints of 15 seconds with long walking breaks. About 25 min.",
+      briefingLine:"One of my hobgoblins has escaped with a satchel again. They are fast in short bursts and then they stop for snacks, so that is exactly how you will chase it. Short sprints, long rests. Fascinating creatures.",
       flavor:"\"It will stop. They always do, usually for snacks.\" Peer 03",
-      desc:"A hobgoblin thief is darting through back lanes and orchards. Every time it breaks line of sight you surge. Every time you lose it, you slow, scan, and go again.",
+      desc:"A hobgoblin thief is darting through back lanes and orchards. You sprint when you see it, then walk and scan when it vanishes.",
       steps:[
-        {l:"Spot the Thief",      d:"Warm-up, 7 minutes. Easy jog, then 3 strides of 15 seconds.", s:"A flash of brown at the end of the street. A satchel strap trailing behind it."},
-        {l:"Surges 1 to 3",       d:"Fartlek: run easy, then surge hard for 30 to 60 seconds, three times. Recover with easy running between each.", s:"The hobgoblin vaults a wall. You do not vault, you go around, and you are still gaining."},
-        {l:"Lost the Trail",      d:"Run easy for 3 minutes. Breathe, scan the lanes, shake out your arms.", s:"It has vanished into an orchard. You slow to a jog and listen for the sound of stolen paperwork."},
-        {l:"Surges 4 to 8",       d:"Five more surges of 30 to 60 seconds, easy running between each. Make the final surge the fastest.", s:"There it is. Over a fence, across a yard, through a chicken coop. The chickens are furious."},
-        {l:"Satchel Recovered",   d:"Cool-down, 7 minutes. Walk and stretch.", s:"The satchel is returned, slightly chewed. The courier has not stopped apologising and neither has the chicken."},
+        {l:"Spot the Thief",      d:"Warm-up, 10 minutes. 5 minutes brisk walk or easy jog, leg swings 10 each side, 10 walking lunges, then 3 build-ups of 50 metres getting faster each time (60%, 70%, 80%). Flat ground or a track. A bike works too if running hurts.", s:"A flash of brown at the end of the street. A satchel strap trailing behind it."},
+        {l:"Sprints 1 to 3",      d:"Sprint 15 seconds at about 80%, fast but relaxed. Walk 90 seconds. Repeat 3 times.", s:"It vaults a wall. You go around, and you are still gaining."},
+        {l:"Lost the Trail",      d:"Walk 2 minutes. Breathe, shake out your arms.", s:"It has vanished into an orchard. You slow down and listen for the sound of stolen paperwork."},
+        {l:"Sprints 4 to 6",      d:"Three more 15-second sprints, walking 90 seconds between. Make the last one your fastest, still with good form.", s:"There it is. Over a fence, across a yard, through a chicken coop. The chickens are furious."},
+        {l:"Satchel Recovered",   d:"Cool-down, 6 minutes. Easy walk, then calf and hamstring stretches.", s:"The satchel is returned, slightly chewed. Fia is delighted and takes notes."},
       ],
     },
     {
-      id:"rn_ridge", type:"run", title:"Ridge Reconnaissance", loc:"The hills north of Czocha", diff:"Restricted", rep:220, mins:40, icon:"⛰️",
-      sum:"8 uphill efforts of 60 to 90 seconds, walking or jogging down. About 40 min.",
-      briefingLine:"Hill work. The high ground tells you things instruments cannot. Eight climbs. I will be at the top, and I will be counting.",
-      flavor:"\"Every good view is paid for in advance.\" Peer 05",
-      desc:"A series of repeated climbs up a ridge to check marker stones and gather readings, because the instruments cannot be trusted to do it alone.",
+      id:"rn_lunacy", type:"run", beast:true, title:"Lunacy Watch", loc:"The forests of Lower Silesia, at dusk", diff:"Hazardous", rep:190, mins:30, icon:"🌕",
+      sum:"Sprint level 2: 8 sprints of 20 seconds with walking breaks. About 30 min.",
+      briefingLine:"A werewolf practice pursuit! The Seniors are playing the wolf, and I have wolfsbane in my pockets just in case, which is proper procedure and also the only procedure I remember. Eight sprints. Run!",
+      flavor:"\"Wolfsbane in the pocket, shoes laced, and tell nobody where you are going.\" Peer 05",
+      desc:"A werewolf has been reported near a village before the full moon. You run the tree line in bursts, flush it out and drive it toward the wardline.",
       steps:[
-        {l:"Reach the Foot",      d:"Warm-up, 10 minutes. Easy jog to a hill with a gentle but steady slope, then 3 strides.", s:"The marker stones are on the ridge. The path is steep, muddy, and not on any map."},
-        {l:"Climbs 1 to 3",       d:"Run uphill hard for 60 to 90 seconds. Walk or jog down to recover. Repeat 3 times.", s:"First marker: intact. Second: warm to the touch. Third: humming. You write that down."},
-        {l:"Climbs 4 to 6",       d:"Three more climbs of 60 to 90 seconds. Same effort. Recover fully on the way down.", s:"The wind picks up. A stone you checked earlier has moved six inches. Nobody has an explanation."},
-        {l:"Climbs 7 and 8",      d:"Two final climbs. Give them everything that is left, with good form.", s:"At the summit the whole valley is visible. A line of ward-light flickers at the edge of the woods."},
-        {l:"Come Down",           d:"Cool-down, 8 minutes. Easy jog or walk on flat ground, then stretch quads and calves.", s:"You report the flicker to Wulfric. He nods slowly, which in his language is applause."},
+        {l:"Into the Trees",      d:"Warm-up, 10 minutes. Easy jog or brisk walk 5 minutes, leg swings, skips, then 3 build-ups of 60 metres (60%, 75%, 85%).", s:"The light goes amber, then grey. Somewhere ahead a dog is barking at nothing."},
+        {l:"Pick Up the Scent",   d:"Sprint 20 seconds at about 85%, walk 90 seconds. Repeat 3 times.", s:"There are claw marks on a tree at head height. You pick up the pace."},
+        {l:"Flush It Out",        d:"Sprint 20 seconds, walk 90 seconds. Repeat 3 times.", s:"Something breaks cover. You are not sure it is the wolf, and you are not stopping to check."},
+        {l:"Drive It to the Ward",d:"Two last sprints of 20 seconds, walking 2 minutes between. Make the last one your best.", s:"The wardline is a quarter mile ahead. The run is now a herding job."},
+        {l:"Stand Down",          d:"Cool-down, 7 minutes. Easy walk, then calf, quad and hip stretches.", s:"The wolf slows at the ward and turns. The pursuit is over. Your lungs file a formal complaint."},
+      ],
+    },
+    {
+      id:"rn_ridge", type:"run", title:"Ridge Reconnaissance", loc:"The hills north of Czocha", diff:"Restricted", rep:210, mins:30, icon:"⛰️",
+      sum:"Sprint level 3: 8 uphill sprints of 20 to 25 seconds, walking down to recover. About 30 min.",
+      briefingLine:"Hill sprints. The high ground tells you things instruments cannot, and uphill is kinder to your joints than flat sprinting. Eight climbs. I will be at the top, and I will be counting.",
+      flavor:"\"Every good view is paid for in advance.\" Peer 05",
+      desc:"Repeated hard climbs up a ridge to check marker stones, because the instruments cannot be trusted to do it alone.",
+      steps:[
+        {l:"Reach the Foot",      d:"Warm-up, 10 minutes. Easy jog or brisk walk to a moderate hill, leg swings, then 2 easy runs halfway up.", s:"The marker stones are on the ridge. The path is steep, muddy, and not on any map."},
+        {l:"Climbs 1 to 3",       d:"Sprint uphill 20 to 25 seconds, hard but controlled. Walk back down slowly to recover. Repeat 3 times.", s:"First marker: intact. Second: warm to the touch. Third: humming. You write that down."},
+        {l:"Climbs 4 to 6",       d:"Three more climbs. Same effort. Recover fully on the walk down.", s:"A stone you checked earlier has moved six inches. Nobody has an explanation."},
+        {l:"Climbs 7 and 8",      d:"Two final climbs. Give them everything that is left, with good form.", s:"At the summit the valley is visible. A line of ward-light flickers at the edge of the woods."},
+        {l:"Come Down",           d:"Cool-down, 7 minutes. Easy walk on flat ground, then stretch quads and calves.", s:"You report the flicker to Wulfric. He nods slowly, which in his language is applause."},
+      ],
+    },
+  ],
+
+  pool: [
+    {
+      id:"pl_merfolk", type:"pool", beast:true, title:"Merfolk at the Lake", loc:"The lake below Czocha", diff:"Hazardous", rep:180, mins:35, icon:"🧜",
+      sum:"Swim intervals: easy warm-up, 6 hard lengths, kick sets, easy finish. About 35 min.",
+      briefingLine:"The merfolk have agreed to a short meeting, on the condition that you can keep up with them. They are very fast and very judgemental. Swim hard in short bursts and rest at the wall. Fascinating! Let's see what happens!",
+      flavor:"\"Never ask a merman how far it is. He will lie.\" Professor Fia Mallow",
+      desc:"A diplomatic swim with the lake's merfolk. Every burst of speed earns a little more of their respect.",
+      steps:[
+        {l:"Into the Water",      d:"Warm-up, 6 minutes. 4 easy lengths, any stroke, then 2 lengths of easy kicking holding the wall or a board. If lengths are new to you, swim for minutes instead.", s:"The water is cold enough to make you swear. Something below watches you get in."},
+        {l:"Keep Up",             d:"6 lengths fast, about 80%, resting 30 to 45 seconds at the wall after each one.", s:"A merman surfaces beside you, looks you up and down, and swims off at twice your speed."},
+        {l:"Kick Work",           d:"4 lengths of kicking with a board, steady and strong. Rest 20 seconds between.", s:"They are impressed by your kicking, or possibly amused. It is hard to tell with merfolk."},
+        {l:"Race the Current",    d:"4 lengths, alternating one fast and one easy. Rest at the wall as needed.", s:"The last stretch is a race. You lose, but by less than anyone expected."},
+        {l:"Climb Out",           d:"Cool-down, 4 minutes. 2 very easy lengths, then stretch shoulders and chest at the poolside.", s:"The merfolk agree to talk next week. Fia is thrilled and has already made a chart."},
+      ],
+    },
+    {
+      id:"pl_crossing", type:"pool", title:"The Lake Crossing", loc:"Across the lake, under a grey sky", diff:"Routine", rep:160, mins:35, icon:"🌊",
+      sum:"Steady swim: 20 minutes at an easy, continuous pace, plus warm-up and cool-down. About 35 min.",
+      briefingLine:"A long crossing at a steady pace. This is where your lungs get built. Rest at the walls if you must, but keep moving.",
+      flavor:"\"Steady is a skill. Most people never learn it.\" Professor Wulfric",
+      desc:"A steady crossing of the lake with the Seniors, practising calm breathing and endurance in cold water.",
+      steps:[
+        {l:"Wade In",             d:"Warm-up, 5 minutes. Easy lengths, any stroke, and a few slow exhales underwater.", s:"Mist sits on the water. The far shore looks further than it did from the castle."},
+        {l:"First Third",         d:"Swim 7 minutes at an easy pace you could hold all day. Rest briefly at the wall if needed.", s:"You find a rhythm. Peer 06 is reciting a treaty clause about lake access."},
+        {l:"Middle Third",        d:"Swim 7 more minutes, same pace. Focus on long, smooth strokes.", s:"Halfway. The castle is behind you now and the shore ahead is getting closer."},
+        {l:"Last Third",          d:"Swim 6 more minutes. Pick up the pace for the last 2 if you feel good.", s:"The far shore. Reeds, mud, and a very confused heron."},
+        {l:"Dry Off",             d:"Cool-down, 5 minutes. Easy lengths, then stretch shoulders, chest and lats.", s:"Wulfric is waiting with a towel he will deny bringing."},
+      ],
+    },
+  ],
+
+  vr: [
+    {
+      id:"vr_duel", type:"vr", title:"The Illusion Chamber: Duel Drills", loc:"The Technomancy wing, illusion chamber", diff:"Hazardous", rep:180, mins:30, icon:"🥽",
+      sum:"VR combat rounds: a boxing or sword game, 6 hard rounds of 3 minutes. About 30 min.",
+      briefingLine:"Technomancy has built a duelling illusion. Peer 04 swears it is safe. You will fight it in rounds, and you will keep your guard up between them.",
+      flavor:"\"The best defence is a good offence. Even against an illusion.\" Professor Wulfric",
+      desc:"A Technomancy combat simulation. Use a VR boxing or sword-fighting game (for example Thrill of the Fight, FitXR or Creed).",
+      steps:[
+        {l:"Calibrate",           d:"Warm-up, 5 minutes. Light rounds or an easy level: arm circles, shadow boxing, gentle footwork.", s:"The chamber hums. The illusion steps forward and bows, which is unsettling."},
+        {l:"Rounds 1 and 2",      d:"Two rounds of 3 minutes, working hard, 1 minute rest between. Keep moving your feet.", s:"It hits harder than an illusion should. Peer 04 checks a gauge and frowns."},
+        {l:"Rounds 3 and 4",      d:"Two more rounds of 3 minutes, 1 minute rest. Focus on breathing out with every strike.", s:"You find its rhythm. It finds yours. This becomes a conversation."},
+        {l:"Rounds 5 and 6",      d:"Two final rounds of 3 minutes. Make the last minute your hardest.", s:"Final exchange. The illusion staggers, flickers, and salutes."},
+        {l:"Power Down",          d:"Cool-down, 5 minutes. Slow arm swings, shoulder and chest stretches, deep breaths.", s:"The chamber goes quiet. Peer 04 declares the test a success after one more check."},
+      ],
+    },
+    {
+      id:"vr_rhythm", type:"vr", title:"The Illusion Chamber: Rhythm Gauntlet", loc:"The Technomancy wing, illusion chamber", diff:"Routine", rep:160, mins:30, icon:"🎶",
+      sum:"VR rhythm game: 5 blocks of 4 minutes getting harder, short breaks. About 30 min.",
+      briefingLine:"A rhythm gauntlet. Technomancy says it trains reflexes. I say it trains stamina, and I will be watching your footwork.",
+      flavor:"\"Reflex is just practice you have stopped noticing.\" Professor Wulfric",
+      desc:"A Technomancy reflex drill. Use a VR rhythm or fitness game (for example Beat Saber or Supernatural), turning the difficulty up as you go.",
+      steps:[
+        {l:"Warm the Wand Arm",   d:"Warm-up, 5 minutes on an easy song or level. Big arm movements, light squats between notes.", s:"Lights pulse in time with something only the chamber can hear."},
+        {l:"Block 1 and 2",       d:"Two blocks of 4 minutes at a medium level, 1 minute rest between. Squat low to dodge, do not just bend your back.", s:"Peer 01 is watching and keeping score out loud. Incorrectly."},
+        {l:"Block 3",             d:"One block of 4 minutes at a harder level. Rest 1 minute.", s:"The pattern speeds up. So do you."},
+        {l:"Blocks 4 and 5",      d:"Two final blocks of 4 minutes at your hardest comfortable level, 1 minute rest between.", s:"The gauntlet ends in a shower of light. Even Wulfric looked up."},
+        {l:"Cool Down",           d:"Cool-down, 5 minutes. Slow walking, shoulder and hip stretches.", s:"Your arms are tired in a completely new way. Noted."},
       ],
     },
   ],
 
   mobility: [
     {
+      id:"mb_spine", type:"mobility", title:"Spine Wards", loc:"A quiet room in the Magical Defence wing", diff:"Routine", rep:150, mins:20, icon:"🛡️",
+      sum:"Back care: the three core moves physios love, plus gentle hip work. About 20 min.",
+      briefingLine:"Your back is your armour. We are going to make it strong and boring, which is the best kind of back. Slow, controlled, and stop if anything pinches.",
+      flavor:"\"An injury you train around is a lesson. One you ignore is a sentence.\" Professor Wulfric",
+      desc:"A short session that builds a sturdy, pain-free back: the core moves that protect your spine when you lift.",
+      steps:[
+        {l:"Loosen the Line",     d:"Cat-cow, 10 slow reps. Then lie on your back and hug your knees for 30 seconds.", s:"A quiet room, a mat, and Wulfric reading in the corner, pretending not to watch."},
+        {l:"Curl-Ups",            d:"Modified curl-up: lie down, one knee bent, hands under your lower back. Lift head and shoulders slightly, hold 8 to 10 seconds. 3 sets of 5.", s:"Small movements. Wulfric says the small ones are the ones that matter."},
+        {l:"Side Planks",         d:"Side plank from knees or feet, 3 holds of 15 to 20 seconds each side.", s:"Your obliques have opinions. You ignore them."},
+        {l:"Bird Dogs",           d:"Bird dog: on hands and knees, reach opposite arm and leg, hold 8 seconds. 3 sets of 5 each side.", s:"Balance, breathe, reach. Like aiming a wand without trembling."},
+        {l:"Hips and Glutes",     d:"Glute bridge 2 sets of 12, then hip flexor stretch 45 seconds each side and child's pose for 1 minute.", s:"Done. Your back feels quieter than it did an hour ago."},
+      ],
+    },
+    {
       id:"mb_dawn", type:"mobility", title:"Wand Forms at Dawn", loc:"The castle's east terrace", diff:"Routine", rep:150, mins:25, icon:"🌅",
       sum:"Hips, spine and shoulders, plus slow breathing. About 25 min.",
       briefingLine:"Physical Education calls it yoga-like wandcraft drills. I call it maintenance. Your left shoulder drops when you are tired. Fix it.",
       flavor:"\"The body is the throne of magic. Keep it in repair.\" Czocha Handbook, Physical Education",
-      desc:"Early morning on the terrace. Slow wandcraft forms, deep stretches, and the kind of discipline that makes next week's heavy day possible.",
+      desc:"Early morning on the terrace. Slow wandcraft forms and deep stretches that make the heavy days possible.",
       steps:[
-        {l:"Settle the Breath",   d:"5 minutes of slow nasal breathing. Sit or lie down. Inhale 4 counts, exhale 6 counts.", s:"The terrace is quiet, the stone is cold, and Czocha slowly reveals itself in the mist."},
-        {l:"Spine Forms",         d:"Cat-cow 10 slow reps, thread-the-needle 8 each side, thoracic rotations 10 each side.", s:"Your spine moves in the arcs a wand would trace. You are not casting, you are rehearsing."},
-        {l:"Hip Forms",           d:"90/90 hip switches 8 each side, world's greatest stretch 5 each side, deep squat hold 60 seconds.", s:"Peer 04 corrects your stance from across the terrace without looking up."},
-        {l:"Shoulder and Wrist",  d:"Shoulder circles 10 each direction, wall slides 10, wrist circles and wand-grip stretches 10 each way.", s:"Your wand arm is stiffer than your other arm. This will have consequences if ignored."},
-        {l:"Long Holds",          d:"Couch stretch 60 seconds each side, hamstring stretch 60 seconds each side, child's pose 90 seconds.", s:"The sun finally clears the tower. Forms complete. You feel taller, which is unexplained."},
-      ],
-    },
-    {
-      id:"mb_breath", type:"mobility", title:"The Breathing Circle", loc:"A quiet room in the Mind Magic wing", diff:"Routine", rep:140, mins:20, icon:"🕯️",
-      sum:"Box breathing, joint circles, gentle stretches. About 20 min.",
-      briefingLine:"Breathing practice. A clear head and loose joints. You will not skip it because you feel fine. Feeling fine is when people get careless.",
-      flavor:"\"A mind that cannot be still will not stay steady under pressure.\" Professor Wulfric",
-      desc:"A candlelit circle, controlled breathing, and slow joint work. This is recovery and focus training for a witchard who spends too much time tensed up.",
-      steps:[
-        {l:"Light the Circle",    d:"Lie down. 3 minutes of slow belly breathing with one hand on your stomach.", s:"A single candle, a circle of chalk, and a lecture-free silence."},
-        {l:"Box Breathing",       d:"10 rounds: inhale 4, hold 4, exhale 4, hold 4. Sit tall.", s:"Your pulse drops. Outside, someone drops a cauldron, and you do not react."},
-        {l:"Joint Circles",       d:"Slow circles for neck (5 each way), shoulders (10), hips (8 each leg), ankles (10 each).", s:"Each joint pops in turn, like a sleepy orchestra warming up."},
-        {l:"Gentle Stretches",    d:"Supine twist 60 seconds each side, hamstring floss 10 each leg, pigeon pose 60 seconds each side.", s:"The tension you didn't know you had finally lets go."},
-        {l:"Close the Circle",    d:"2 minutes lying still. Count ten slow breaths.", s:"You blow out the candle. Nothing happens, which is exactly right."},
-      ],
-    },
-    {
-      id:"mb_ritual", type:"mobility", title:"Ritual Circle Holds", loc:"The ritual hall beneath the keep", diff:"Hazardous", rep:170, mins:30, icon:"🔮",
-      sum:"Long deep holds for hips, back and core. About 30 min.",
-      briefingLine:"Ritual Magic asks you to hold awkward positions for a very long time without twitching. Your hips will complain. I do not care.",
-      flavor:"\"The circle does not care if your legs have gone numb.\" Peer 02",
-      desc:"A ritual rehearsal in which the real challenge is staying in awkward postures without twitching. Strength lives in the holds, not just the moves.",
-      steps:[
-        {l:"Enter the Circle",    d:"Warm-up, 5 minutes. Walk in place, hip circles, 10 slow bodyweight squats.", s:"The hall is cold and smells of beeswax. Chalk lines glow faintly underfoot."},
-        {l:"Deep Squat Holds",    d:"Deep squat hold, 3 times for 60 seconds. Rest 30 seconds between.", s:"The first invocation is short. The second is not. The third involves a brief argument with the stone."},
-        {l:"Side Lunge Work",     d:"Cossack squats 8 each side, frog stretch hold 90 seconds.", s:"The ritual calls for a lateral stance and a steady voice. Yours only wobbles once."},
-        {l:"Core Hold",           d:"Hollow body hold 3 times for 20 seconds, then dead bug 10 each side.", s:"Somebody mentions a minor binding mishap in the next circle. You keep your form regardless."},
-        {l:"Release",             d:"Child's pose 2 minutes, then a slow walk for 3 minutes.", s:"The circle fades. You stand up carefully, like someone made of old pottery."},
+        {l:"Settle the Breath",   d:"5 minutes of slow nasal breathing. Sit or lie down. Inhale 4 counts, exhale 6 counts.", s:"The terrace is quiet, the stone is cold, and Czocha slowly appears out of the mist."},
+        {l:"Spine Forms",         d:"Cat-cow 10 slow reps, thread-the-needle 8 each side, open books 8 each side.", s:"Your spine moves in the arcs a wand would trace. You are not casting, you are rehearsing."},
+        {l:"Hip Forms",           d:"90/90 hip switches 8 each side, world's greatest stretch 5 each side, supported deep squat hold 45 seconds.", s:"Peer 04 corrects your stance from across the terrace without looking up."},
+        {l:"Shoulder and Wrist",  d:"Shoulder circles 10 each direction, wall slides 10, wrist circles 10 each way.", s:"Your wand arm is stiffer than your other arm. This will have consequences if ignored."},
+        {l:"Long Holds",          d:"Couch stretch 60 seconds each side, hamstring stretch 60 seconds each side, child's pose 90 seconds.", s:"The sun clears the tower. Forms complete. You feel taller, which is unexplained."},
       ],
     },
     {
@@ -562,70 +601,11 @@ let MISSIONS = {
       flavor:"\"Recovery is training with the volume turned down.\" Professor Wulfric",
       desc:"A recovery day after hard work. Slow rolling, easy walking, and gentle stretching to keep the engine in order.",
       steps:[
-        {l:"Check In",            d:"5 minutes of easy walking, swinging your arms.", s:"The infirmary has beds with excellent blankets and a smell of peppermint."},
-        {l:"Roll the Legs",       d:"Foam roll quads, hamstrings, glutes and calves, about 60 seconds each. Pause on tender spots, breathe.", s:"The nurse prescribes a poultice and then, helpfully, a foam roller."},
-        {l:"Roll the Back",       d:"Foam roll upper back and lats 60 seconds each, then lie on a ball or roller under the shoulder blades for 60 seconds.", s:"Something cracks. The nurse nods approvingly and writes a very short note."},
-        {l:"Gentle Stretches",    d:"Hamstring stretch 60 seconds each, hip flexor stretch 60 seconds each, chest opener 60 seconds.", s:"The blanket is warm and the stretches are slow. You are almost enjoying this."},
+        {l:"Check In",            d:"5 minutes of easy walking, swinging your arms.", s:"The infirmary has excellent blankets and a smell of peppermint."},
+        {l:"Roll the Legs",       d:"Foam roll quads, hamstrings, glutes and calves, about 60 seconds each. Pause on tender spots and breathe.", s:"The nurse prescribes a poultice and then, helpfully, a foam roller."},
+        {l:"Roll the Upper Back", d:"Foam roll upper back and lats, 60 seconds each. Keep the roller off your lower back.", s:"Something cracks. The nurse nods approvingly and writes a very short note."},
+        {l:"Gentle Stretches",    d:"Hamstring stretch 60 seconds each side, hip flexor stretch 60 seconds each side, chest opener 60 seconds.", s:"The stretches are slow. You are almost enjoying this."},
         {l:"Discharge",           d:"3 minutes of slow breathing, then drink some water.", s:"You are discharged with a clean bill of health and a bottle of something orange."},
-      ],
-    },
-  ],
-
-  home: [
-    {
-      id:"hm_dorm", type:"home", title:"Dorm Room Breach", loc:"A converted tower dormitory", diff:"Hazardous", rep:190, mins:30, icon:"🛏️",
-      sum:"A 4 round bodyweight circuit: 40 seconds on, 20 seconds off. About 30 min.",
-      briefingLine:"No equipment, a locked dormitory door, and a first year who has been inside since breakfast. Breach it the honest way. I do not want to hear about your lack of gear.",
-      flavor:"\"If it needs fixing quickly and quietly, send a Senior with no gear.\" Peer 01",
-      desc:"An improvised breach in a tower dormitory. No weights, no gear, no room to move, only your body and a stubborn lock.",
-      steps:[
-        {l:"Case the Room",       d:"Warm-up, 5 minutes. Jumping jacks 40 seconds, arm circles, 10 air squats, 10 push-ups on knees or toes.", s:"The door glows faintly. Somebody has left a note that says \"Please do not.\""},
-        {l:"Round 1",             d:"6 exercises, 40 seconds each with 20 seconds rest: air squat, push-up, reverse lunge, mountain climber, plank, glute bridge.", s:"You test the door. It tests you back."},
-        {l:"Round 2",             d:"Repeat the same 6 exercises. Same pace.", s:"The lock rattles. A single plaintive cough comes from behind the door."},
-        {l:"Rounds 3 and 4",      d:"Repeat the circuit two more times. Rest 60 seconds between rounds. Keep your form clean as you tire.", s:"Peer 03 arrives to cheer and apologise in equal measure. The door finally clicks."},
-        {l:"Inside",              d:"Cool-down, 5 minutes. Walk, shake out arms and legs, then hold a hamstring stretch for 45 seconds each side.", s:"Inside: one very embarrassed first year and a cat. You file this under 'Resolved.'"},
-      ],
-    },
-    {
-      id:"hm_fireball", type:"home", title:"Fireball Practice", loc:"The practice pitch behind the castle", diff:"Hazardous", rep:190, mins:30, icon:"☄️",
-      sum:"A 20 minute EMOM: jump squats, push-ups, mountain climbers, plank. About 30 min.",
-      briefingLine:"Peer 01 has organised a Fireball session, and I am refereeing. Yes, I will blow the whistle. Yes, I will notice if you coast.",
-      flavor:"\"Every minute is a new play.\" Peer 01",
-      desc:"A Fireball-style conditioning drill. Each minute has a job, and you get whatever time is left to breathe.",
-      steps:[
-        {l:"Warm Up the Pitch",   d:"Warm-up, 5 minutes. Light jog in place, high knees, lunges with a twist, 10 air squats.", s:"Peer 01 is already juggling something that is probably a flaming ball and probably supervised."},
-        {l:"Minutes 1 to 5",      d:"EMOM (every minute on the minute): minute 1 jump squats x12, minute 2 push-ups x10, minute 3 mountain climbers x20 (10 a side), minute 4 plank for 40 seconds, minute 5 rest. Rest is whatever time is left.", s:"The first pass goes cleanly. Peer 01 shouts the score and it is incorrect."},
-        {l:"Minutes 6 to 10",     d:"Repeat the same 5 minute block.", s:"Someone catches a fireball with a bucket. It is not clear whether that is allowed."},
-        {l:"Minutes 11 to 20",    d:"Repeat the 5 minute block two more times. Keep your form tidy. Drop reps only if you must.", s:"Final quarter. The score is close. Nobody agrees what the score is."},
-        {l:"Full Time",           d:"Cool-down, 5 minutes. Walk, breathe, quad and hip stretches.", s:"Your team wins by a margin that Peer 01 calls decisive and the referee calls 'unclear.'"},
-      ],
-    },
-    {
-      id:"hm_corridor", type:"home", title:"Hold the Corridor", loc:"A castle corridor with no way around", diff:"Restricted", rep:210, mins:35, icon:"🚪",
-      sum:"Push-up and squat pyramids to 8 and back, plus planks. About 35 min.",
-      briefingLine:"One corridor, one of you, and no way around. This is Magical Combat, not Magical Defence, whatever the timetable says. Hold it.",
-      flavor:"\"A narrow place is a strong place.\" Peer 02",
-      desc:"A bodyweight pyramid that rewards steady pacing. You build the wall one rep at a time, then take it apart again.",
-      steps:[
-        {l:"Choose the Ground",   d:"Warm-up, 5 minutes. Arm swings, hip circles, 10 air squats, 8 incline push-ups.", s:"You pick a spot in the corridor and plant your feet. The portraits regard you coolly."},
-        {l:"Build Up",            d:"Push-up and air squat pyramid, going up: 1 push-up and 1 squat, then 2 and 2, up to 8 and 8. Scale push-ups to knees if needed. Move steadily.", s:"The first stones go in quickly. The portraits begin to take an interest."},
-        {l:"Peak",                d:"At 8 and 8, hold a plank for 45 seconds.", s:"The wall reaches shoulder height. Something knocks on the other side."},
-        {l:"Come Down",           d:"Work back down: 7 and 7, 6 and 6, all the way to 1 and 1.", s:"Stone by stone the wall comes down, each one placed carefully. The knocking stops."},
-        {l:"Finish the Wall",     d:"Finish with 3 side planks of 30 seconds each side. Cool down with a 3 minute walk.", s:"The corridor is clear. The portraits applaud, but only the ones who are not pretending to be asleep."},
-      ],
-    },
-    {
-      id:"hm_alarm", type:"home", title:"Alarm Ward Intervals", loc:"The technomancy workshop", diff:"Hazardous", rep:180, mins:30, icon:"🚨",
-      sum:"Four Tabata blocks of 20 seconds on, 10 seconds off. About 30 min.",
-      briefingLine:"Peer 04 has built an alarm ward that sounds when you slow down. I signed the form. Do not make it beep.",
-      flavor:"\"It only beeps when it works. Which is mostly now.\" Peer 04",
-      desc:"Short, hard intervals set to a magical metronome. The alarm beeps if you coast. It is unpleasantly good at that.",
-      steps:[
-        {l:"Power Up",            d:"Warm-up, 6 minutes. Jumping jacks, arm circles, hip hinges, 10 slow air squats.", s:"Peer 04 flips a switch. Nothing happens. Then everything does."},
-        {l:"Block 1: Squats",     d:"Tabata: 8 rounds of 20 seconds jump squats (or fast air squats), 10 seconds rest. Rest 1 minute afterwards.", s:"The ward hums. When you slow down, it beeps. When you speed up, it beeps differently."},
-        {l:"Block 2: Push-ups",   d:"Tabata: 8 rounds of 20 seconds push-ups (any version), 10 seconds rest. Rest 1 minute afterwards.", s:"A fuse blows and has to be replaced. You use the break to breathe. The alarm disapproves."},
-        {l:"Block 3: Knees",      d:"Tabata: 8 rounds of 20 seconds high knees, 10 seconds rest. Rest 1 minute afterwards.", s:"Peer 04 is checking the readings a third time and is visibly pained by the margin of error."},
-        {l:"Block 4: Shoulders",  d:"Tabata: 8 rounds of 20 seconds plank shoulder taps, 10 seconds rest. Then cool down for 4 minutes with a walk and stretch.", s:"The alarm finally goes silent. Peer 04 declares the ward acceptable, after one more check. The ward is on fire."},
       ],
     },
   ],
@@ -639,11 +619,40 @@ function applyNames(obj) {
 }
 MISSIONS = applyNames(MISSIONS);
 
-function getDailyMissions() {
-  const seed = dayStamp();
-  const out = {};
-  Object.entries(MISSIONS).forEach(([type, pool]) => { out[type] = pool[hash(seed + type) % pool.length]; });
+// Which mission each card shows today.
+// Lifting rotates A, B, C in order. Sprints level up every 3 sessions. The rest rotate daily.
+function getDailyMissions(gs) {
+  const allW=(gs&&gs.allW)||[];
+  const today=dayStamp();
+  const out={};
+  Object.entries(MISSIONS).forEach(([type,pool])=>{
+    const ofType=allW.filter(w=>pool.some(m=>m.id===w.arcId));
+    const doneToday=ofType.find(w=>w.stamp===today);
+    if(doneToday){ out[type]=pool.find(m=>m.id===doneToday.arcId); return; }
+    if(type==="strength"){ const last=ofType[ofType.length-1]; out[type]=pool[last?(pool.findIndex(m=>m.id===last.arcId)+1)%pool.length:0]; }
+    else if(type==="run") out[type]=pool[Math.min(pool.length-1,Math.floor(ofType.length/3))];
+    else out[type]=pool[hash(today+type)%pool.length];
+  });
   return out;
+}
+
+// Weekly plan: 3 lifting days + 1 conditioning session (sprints, pool or VR).
+function weekSummary(gs) {
+  const wk=(gs.allW||[]).filter(w=>w&&w.date&&weekKey(w.date)===weekKey());
+  return { wk, lifts:wk.filter(w=>w.type==="strength").length, cond:wk.filter(w=>CONDITIONING.includes(w.type)).length };
+}
+function recommendToday(gs) {
+  const allW=gs.allW||[];
+  const {lifts,cond}=weekSummary(gs);
+  const todayN=dayNum(localDay(new Date()));
+  if(allW.some(w=>w.stamp===dayStamp())) return {type:"mobility", why:"You have already trained today. Rest, or add some mobility if you feel like it."};
+  const liftedYesterday=allW.some(w=>w.type==="strength"&&todayN-dayNum(localDay(w.date))===1);
+  const lastOf=t=>{ const w=[...allW].reverse().find(x=>x.type===t); return w?dayNum(localDay(w.date)):-1; };
+  const condPick=[...CONDITIONING].sort((a,b)=>lastOf(a)-lastOf(b))[0];
+  if(lifts<3 && !liftedYesterday) return {type:"strength", why:`Lifting day ${lifts+1} of 3 this week.`};
+  if(cond<1) return {type:condPick, why:liftedYesterday?"You lifted yesterday, so give those muscles a day off. This week's conditioning session fits today.":"This week's conditioning session."};
+  if(lifts<3) return {type:"mobility", why:"You lifted yesterday. Mobility today, then lift again tomorrow."};
+  return {type:"mobility", why:"This week's plan is complete. Anything more is a bonus, and mobility helps you recover."};
 }
 
 // Suggested team: peers whose specialty matches the workout, rotated daily by mission.
@@ -765,23 +774,22 @@ function rankFor(rep) {
   return { idx:i, title:RANKS[i].title, next, toNext: next ? next.at - rep : 0, pct: next ? Math.round(((rep-RANKS[i].at)/(next.at-RANKS[i].at))*100) : 100 };
 }
 
+// No deadlifts here on purpose (back). Swaps: hip thrust, back extension, leg curl, cable pull-through.
 const EXERCISES = {
-  "Compound": ["Deadlift","Squat","Bench Press","Overhead Press","Barbell Row","Hip Thrust","Romanian Deadlift","Front Squat"],
-  "Push":     ["Push-up","Dumbbell Press","Skull Crusher","Tricep Dip","Lateral Raise","Cable Fly","Arnold Press"],
-  "Pull":     ["Pull-up","Dumbbell Row","Face Pull","Bicep Curl","Hammer Curl","Cable Row","Lat Pulldown"],
-  "Legs":     ["Lunge","Step Up","Leg Press","Leg Curl","Calf Raise","Bulgarian Split Squat","Box Jump","Glute Bridge"],
-  "Core":     ["Plank","Dead Bug","Hanging Knee Raise","Cable Crunch","Russian Twist","Pallof Press","Ab Wheel"],
+  "Legs":     ["Goblet Squat","Leg Press","Hack Squat","Hip Thrust","Bulgarian Split Squat","Leg Curl","Leg Extension","Step Up","Calf Raise","Glute Bridge","Cable Pull-Through"],
+  "Push":     ["Dumbbell Bench Press","Incline Dumbbell Press","Seated Dumbbell Press","Machine Chest Press","Push-up","Lateral Raise","Triceps Pushdown","Cable Fly"],
+  "Pull":     ["Lat Pulldown","Cable Row","Chest-Supported Row","Assisted Pull-up","Face Pull","Cable Curl","Dumbbell Curl","Hammer Curl"],
+  "Core":     ["Dead Bug","Side Plank","Bird Dog","Pallof Press","Back Extension","Farmer's Carry"],
 };
 
 /* ═══════════════════════════════════════════════════
    UTILS
 ═══════════════════════════════════════════════════ */
 const dayStamp  = () => { const n=new Date(); return `${n.getFullYear()}-${n.getMonth()}-${n.getDate()}`; };
-const weekKey   = () => {
-  const n=new Date();
+const weekKey   = (d) => {   // Monday of the week containing d (default today)
+  const n=d?new Date(d):new Date();
   const day=n.getDay();
-  const diff=n.getDate()-(day===0?6:day-1);
-  const mon=new Date(new Date().setDate(diff));
+  const mon=new Date(n.getFullYear(),n.getMonth(),n.getDate()-(day===0?6:day-1));
   return `${mon.getFullYear()}-${String(mon.getMonth()+1).padStart(2,'0')}-${String(mon.getDate()).padStart(2,'0')}`;
 };
 const todayIdx  = () => { const d=new Date().getDay(); return d===0?6:d-1; };
@@ -1167,10 +1175,12 @@ function HomeView({ gs, setGs, onStartWorkout, apiKey, onFlow }) {
   useEffect(()=>()=>{ onFlow&&onFlow(false); },[]);
   const [selectedMission, setSelectedMission] = useState(null);
 
-  const daily   = getDailyMissions();
+  const daily   = getDailyMissions(gs);
   const doneIds = (gs.allW||[]).filter(w=>w.stamp===dayStamp()).map(w=>w.arcId);
   const today   = todayIdx();
-  const thisWeekW = gs.weekKey===weekKey()?(gs.weekW||[]):[];
+  const {wk:thisWeekW,lifts,cond} = weekSummary(gs);
+  const rec     = recommendToday(gs);
+  const order   = [rec.type,...WORKOUT_TYPES.map(w=>w.id).filter(id=>id!==rec.type)];
   const days=["M","T","W","T","F","S","S"];
   const rank = rankFor(gs.char?.rep||0);
 
@@ -1223,20 +1233,27 @@ function HomeView({ gs, setGs, onStartWorkout, apiKey, onFlow }) {
           );
         })
       ),
-      h('div',{class:"progress-track"},h('div',{class:"progress-fill",style:`width:${Math.min(100,(thisWeekW.length/4)*100)}%`})),
-      h('div',{class:"progress-text"},thisWeekW.length>=4?"Weekly Order duty fulfilled.":`${4-thisWeekW.length} session${4-thisWeekW.length!==1?"s":""} left this week.`)
+      h('div',{class:"plan-row"},
+        h('div',{class:`plan-pill${lifts>=3?" met":""}`},`🏋️ Lifting ${Math.min(lifts,3)}/3`),
+        h('div',{class:`plan-pill${cond>=1?" met":""}`},`⚡ Sprint, swim or VR ${Math.min(cond,1)}/1`)
+      ),
+      h('div',{class:"progress-track"},h('div',{class:"progress-fill",style:`width:${(Math.min(lifts,3)+Math.min(cond,1))/4*100}%`})),
+      h('div',{class:"progress-text"},lifts>=3&&cond>=1?"This week's plan is complete.":"Plan: 3 lifting days and 1 sprint, swim or VR session.")
     ),
 
     h('div',{style:"padding:0 14px 20px"},
       h('div',{class:"section-head"},"Today's Assignments"),
-      h('div',{class:"hint",style:"margin:-4px 0 12px"},"Step 1: pick the kind of workout you want to do today."),
-      WORKOUT_TYPES.map(wt=>{
+      h('div',{class:"rec-card"},
+        h('div',{class:"rec-label"},"Recommended today"),
+        h('div',{class:"rec-text"},`${(WORKOUT_TYPES.find(w=>w.id===rec.type)||{}).label}. ${rec.why}`)
+      ),
+      order.map(id=>WORKOUT_TYPES.find(w=>w.id===id)).filter(Boolean).map(wt=>{
         const m = daily[wt.id];
         if(!m) return null;
         const done = doneIds.includes(m.id);
         return h('div',{
           key:wt.id,
-          class:`mission-card${done?" done":""}`,
+          class:`mission-card${done?" done":""}${wt.id===rec.type&&!done?" recommended":""}`,
           onClick:()=>{ if(!done){ setSelectedMission(m); setStep("briefing"); } }
         },
           h('div',{class:"mc-type"},
@@ -1312,6 +1329,8 @@ function WorkoutView({ mission, workoutType, gs, setGs, apiKey, onFinish, starte
   const [repsVal,  setRepsVal] = useState("");
   const [restEnd,  setRestEnd] = useState(sv.restEnd||0);
   const lastLift = gs.lastLift||{};
+  const exNames  = (mission.ex||[]).map(e=>e.n);
+  const exTarget = n => (mission.ex||[]).find(e=>e.n===n);
   const feedRef = useRef(null);
   const evIdx   = useRef(sv.evIdx||null);
   const evShown = useRef(sv.evShown||[false,false]);
@@ -1560,9 +1579,17 @@ No JSON, no markdown, no narration outside those lines. Keep each line under 40 
     logSetOpen&&h('div',{class:"log-set-overlay"},
       h('div',{class:"log-set-panel"},
         h('div',{class:"log-set-title"},"Log Set"),
-        h('div',{class:"log-set-prev"},curEx ? (lastLift[curEx] ? `${curEx}. Last time: ${lastLift[curEx].kg}kg × ${lastLift[curEx].reps}` : `${curEx}. No previous sets yet`) : "Select an exercise"),
+        h('div',{class:"log-set-prev"},curEx||"Select an exercise"),
+        curEx&&(()=>{
+          const t=exTarget(curEx), last=lastLift[curEx];
+          const target=t?`Target: ${t.sets} sets of ${t.lo} to ${t.hi}${t.unit?" "+t.unit:""}. `:"";
+          const tip=!last?"First time: pick a weight you could lift 2 to 3 more times."
+            : t&&last.reps>=t.hi?`Last time ${last.kg}kg × ${last.reps}. You hit the top of the range, so go a little heavier today.`
+            : `Last time ${last.kg}kg × ${last.reps}. Same weight, aim for one more rep.`;
+          return h('div',{class:"log-tip"},target+tip);
+        })(),
         h('div',{class:"exercise-picker"},
-          [["Today's mission",mission.ex||[]],...Object.entries(EXERCISES).map(([c,e])=>[c,e.filter(x=>!(mission.ex||[]).includes(x))])].flatMap(([cat,exs])=>exs.map(ex=>
+          [["Today's mission",exNames],...Object.entries(EXERCISES).map(([c,e])=>[c,e.filter(x=>!exNames.includes(x))])].flatMap(([cat,exs])=>exs.map(ex=>
             h('button',{key:ex,class:`ex-pick-btn${curEx===ex?" active":""}${cat==="Today's mission"?" today":""}`,onClick:()=>{
               setCurEx(ex);
               const last=lastLift[ex];
