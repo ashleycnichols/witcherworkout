@@ -6,30 +6,30 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Crossed Keys">
-<meta name="theme-color" content="#17433f">
+<meta name="theme-color" content="#3d1119">
 <link rel="apple-touch-icon" href="crew/applescreen.png">
 <title>Crossed Keys Training Log</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
 <style>
   /* ═══ THEME ═══
-     Light "castle daylight": warm limestone, with Sendivogius teal and alchemical gold.
-     The Sendivogius colours are an ASSUMPTION. To change the house look, edit --house, --house-hi,
-     --house-deep and --gold below. Everything else follows. --castle is the dark teal stone used
+     Light "castle daylight": warm limestone, with Sendivogius maroon and alchemical gold.
+     The Sendivogius colours: maroon and gold. To change the house look, edit --house, --house-hi,
+     --house-deep and --gold below. Everything else follows. --castle is the dark maroon stone used
      for the top bar and the main buttons so the screen keeps some definition. */
   :root {
     --bg:#f4efe3;        /* limestone */
     --bg2:#ebe4d2;       /* shaded stone */
     --card:#fffdf7;      /* parchment card */
-    --raised:#dff0ec;    /* selected tint */
+    --raised:#f6e4e4;    /* selected tint */
     --line:#d2c7ae;      /* mortar */
     --text:#1b2829;      /* ink */
     --muted:#566867;     /* soft ink */
-    --house:#1f8579;     /* Sendivogius teal (assumed) */
-    --house-hi:#13665d;  /* teal for text */
-    --house-deep:#17695f;/* teal for buttons */
-    --castle:#17433f;    /* dark castle teal: top bar */
-    --on-dark:#f6f1e4;   /* text on dark teal */
+    --house:#8c2f3f;     /* Sendivogius maroon */
+    --house-hi:#7a1f2e;  /* maroon for text */
+    --house-deep:#7a1f2e;/* maroon for buttons */
+    --castle:#3d1119;    /* dark castle maroon: top bar */
+    --on-dark:#f8eeea;   /* text on dark maroon */
     --gold:#97690f;      /* alchemical gold for text (assumed) */
     --gold-bright:#d4a84b;/* gold for fills */
     --gold-bg:#f6ecd0;
@@ -70,7 +70,7 @@
   /* ── Chrome ── */
   .topbar { display:flex; align-items:center; padding:max(10px,env(safe-area-inset-top)) 16px 10px; flex-shrink:0; background:var(--castle); color:var(--on-dark); gap:10px; }
   .topbar-title { font-family:'Cinzel',serif; font-size:16px; font-weight:700; letter-spacing:1px; flex:1; text-transform:uppercase; white-space:nowrap; }
-  .topbar-sub   { font-style:italic; font-size:15px; color:#cfe3de; }
+  .topbar-sub   { font-style:italic; font-size:15px; color:#ecd5d8; }
   .pill-btn { font-family:'Cinzel',serif; font-size:11px; font-weight:700; letter-spacing:0.5px; padding:8px 10px; white-space:nowrap; border:1.5px solid; text-transform:uppercase; min-height:36px; }
 
   .navbar { display:flex; padding:4px 8px; padding-bottom:max(6px,env(safe-area-inset-bottom)); background:var(--card); border-top:1px solid var(--line); flex-shrink:0; }
@@ -116,7 +116,7 @@
   .mission-card.done { opacity:0.55; cursor:default; }
   .mc-type { padding:12px 14px; background:var(--castle); color:var(--on-dark); display:flex; align-items:center; gap:12px; }
   .mc-type-label { font-family:'Cinzel',serif; font-size:21px; font-weight:700; color:#fff; letter-spacing:1px; }
-  .mc-type-sub { font-style:italic; font-size:14px; color:#cfe3de; margin-top:2px; line-height:1.25; }
+  .mc-type-sub { font-style:italic; font-size:14px; color:#ecd5d8; margin-top:2px; line-height:1.25; }
   .mc-body { padding:12px 14px 10px; }
   .mc-title { font-family:'Cinzel',serif; font-size:16px; font-weight:700; color:var(--text); line-height:1.3; }
   .mc-loc { font-style:italic; font-size:14px; color:var(--muted); margin-top:2px; }
@@ -146,8 +146,8 @@
   .ghost-btn { font-family:'Cinzel',serif; font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--house-hi); border:2px solid var(--house); padding:10px 12px; background:var(--card); min-height:44px; }
 
   .back-btn { font-family:'Cinzel',serif; font-size:14px; font-weight:700; color:var(--house-hi); letter-spacing:1px; padding:10px 0; min-height:44px; background:none; border:none; }
-  .primary-btn { width:100%; min-height:56px; padding:14px; background:var(--house-deep); color:#fff; font-family:'Cinzel',serif; font-size:15px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; border:none; box-shadow:0 2px 0 #0e4a43; }
-  .primary-btn:active { background:#0f544c; }
+  .primary-btn { width:100%; min-height:56px; padding:14px; background:var(--house-deep); color:#fff; font-family:'Cinzel',serif; font-size:15px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; border:none; box-shadow:0 2px 0 #4d1019; }
+  .primary-btn:active { background:#5e1624; }
   .primary-btn:disabled { opacity:0.4; }
   .footer-bar { padding:12px 16px; padding-bottom:max(12px,env(safe-area-inset-bottom)); border-top:1px solid var(--line); background:var(--card); flex-shrink:0; }
 
@@ -190,7 +190,7 @@
   .now-do { font-size:18px; color:var(--text); line-height:1.4; }
 
   .action-bar { padding:8px 16px; flex-shrink:0; }
-  .done-btn { width:100%; min-height:60px; background:var(--house-deep); color:#fff; font-family:'Cinzel',serif; font-size:17px; font-weight:700; letter-spacing:2px; text-transform:uppercase; box-shadow:0 2px 0 #0e4a43; }
+  .done-btn { width:100%; min-height:60px; background:var(--house-deep); color:#fff; font-family:'Cinzel',serif; font-size:17px; font-weight:700; letter-spacing:2px; text-transform:uppercase; box-shadow:0 2px 0 #4d1019; }
   .complete-btn { width:100%; min-height:60px; background:var(--gold-bright); color:#2a2006; font-family:'Cinzel',serif; font-size:17px; font-weight:700; letter-spacing:2px; text-transform:uppercase; box-shadow:0 2px 0 #9a7a25; }
 
   .rest-chip { margin:0 16px 8px; padding:10px 14px; background:var(--gold-bg); border:2px solid var(--gold-bright); display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
@@ -225,7 +225,7 @@
   .log-btn { padding:0 12px; min-height:48px; background:var(--gold-bg); border:2px solid var(--gold-bright); color:var(--gold); font-family:'Cinzel',serif; font-size:12px; font-weight:700; letter-spacing:1px; flex-shrink:0; }
 
   /* ── Lift log ── */
-  .log-set-overlay { position:fixed; inset:0; background:rgba(20,30,28,0.6); display:flex; align-items:flex-end; z-index:200; }
+  .log-set-overlay { position:fixed; inset:0; background:rgba(35,12,16,0.6); display:flex; align-items:flex-end; z-index:200; }
   .log-set-panel   { background:var(--card); border-top:3px solid var(--house); padding:18px 16px; padding-bottom:max(18px,env(safe-area-inset-bottom)); width:100%; max-width:480px; margin:0 auto; max-height:92vh; overflow-y:auto; }
   .log-set-title   { font-family:'Cinzel',serif; font-size:22px; font-weight:700; color:var(--text); margin-bottom:2px; }
   .log-set-prev    { font-style:italic; font-size:16px; color:var(--house-hi); margin-bottom:10px; }
@@ -246,7 +246,7 @@
   .set-chip-d { font-family:'Cinzel',serif; font-size:16px; color:var(--text); }
 
   /* ── Finish ── */
-  .finish-overlay { position:fixed; inset:0; background:rgba(20,30,28,0.7); display:flex; align-items:center; justify-content:center; z-index:300; padding:16px; overflow-y:auto; }
+  .finish-overlay { position:fixed; inset:0; background:rgba(35,12,16,0.7); display:flex; align-items:center; justify-content:center; z-index:300; padding:16px; overflow-y:auto; }
   .finish-card    { background:var(--card); border-top:4px solid var(--gold-bright); padding:20px 18px; width:100%; max-width:420px; max-height:96vh; overflow-y:auto; }
   .finish-title   { font-family:'Cinzel',serif; font-size:24px; font-weight:900; color:var(--text); margin-bottom:4px; }
   .finish-arc     { font-style:italic; font-size:17px; color:var(--gold); margin-bottom:6px; }
@@ -298,7 +298,7 @@ import { useState, useEffect, useRef, useCallback } from 'https://esm.sh/preact@
    Anything marked INVENTED is this app's own material, not canon.
 ═══════════════════════════════════════════════════ */
 
-const HERO = { id:"sterling", name:"Sterling", full:"Sterling Ashbourne", role:"Probationary Keybearer", color:"#17695f" };
+const HERO = { id:"sterling", name:"Sterling", full:"Sterling Ashbourne", role:"Probationary Keybearer", color:"#7a1f2e" };
 
 /* To give a peer their real name and look: edit name / role in PEERS below,
    then upload crew/<id>.webp (example: crew/p01.webp) to the repo. */
@@ -742,7 +742,7 @@ const weekKey   = () => {
 const todayIdx  = () => { const d=new Date().getDay(); return d===0?6:d-1; };
 const hash      = s => { let h=0; for(let i=0;i<s.length;i++) h=((h<<5)-h+s.charCodeAt(i))|0; return Math.abs(h); };
 const pick      = a => a[Math.floor(Math.random()*a.length)];
-const diffColor = d => d==="Restricted"?"#c0513f":d==="Hazardous"?"#d4a84b":"#2fa59a";
+const diffColor = d => d==="Restricted"?"#a3262a":d==="Hazardous"?"#d4a84b":"#5f6f7d";
 const fmt       = n => n>=1000000?(n/1000000).toFixed(0)+"M":n>=10000?(n/1000).toFixed(0)+"K":String(n);
 const fmtTime   = s => { const m=Math.floor(s/60),sec=s%60; return `${m}:${String(sec).padStart(2,'0')}`; };
 
@@ -1588,15 +1588,15 @@ function App() {
   );
 
   if(workout&&view==="workout") return h('div',{id:"app-inner",style:"display:flex;flex-direction:column;height:100%"},
-    Top(h('button',{class:"pill-btn",style:"color:#e4efec;border-color:#e4efec88",onClick:()=>{ if(confirm("Leave this mission? Nothing will be saved.")){setWorkout(null);setView("home");} }},"Leave")),
+    Top(h('button',{class:"pill-btn",style:"color:#f3e4e6;border-color:#f3e4e688",onClick:()=>{ if(confirm("Leave this mission? Nothing will be saved.")){setWorkout(null);setView("home");} }},"Leave")),
     h(WorkoutView,{ mission:workout.mission, workoutType:workout.type, gs, setGs, apiKey, onFinish:finishWorkout }),
     finishing&&h(FinishOverlay,{mission:workout.mission,workoutType:workout.type,elapsed:finishing.elapsed,bonus:teamBonus((gs.party||[]),workout.mission.type),onSave:saveWorkout})
   );
 
   return h('div',{id:"app-inner",style:"display:flex;flex-direction:column;height:100%"},
     Top(h('div',{style:"display:flex;align-items:center;gap:8px"},
-      h(CompanionIcon,{id:HERO.id,size:34,style:"border:2px solid #cfe3de;"}),h('div',{class:"topbar-sub"},HERO.name),
-      h('button',{class:"pill-btn",style:`color:${apiKey?"#9fe6da":"#f3d27f"};border-color:${apiKey?"#9fe6da99":"#f3d27faa"}`,onClick:()=>setShowApi(true)},apiKey?"Narrator on":"Narrator off")
+      h(CompanionIcon,{id:HERO.id,size:34,style:"border:2px solid #ecd5d8;"}),h('div',{class:"topbar-sub"},HERO.name),
+      h('button',{class:"pill-btn",style:`color:${apiKey?"#f3c6cc":"#f3d27f"};border-color:${apiKey?"#f3c6cc99":"#f3d27faa"}`,onClick:()=>setShowApi(true)},apiKey?"Narrator on":"Narrator off")
     )),
     view==="home"   &&h(HomeView,   {gs,setGs,onStartWorkout:startWorkout,apiKey}),
     view==="party"  &&h(PartyView,  {gs}),
